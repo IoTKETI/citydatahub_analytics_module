@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vaiv.analyticsManager.restFullApi.mapper.ProjectRestMapper">
+	
+	<select id="preprocessedDataList" resultType="java.util.HashMap">
+		SELECT * 
+		FROM "PREPROCESSED_DATA" 
+		WHERE "DELETE_FLAG" = FALSE 
+			AND "INSTANCE_SEQUENCE_FK2"=#{instancePk}
+			AND "ORIGINAL_DATA_SEQUENCE_FK1"=#{originalDataSequencePk}
+		ORDER BY "PREPROCESSED_DATA_SEQUENCE_PK" DESC
+	</select>
+	
+	<select id="preprocessedData" resultType="java.util.HashMap" parameterType="int">
+		SELECT *
+		FROM "PREPROCESSED_DATA"
+		WHERE "DELETE_FLAG" = FALSE
+			AND "INSTANCE_SEQUENCE_FK2"=#{instancePk}
+		    AND "PREPROCESSED_DATA_SEQUENCE_PK" = #{preprocessedDataSequencePk}
+	</select>
+   
+   <insert id="insertPreprocessedData" parameterType="com.vaiv.analyticsManager.restFullApi.domain.PreprocessedData">
+   		INSERT INTO 
+   			"PREPROCESSED_DATA"(
+   				"PREPROCESSED_DATA_SEQUENCE_PK"
+   				, "COMMAND"
+   				, "NAME"
+   				, "CREATE_DATETIME"
+   				, "PROGRESS_STATE"
+   				, "PROGRESS_START_DATETIME"
+   				, "ORIGINAL_DATA_SEQUENCE_FK1"
+   				, "INSTANCE_SEQUENCE_FK2"
+   			) VALUES (
+   				#{preprocessedDataSequencePk}
+   				,#{command}
+   				,#{name}
+   				,#{createDatetime}
+   				,#{progressState}
+   				,#{progressStartDatetime}
+   				,#{originalDataSequenceFk1}
+   				,#{instanceSequenceFk2}
+   			)
+   </insert>
+   
+   <update id="updatePreprocessedData" parameterType="com.vaiv.analyticsManager.restFullApi.domain.PreprocessedData">
+   		UPDATE "PREPROCESSED_DATA"
+   		SET
+   		<trim prefixOverrides=",">
+   			<if test='filepath != null and filepath != ""' >,"FILEPATH" = #{filepath}</if>
+   			<if test='filename != null and filename != ""' >,"FILENAME" = #{filename}</if>
+   			<if test='summary != null and summary != ""' >,"SUMMARY" = #{summary}</if>
+   			<if test='progressState != null and progressState != ""' >,"PROGRESS_STATE" = #{progressState}</if>
+   			<if test='progressEndDatetime != null and progressEndDatetime != ""' >,"PROGRESS_END_DATETIME" = #{progressEndDatetime}</if>
+   			<if test='columns != null and columns != ""' >,"COLUMNS" = #{columns}</if>
+   			<if test='statistics != null and statistics != ""' >,"STATISTICS" = #{statistics}</if>
+   			<if test='sampleData != null and sampleData != ""' >,"SAMPLE_DATA" = #{sampleData}</if>
+   			<if test='amount != null and amount != ""' >,"AMOUNT" = #{amount}</if>
+   			<if test='deleteFlag != null and deleteFlag != ""' >,"DELETE_FLAG" = #{deleteFlag}</if>
+		</trim>
+		WHERE "PREPROCESSED_DATA_SEQUENCE_PK" = #{preprocessedDataSequencePk}
+   </update>
+   
+ 
+</mapper>

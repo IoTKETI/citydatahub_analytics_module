@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vaiv.analyticsManager.restFullApi.mapper.ProjectRestMapper">
+	
+	<select id="projects" resultType="java.util.HashMap">
+		SELECT 
+			*
+			, "USER_ID" AS "userId"
+		    ,(SELECT "NAME" FROM "INSTANCE" WHERE "INSTANCE_SEQUENCE_PK" = project."SELECTED_INSTANCE" LIMIT 1) AS "instanceName"
+			, to_char("CREATE_DATETIME", 'YYYY-MM-DD') as "createDataTime"
+		FROM "PROJECT" AS project
+        WHERE "DELETE_FLAG" = FALSE
+        	<if test="userId != null and userId != 'null' and userId != ''">
+        		AND "USER_ID" = #{userId}
+        	</if>
+		ORDER BY "CREATE_DATETIME" DESC
+   </select>
+
+	<select id="project" resultType="java.util.HashMap">
+		SELECT 
+			*
+			, "USER_ID" AS "userId"
+		    ,(SELECT "NAME" FROM "INSTANCE" WHERE "INSTANCE_SEQUENCE_PK" = project."SELECTED_INSTANCE" LIMIT 1) AS "instanceName"
+			, to_char("CREATE_DATETIME", 'YYYY-MM-DD') as "createDataTime"
+		FROM "PROJECT" AS project
+		WHERE "PROJECT_SEQUENCE_PK" = #{projectSequencePk}
+   </select>
+  
+	<select id="checkProjectName" resultType="int" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Project">
+		SELECT count(*) 
+		FROM "PROJECT" 
+		WHERE "NAME" = #{name} 
+			AND "DELETE_FLAG" = FALSE
+			<if test='projectSequencePk != null and projectSequencePk != ""' >
+				AND "PROJECT_SEQUENCE_PK" NOT IN(#{projectSequencePk})
+			</if>
+				
+	</select>
+	
+	<insert id="insertProject" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Project" 
+			useGeneratedKeys="true" keyProperty="projectSequencePk" keyColumn="PROJECT_SEQUENCE_PK">
+		INSERT INTO 
+			"PROJECT"(
+				"NAME"
+				, "DESCRIPTION"
+				, "CREATE_DATETIME"
+				, "USER_ID"
+				, "SELECTED_INSTANCE"
+			)VALUES(
+           		#{name}
+           		, #{description}
+           		, NOW()
+           		, #{userId}
+           		, #{selectedInstance}
+          	)
+	</insert>
+	
+	<update id="updateProject" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Project">
+		UPDATE "PROJECT"
+		SET 
+		<trim prefixOverrides=",">
+   			<if test='name != null and name != ""' >,"NAME" = #{name}</if>
+   			<if test='description != null and description != ""' >,"DESCRIPTION" = #{description}</if>
+			<if test='selectedInstance != null and selectedInstance != ""' >,"SELECTED_INSTANCE" = #{selectedInstance}</if>
+			<if test='deleteFlag != null and deleteFlag != ""' >,"DELETE_FLAG" = #{deleteFlag}</if>
+		</trim>
+   			
+		WHERE "PROJECT_SEQUENCE_PK" = #{projectSequencePk}
+	</update>
+	
+	<select id="projectsByinstancePk" resultType="java.util.HashMap">
+		SELECT *
+		FROM "PROJECT" AS project
+        WHERE "DELETE_FLAG" = FALSE
+        	AND "SELECTED_INSTANCE" = #{instancePk}
+		ORDER BY "CREATE_DATETIME" DESC
+	</select>
+</mapper>

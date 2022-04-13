@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vaiv.analyticsManager.restFullApi.mapper.ProjectRestMapper">
+	
+	<select id="modelsList" resultType="java.util.HashMap" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Model">
+		SELECT * 
+		FROM "MODEL" 
+		WHERE "DELETE_FLAG" = false
+			AND "PROJECT_SEQUENCE_FK4" = #{projectSequenceFk4}
+		<if test='preprocessedDataSequenceFk2 != null and preprocessedDataSequenceFk2 != ""' >
+			AND "PREPROCESSED_DATA_SEQUENCE_FK2" = #{preprocessedDataSequenceFk2}
+		</if>
+		ORDER BY "MODEL_SEQUENCE_PK" DESC
+	</select>
+	
+	<select id="model" resultType="java.util.HashMap" parameterType="int">
+		SELECT * 
+		FROM "MODEL" 
+		WHERE "MODEL_SEQUENCE_PK" = #{modelSequencePk}
+			AND "PROJECT_SEQUENCE_FK4" = #{projectSequencePk}
+		ORDER BY "MODEL_SEQUENCE_PK" DESC
+	</select>
+   
+   <insert id="insertModel" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Model">
+   		INSERT INTO 
+   			"MODEL"(
+   				"MODEL_SEQUENCE_PK"
+   				, "COMMAND"
+   				, "NAME"
+   				, "CREATE_DATETIME"
+   				, "PROGRESS_STATE"
+   				, "PROGRESS_START_DATETIME"
+   				, "LOAD_STATE"
+   				, "ORIGINAL_DATA_SEQUENCE_FK1"
+   				, "PREPROCESSED_DATA_SEQUENCE_FK2"
+   				, "INSTANCE_SEQUENCE_FK3"
+   				, "PROJECT_SEQUENCE_FK4"
+   			) VALUES (
+   				#{modelSequencePk}
+   				,#{command}
+   				,#{name}
+   				,#{createDatetime}
+   				,#{progressState}
+   				,#{progressStartDatetime}
+   				,#{loadState}
+   				,#{originalDataSequenceFk1}
+   				,#{preprocessedDataSequenceFk2}
+   				,#{instanceSequenceFk3}
+   				,#{projectSequenceFk4}
+   			)
+   </insert>
+   
+   <update id="updateModels" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Model">
+   		UPDATE "MODEL"
+   		SET
+   		<trim prefixOverrides=",">
+   			<if test='filepath != null and filepath != ""' >,"FILEPATH" = #{filepath}</if>
+   			<if test='filename != null and filename != ""' >,"FILENAME" = #{filename}</if>
+   			<if test='trainSummary != null and trainSummary != ""' >,"TRAIN_SUMMARY" = #{trainSummary}</if>
+   			<if test='validationSummary != null and validationSummary != ""' >,"VALIDATION_SUMMARY" = #{validationSummary}</if>
+   			<if test='progressState != null and progressState != ""' >,"PROGRESS_STATE" = #{progressState}</if>
+   			<if test='progressEndDatetime != null and progressEndDatetime != ""' >,"PROGRESS_END_DATETIME" = #{progressEndDatetime}</if>
+   			<if test='loadState != null and loadState != ""' >,"LOAD_STATE" = #{loadState}</if>
+   			<if test='deleteFlag != null and deleteFlag != ""' >,"DELETE_FLAG" = #{deleteFlag}</if>
+		</trim>
+		WHERE "MODEL_SEQUENCE_PK" = #{modelSequencePk}
+   </update>
+   
+   
+   	<select id="modelsOfInstancePk" resultType="java.util.HashMap">
+		SELECT *
+		FROM "MODEL"
+		WHERE "DELETE_FLAG" = false
+				AND "PROGRESS_STATE" = 'success'
+			<if test='instanceSequencePk != null and instanceSequencePk != ""' >
+				AND "INSTANCE_SEQUENCE_FK3" = #{instanceSequencePk}			
+			</if>
+		ORDER BY "MODEL_SEQUENCE_PK" DESC;
+	</select>
+   
+</mapper>

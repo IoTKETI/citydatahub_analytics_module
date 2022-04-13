@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vaiv.analyticsManager.restFullApi.mapper.SandboxRestMapper">
+
+   <select id="instances" resultType="java.util.HashMap">
+		SELECT 
+			ist.*
+			, to_char("CREATE_DATETIME", 'YYYY-MM-DD') as "createDataTime"
+       		, (SELECT "NAME" 
+       			FROM "ANALYSIS_TEMPLATE" 
+       			WHERE "ANALYSIS_TEMPLATE_SEQUENCE_PK" = ist."ANALYSIS_TEMPLATE_SEQUENCE_FK1"
+       		) AS "TEMPLATE_NAME"
+		FROM "INSTANCE" AS ist
+        WHERE ist."DELETE_FLAG" = false
+        	AND ist."ANALYSIS_INSTANCE_SERVER_TYPE" = 'sandbox'
+        	<if test="userId != null and userId != 'null' and userId != ''">
+        		AND "USER_ID" = #{userId}
+        	</if>
+		ORDER BY "CREATE_DATETIME" DESC
+   </select>
+
+	<select id="instance" resultType="java.util.HashMap">
+		SELECT 
+			ist.*
+			, to_char("CREATE_DATETIME", 'YYYY-MM-DD') as "createDataTime"
+			, (SELECT "NAME" 
+       			FROM "ANALYSIS_TEMPLATE" 
+       			WHERE "ANALYSIS_TEMPLATE_SEQUENCE_PK" = ist."ANALYSIS_TEMPLATE_SEQUENCE_FK1"
+       		) AS "TEMPLATE_NAME"
+		FROM "INSTANCE" AS ist
+		WHERE "INSTANCE_SEQUENCE_PK" = #{instancePk}
+   </select>
+   
+   
+	<insert id="insertInstance" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Instance" 
+		useGeneratedKeys="true" keyProperty="instanceSequencePk" keyColumn="INSTANCE_SEQUENCE_PK">
+   		INSERT INTO 
+   			"INSTANCE"(
+                 "NAME"
+                 ,"KEYPAIR_NAME"
+                 ,"SERVER_STATE"
+                 ,"MODULE_STATE"
+                 ,"PRIVATE_IP"
+                 ,"PUBLIC_IP"
+                 ,"AVAILABILITY_ZONE"
+                 ,"CREATE_DATETIME"
+                 ,"CLOUD_INSTNACE_SERVER_ID"
+                 ,"ANALYSIS_TEMPLATE_SEQUENCE_FK1"
+                 ,"USER_ID"
+                 ,"ANALYSIS_INSTANCE_SERVER_TYPE"
+			) VALUES(
+            	#{name},
+            	#{keypairName},
+                #{serverState},
+                #{moduleState},
+                #{privateIp},
+                #{publicIp},
+                #{availabilityZone},
+                NOW(),
+                #{cloudInstanceServerId},
+                #{templateId},
+                #{userId},
+                #{analysisInstanceServerType}
+        	)
+   </insert>
+   
+   <insert id="insertInstanceDetail" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Instance">
+   		INSERT INTO 
+   			"INSTANCE_DETAIL"(
+   				"INSTANCE_SEQUENCE_FK1",
+                 "DATA_SUMMARY",
+                 "DATA_STARTDATE",
+                 "DATA_ENDDATE",
+                 "SNAPSHOT_ID"
+			) VALUES(
+				#{instanceSequencePk},
+            	#{dataSummaryToString},
+            	#{dataStartDate},
+                #{dataEndDate},
+                #{snapshotId}
+        	)
+   </insert>
+   
+   <select id="InstancesOfServerState" resultType="java.util.HashMap">
+		SELECT * FROM "INSTANCE"
+		WHERE "SERVER_STATE" LIKE concat('%', #{serverState}, '%')
+			AND "DELETE_FLAG" = FALSE
+		ORDER BY "CREATE_DATETIME" DESC
+   </select>
+   
+   <update id="updateInstance" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Instance">
+   		UPDATE "INSTANCE" 
+   		SET
+   		<trim prefixOverrides=",">
+   			<if test='instanceId != null and instanceId != ""' >,"INSTANCE_ID" = #{instanceId}</if>
+			<if test='serverState != null and serverState != ""' >,"SERVER_STATE" = #{serverState}</if>
+			<if test='moduleState != null and moduleState != ""' >,"MODULE_STATE" = #{moduleState}</if>
+			<if test='privateIp != null and privateIp != ""' >,"PRIVATE_IP" = #{privateIp}</if>
+			<if test='publicIp != null and publicIp != ""' >,"PUBLIC_IP" = #{publicIp}</if>
+			<if test='deleteFlag != null and deleteFlag != ""' >,"DELETE_FLAG" = #{deleteFlag}</if>
+		</trim>
+   			
+		WHERE "INSTANCE_SEQUENCE_PK" = #{instanceSequencePk}
+   </update>
+   
+   <select id="checkInstanceName" resultType="int">
+		SELECT COUNT(*) FROM "INSTANCE"
+		WHERE "NAME" = #{name}
+			AND "DELETE_FLAG" = FALSE
+   </select>
+   
+   
+</mapper>

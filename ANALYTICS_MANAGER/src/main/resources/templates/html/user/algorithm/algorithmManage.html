@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+  layout:decorator="layout/defaultLayout">
+
+<head>
+	<meta charset="UTF-8">
+</head>
+<body>
+	<th:block layout:fragment="content">
+	<script th:src="@{js/user/algorithmManage.js}"></script>
+	
+        <!-- page content -->
+        <!-- breadcrumb -->
+        <ul class="breadcrumb">
+          <li class="breadcrumb__list breadcrumb__list--home material-icons">Home</li>
+          <li class="breadcrumb__list">알고리즘</li>
+          <li class="breadcrumb__list breadcrumb__list--current">알고리즘 조회</li>
+        </ul>
+        <!-- //breadcrumb -->
+        <h3 class="sub__heading1">알고리즘<small class="sub__heading1--small">알고리즘 목록을 보여준다.</small></h3>
+        
+        <div class="sub__content">
+          <h4 class="sub__heading2">알고리즘 조회</h4>
+		  
+          <table class="board-table" id="logTable">
+            <caption>해당 테이블에 대한 캡션</caption>
+            <colgroup>
+            	<col width="">
+              	<col width="40%">
+              	<col width="">
+              	<col width="">
+              	<col width="">
+            </colgroup>
+            <thead>
+              <tr>
+				<th>Usage</th>
+                <th>Algorithm</th>
+                <th>Library</th>
+                <th>Data Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyHtml">              
+            </tbody>
+          </table>
+      </div>
+        <!-- /page content -->
+        
+          <!-- 알고리즘 세부정보 모달창 -->
+		  <div id="detail_modal" class="modal">
+		    <div class="modal__outer">
+		      <div class="modal__inner">
+		        <div class="modal__header">
+		          <h3 class="hidden">알고리즘 세부정보 팝업</h3>
+		          <button class="modal__button--close js-modal-close material-icons" type="button"><span class="hidden">모달 닫기</span></button>
+		        </div>
+		        <div class="modal__body">
+		          <section class="modal__service-request">
+		            <h4 class="modal__heading1">알고리즘 세부정보</h4>
+					
+						<div class="x_panel">
+							<div class="x_title clearfix mg_0">
+								<h2>See details about</h2>
+							</div>
+							<div class="x_content">
+								<table class="board-table">
+									<thead>
+										<tr>
+											<th>ALGORITHM</th>
+											<th>LIBRARY</th>
+											<th>USAGE</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td id="algorithmName"></td>
+                                            <td id="libraryName"></td>
+                                            <td id="libraryFunctionUasge"></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+		
+						<div class="x_panel">
+							<div class="x_title mg_0">
+								<h2>Algorithm details</h2>
+							</div>
+							<div class="x_content">
+							   <table class="board-table">
+									<thead>
+										<tr>
+											<td>BASIC INFORAMTION</td>
+											<td id="libraryFunctionDescription"></td>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						</div>
+						
+						<div class="x_panel">
+							<div class="x_title clearfix mg_0">
+								<h2>Model Parameter</h2>
+							</div>
+							<div class="x_content" style="overflow:scroll;height:300px;">
+								<table class="board-table">
+									<caption>해당 테이블에 대한 캡션</caption>
+						            <colgroup>
+						            	<col width="20%">
+						              	<col width="15%">
+						              	<col width="15%">
+						              	<col width="50%">
+						            </colgroup>
+									<thead>
+										<tr>
+											<th>Name</th>
+                                            <th>Default</th>
+                                            <th>Type</th>
+                                            <th>Note</th>
+										</tr>
+									</thead>
+									<tbody id="modelParamList">
+									</tbody>
+								</table>
+							</div>
+						</div>
+						
+						<div class="x_panel">
+							<div class="x_title clearfix mg_0">
+								<h2>Train Parameter</h2>
+							</div>
+							<div class="x_content">
+								<table class="board-table">
+									<caption>해당 테이블에 대한 캡션</caption>
+						            <colgroup>
+						            	<col width="20%">
+						              	<col width="15%">
+						              	<col width="15%">
+						              	<col width="50%">
+						            </colgroup>
+									<thead>
+										<tr>
+											<th>Name</th>
+                                            <th>Default</th>
+                                            <th>Type</th>
+                                            <th>Note</th>
+										</tr>
+									</thead>
+									<tbody id="trainParamList">
+									</tbody>
+								</table>
+							</div>
+						</div>
+		
+						<div class="x_panel">
+							<div class="x_title">
+								<h2>Parameter</h2>
+							</div>
+							<div class="x_content" id="jsonParameter" style="overflow:scroll; height:400px;">
+							</div>
+						</div>
+		          
+				  </section>
+		          <div class="modal__footer">
+		            <div class="button__group">
+		              <a class="button button__outline--secondary js-modal-close" href="#none">닫기</a>
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+		    </div>
+		  </div>
+		  <!-- //알고리즘 세부정보 모달창  -->
+
+        
+	</th:block>
+</body>
+</html>

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+  layout:decorator="layout/adminLayout">
+
+<head>
+	<meta charset="UTF-8">
+</head>
+<body>
+	<th:block layout:fragment="content">
+		<script th:src="@{/js/admin/sandbox/instanceAdmin.js}"></script>
+		<script th:src="@{/js/admin/sandbox/templateAdmin.js}"></script>
+		
+		<h3 class="content__title">샌드박스 관리</h3>
+          <fieldset>
+            <legend>필드셋 제목</legend>
+            <section class="section">
+              <div class="section__header">
+                <h4 class="section__title">샌드박스 목록</h4>
+              </div>
+              <div class="section__content">
+                <table class="table--column" id="logTable">
+                  <caption>테이블 제목</caption>
+                  <!-- <colgroup>
+                    <col style="width:60px">
+                    <col style="width:auto">
+                    <col style="width:auto">
+                  </colgroup> -->
+                  <thead>
+					  <tr>
+						<th scope="col"><div class="checkboxCustom"><input type="checkbox" id="check-all"><label for="check-all"></label></div></th>
+						<th scope="col">instanceSequencePk</th>
+						<th scope="col">인스턴트 이름</th>
+						<th scope="col">템플릿 명</th>
+						<th scope="col">상태</th>
+						<th scope="col">모듈상태</th>
+						<th scope="col">가용구역</th>
+						<th scope="col">Hue</th>
+						<th scope="col">Nifi</th>
+						<th scope="col">생성일</th>
+						<th th:if="${session.userRole} == 'Analytics_Admin'">사용자</th>
+					  </tr>
+                  </thead>
+                  <tbody id="tbodyHtml">
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </fieldset>
+
+
+
+	<!-- 샌드박스 정보 모달 -->
+    <div id="templateInfo_modal" class="modal overY_scroll" style="display:block;display:none;">
+    <div class="modal__wrap">
+      <div class="modal__content w-1000">
+        <div class="modal__header">
+          <h4 class="modal__title">샌드박스 정보</h4>
+          <button class="modal__button--close button__modal--close" type="button" onclick="fnCloseModal('templateInfo_modal')"><span class="hidden">모달 닫기</span></button>
+        </div>
+        <div class="modal__body">
+          <div class="section">
+            <div class="section__content">
+              <table class="table--column table--view">
+              <caption>템플릿 정보 캡션</caption>
+              <colgroup>
+                <col width="40%">
+                <col width="60%">
+              </colgroup>
+                <tbody>
+	                <tr>
+						<td>VCPUs</td>
+						<td class="infoModalTd" id="infoVcpus"></td>
+					</tr>
+					<tr>
+						<td>Root 디스크</td>
+						<td class="infoModalTd" id="infoRootDisk"></td>
+					</tr>
+					<tr>
+						<td>Ephemeral 디스크</td>
+						<td class="infoModalTd" id="infoEDisk"></td>
+					</tr>
+					<tr>
+						<td>모든 디스크</td>
+						<td class="infoModalTd" id="infoAllDisk"></td>
+					</tr>
+					<tr>
+						<td>RAM</td>
+						<td class="infoModalTd" id="infoRam"></td>
+					</tr>
+	            </tbody>
+			</table>
+            </div>
+          </div>
+        </div>
+        <div class="modal__footer">
+		  <button class="button__secondary button__modal--close" type="button" onclick="fnCloseModal('templateInfo_modal')">닫기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 샌드박스 정보 -->
+  
+  
+  
+  <!-- 샌드박스 생성 모달 -->
+  <div id="addSandBox_modal" class="modal overY_scroll" style="display:block;display:none;">
+    <div class="modal__wrap" >
+      <div class="modal__content w-1000">
+        <div class="modal__header">
+          <h4 class="modal__title">샌드박스 추가</h4>
+          <button class="modal__button--close button__modal--close" type="button" onclick="fnCloseModal('addSandBox_modal')"><span class="hidden">모달 닫기</span></button>
+        </div>
+        <div class="modal__body">
+          <div class="section">
+            <div class="section__content">
+              <div class="x_panel">
+				<div class="x_title h5"><strong>기본정보</strong></div>
+				<form class="form-horizontal form-label-left">
+					<div class="form-group">
+						<label class="control-label col-md-2 col-sm-2 col-xs-12 text-left">인스턴스 명</label>
+						<div class="col-md-10 col-sm-10 col-xs-12">
+						  <input type="text" class="form-control" placeholder="인스턴스 명" id="instanceName">
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="row">
+				<div class="col-md-6 col-sm-9 col-xs-12">
+					<div class="x_panel">
+						<div class="x_title h5"><strong>서버 성능 선택</strong></div>
+						<div class="x_content">
+							<ul class="select_list" id="serverList"></ul>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6 col-sm-9 col-xs-12">
+					<div class="x_panel">
+						<div class="x_title mg_0 h5"><strong>서버정보</strong></div>
+						<div class="x_content height_200">
+							<table class="table--column">
+								<tr>
+							  		<td>VCPUs</td>
+								  	<td id="c_infoVcpus"></td>
+								</tr>
+								<tr>
+								  	<td>Root 디스크</td>
+								  	<td id="c_infoRootDisk"></td>
+								</tr>
+								<tr>
+								  	<td>Ephemeral 디스크</td>
+								  	<td id="c_infoEDisk"></td>
+								</tr>
+								<tr>
+								  	<td>모든 디스크</td>
+								  	<td id="c_infoAllDisk"></td>
+								</tr>
+								<tr>
+								  	<td>RAM</td>
+								  	<td id="c_infoRam"></td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6 col-sm-9 col-xs-12">
+					<div class="x_panel">
+						<div class="x_title h5"><strong>분석용 템플릿 선택</strong></div>
+						<div class="x_content">
+							<ul class="select_list" id="instanceTemplateList"></ul>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6 col-sm-9 col-xs-12">
+					<div class="x_panel">
+						<div class="x_title h5"><strong>서버정보</strong></div>
+						<div class="x_content height_200 overY_scroll">
+							<h6>A. 데이터 사용가능 목록</h6>
+							<ul class="mgBottom_20" id="instanceTemplateDataSummary"></ul>
+							<h6>B. 기간</h6>
+							<ul>
+								<li id="instanceTemplatePeriod"></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="ta_right pd_15">
+				<button type="button" class="button__primary" onclick="fnCreateInstance()">생성</button>
+			</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <!-- <button class="button__primary" type="button">검색</button> -->
+		  <button class="button__secondary button__modal--close" type="button" onclick="fnCloseModal('addSandBox_modal')">닫기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 샌드박스 생성 모달 -->
+  
+  
+  
+  <!-- 템플릿 관리 -->
+  <div id="templateAdmin_modal" class="modal overY_scroll" style="display:block;display:none;">
+    <div class="modal__wrap" >
+      <div class="modal__content w-1000">
+        <div class="modal__header">
+          <h4 class="modal__title">템플릿 관리</h4>
+          <button class="modal__button--close button__modal--close" type="button" onclick="fnCloseModal('templateAdmin_modal')"><span class="hidden">모달 닫기</span></button>
+        </div>
+        <div class="modal__body">
+          <div class="section">
+            <div class="section__content">
+            	<div class="text-right">
+					<button type="button" class="button__primary adminView" id="createTemplateBtn">탬플릿 생성</button>
+					<button type="button"class="button__primary userView" id="requestCustomTemplateBtn">탬플릿 신청</button>
+				</div>
+
+				<ul class="bar_tabs tab clearfix" id="template_tab">
+					<li class="listTab on"><a href="javascript:void(0)" class="iconArea" onclick="setTabMenu('#template_tab','0');">템플릿 목록</a></li>
+					<li class="reqListTab"><a href="javascript:void(0)" class="iconArea" onclick="setTabMenu('#template_tab','1');">템플릿 신청 목록</a></li>
+				</ul>
+				<div class="tab_con template_tab_con " id="template_tab_con">
+					<div class="tabView listTabView tabViewOn">
+						<div class="row clearfix">
+							<div class="col-md-6 col-sm-9 col-xs-12">
+								<div class="x_panel">
+									<div class="x_title h5"><strong>템플릿 목록</strong></div>
+									<div class="x_content">
+										<div id="templageList"></div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-6 col-sm-9 col-xs-12">
+							
+								<!-- 템플릿  정보 -->
+								<div id="templateInfo">
+									<div class="x_panel">
+										<div class="pull-right text-right adminView templageModifyBtn">
+											<button type="button" class="button__outline adminView" id="updateTemplateBtn">수정</button>
+											<button type="button" class="button__outline adminView" id="delteTemplateBtn">삭제</button>
+										</div>
+										<div class="x_title h5"><strong>템플릿 정보</strong></div>
+										<div class="x_content">
+											<div>
+												<h6>A. 데이터 사용가능 목록</h6>
+												<ul class="mgBottom_20" id="templateDataSummary">
+													
+												</ul>
+												<h6>B. 기간</h6>
+												<ul>
+													<li id="templatePeriod"></li>
+												</ul>
+												<div class="adminView">
+													<h6>C. 사용 유저</h6>
+													<ul>
+														<li id="useUserId"></li>
+													</ul>													
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- //템플릿  정보 -->
+								
+								<!-- 템플릿  수정 -->
+								<div id="updateTemplate">
+									<div class="x_panel">
+										<div class="x_title h5"><strong>템플릿 수정</strong></div>
+										<div class="x_content">
+											<form class="form-horizontal form-label-left">
+											<input type="hidden" id="templateId">
+												<fieldset>
+													<div class="form-group pdBottom_10 bdBottom_f3f3f3">
+														<label class="control-label col-md-3 col-sm-3 col-xs-12 ta_left">템플릿</label>
+														<div class="col-md-9 col-sm-9 col-xs-12">
+														  <input type="text" class="form-control" id="u_templateName" placeholder="템플릿명">
+														</div>
+													</div>
+													<div class="form-group pdBottom_10 bdBottom_f3f3f3">
+														<label class="control-label col-md-3 col-sm-3 col-xs-12 ta_left">샌드박스 이미지</label>
+														<div class="col-md-9 col-sm-9 col-xs-12">
+															<select class="select select--full" id="u_templateSnapshotId">
+																
+															</select>
+														</div>
+													</div>
+													<div class="form-group pdBottom_10 bdBottom_f3f3f3">
+														<div class="col-md-7 col-sm-6 col-xs-6" id="u_templateAvailableList">
+															
+														</div>
+													</div>
+													<div class="form-group pdBottom_10 bdBottom_f3f3f3">
+														<label class="control-label col-md-3 col-sm-3 col-xs-12 ta_left">기간 선택</label>
+														<div class="control-label col-md-9 col-sm-9 col-xs-12">
+															<div class="picker__group">
+															  <label class="label__picker"><input class="input__picker" id="u_startDate" type="text"></label>
+															  <span class="picker__period">~</span>
+															  <label class="label__picker"><input class="input__picker" id="u_endDate" type="text"></label>
+															</div>
+														</div>
+													</div>
+												</fieldset>
+											</form>
+										</div>
+									</div>
+									<div class="x_panel">
+										<div class="x_title h5"><strong>운영환경의 HDFS 데이터를 샌드박스로 옮기는 명령어</strong></div>
+										<div class="x_content wd_break" id="u_copyHdfsDataCommand">
+										</div>
+									</div>
+	
+									<div class="x_panel">
+										<div class="x_title h5"><strong>운영환경의  HIVE DDL을 샌드박스로 옮기는 명령어</strong></div>
+										<div class="x_content wd_break" id="u_copyHiveDataCommand">
+										</div>
+									</div>
+									<div class="x_panel">
+										<div class="x_title h5"><strong>사용자 아이디</strong></div>
+										<div class="x_content">
+											<div>
+												<div class="cheakarea checkboxCustom"><input type="checkbox" id="u_publicFlag"><label for="u_publicFlag">모든 유저 사용가능</label></div>
+												<div  id="u_inputUuserId">
+												  <div class="bootstrap-tagsinput">
+												  	<input type="text" id="u_templateUserId" class="form-control" placeholder="예) test1,test2,test2 (,로 구분자를 주세요)">
+												  </div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="ta_right">
+										<button class="button__file button_default float_none" onclick="fnUpdateTemplate()">템플릿 수정</button>
+									</div>
+								</div>
+								<!-- //템플릿  수정 -->
+							</div>
+						</div>
+					</div> <!-- //템플릿 목록 -->
+					
+					
+					<!-- 템플릿 신청목록 탭 -->
+					<div class="tabView reqListTabView">
+						<div class="row clearfix">
+							<div class="col-md-6 col-sm-9 col-xs-12">
+								<div class="x_panel">
+									<div class="x_title h5">
+										<strong>템플릿 신청 중</strong>
+										<div class="button__group" style="width: 100px;top: 10px;right: 50px;">
+											<select class="select" id="selectState">
+												<option value="ongoing">생성준비중</option>
+												<option value="standby">대기</option>
+												<option value="reject">거절</option>
+											</select>
+										</div>
+									</div>
+									<div class="x_content" id="customTemplateList">
+										
+									</div>
+								</div>
+							</div>
+							<div class="col-md-6 col-sm-9 col-xs-12">
+								<!-- 템플릿 정보 영역 -->
+								<div id="customTemplateInfo">
+									<div class="x_panel">
+										<div class="text-right adminView">
+											<button class="button__primary addTemplateBtn"><span id="addTemplateBtn" style="font-size:10px;">신청 템플릿 생성</span></button>
+										</div>
+										<div class="x_title h5"><strong>템플릿 신청 정보</strong></div>
+										<div class="x_content" id="customTemplateInfoContent">
+											<div>
+												<h6>A. 데이터 사용가능 목록</h6>
+												<ul class="mgBottom_20" id="customTemplateDataSummary"></ul>
+												
+												<h6>B. 기간</h6>
+												<ul class="mgBottom_20">
+													<li id="customTemplatePeriod"></li>
+												</ul>
+												<h6>C. 진행정보</h6>
+												<div class="userView">
+													<ul>
+														<li id="createDate"></li>
+														<li id="progressState"></li>
+														<li id="adminComment"> - </li>
+													</ul>
+												</div>
+												<div class="adminView">
+													<span>1. 신청일 : <span class="createDate"></span></span>
+													<br>
+													<span>2. 상태 : </span>
+													<select class="select" id="changeState">
+														<option value="ongoing">생성준비중</option>
+														<option value="standby">대기</option>
+														<option value="reject">거절</option>
+													</select>
+													<br/>
+													<ul>
+														<li>3. 기타 : </li>
+														<li><textarea class="form-control adminComment" rows="3" placeholder="진행정보 기타 사항"></textarea></li>
+													</ul>
+													<div class="text-right topMargin">
+														<button type="button" class="button__primary" onclick="fnChangeCustomTemplate('change')">변경</button>
+													</div>
+												</div>
+											</div>
+											<div class="text--right"><button type="button" class="button button__danger">신청취소</button></div>
+										</div>
+										<!-- [리스트에서 보이는 영역]-->
+									</div>
+								</div>
+								<!-- //템플릿 정보 영역 -->
+								
+								
+								<!-- 템플릿 생성 영역 -->
+								<div id="createTemplate">
+									<div class="x_panel">
+										<div class="x_title h5"><strong>템플릿 생성</strong></div>
+										<div class="x_content">
+											<form class="form-horizontal form-label-left">
+											<input type="hidden" id="customTemplateId">
+												<fieldset>
+													<div class="form-group pdBottom_10 bdBottom_f3f3f3">
+														<label class="control-label col-md-3 col-sm-3 col-xs-12 ta_left">템플릿</label>
+														<div class="col-md-9 col-sm-9 col-xs-12">
+														  <input type="text" class="form-control" id="templateName" placeholder="템플릿명">
+														</div>
+													</div>
+													<div class="form-group pdBottom_10 bdBottom_f3f3f3">
+														<label class="control-label col-md-3 col-sm-3 col-xs-12 ta_left">샌드박스 이미지</label>
+														<div class="col-md-9 col-sm-9 col-xs-12">
+															<select class="select select--full" id="templateSnapshotId">
+																
+															</select>
+														</div>
+													</div>
+													<div class="form-group pdBottom_10 bdBottom_f3f3f3">
+														<div class="col-md-7 col-sm-6 col-xs-6" id="templateAvailableList">
+															
+														</div>
+													</div>
+													<div class="form-group pdBottom_10 bdBottom_f3f3f3">
+														<label class="control-label col-md-3 col-sm-3 col-xs-12 ta_left">기간 선택</label>
+														<div class="control-label col-md-9 col-sm-9 col-xs-12">
+															<div class="picker__group">
+															  <label class="label__picker"><input class="input__picker" id="startDate" type="text"></label>
+															  <span class="picker__period">~</span>
+															  <label class="label__picker"><input class="input__picker" id="endDate" type="text"></label>
+															</div>
+														</div>
+													</div>
+												</fieldset>
+											</form>
+										</div>
+									</div>
+									<div class="x_panel">
+										<div class="x_title h5"><strong>운영환경의 HDFS 데이터를 샌드박스로 옮기는 명령어</strong></div>
+										<div class="x_content wd_break" id="copyHdfsDataCommand">
+										</div>
+									</div>
+	
+									<div class="x_panel">
+										<div class="x_title h5"><strong>운영환경의  HIVE DDL을 샌드박스로 옮기는 명령어</strong></div>
+										<div class="x_content wd_break" id="copyHiveDataCommand">
+										</div>
+									</div>
+									<div class="x_panel">
+										<div class="x_title h5"><strong>사용자 아이디</strong></div>
+										<div class="x_content">
+											<div>
+												<div class="cheakarea checkboxCustom"><input type="checkbox" id="publicFlag"><label for="publicFlag">모든 유저 사용가능</label></div>
+												<div id="inputUuserId">
+												  <div class="bootstrap-tagsinput">
+												  	<input type="text" id="templateUserId" class="form-control" placeholder="예) test1,test2,test2 (,로 구분자를 주세요)">
+												  </div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="ta_right">
+										<button class="button__file button_default float_none" type="button" onclick="fnCreateTemplate()">템플릿 생성</button>
+									</div>
+								</div>
+								<!-- //템플릿 생성 영역 -->
+							</div>
+						</div>
+					</div><!-- //템플릿 신청 목록 -->
+				</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal__footer">
+		  <button class="button__secondary button__modal--close" type="button" onclick="fnCloseModal('templateAdmin_modal')">닫기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 템플릿 관리 -->
+
+
+	</th:block>
+</body>
+</html>

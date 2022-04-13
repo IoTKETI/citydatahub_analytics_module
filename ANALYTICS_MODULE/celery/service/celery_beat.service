@@ -1,0 +1,28 @@
+[Unit]
+Description=Celery Beat
+
+Requires=rabbitmq-server
+Requires=celery_worker
+
+After=network.target
+After=celery_worker
+After=rabbitmq-server
+
+
+[Service]
+Type=forking
+User=centos
+Group=centos
+Restart=on-failure
+
+ExecStart=/bin/sh -c "/home/centos/ANALYTICS_MODULE/analytics_module/celery/bin/celery_beat_start.sh"
+
+ExecStop=/bin/sh -c "/home/centos/ANALYTICS_MODULE/analytics_module/celery/bin/celery_beat_stop.sh"
+
+ExecReload=/bin/sh -c "/home/centos/ANALYTICS_MODULE/analytics_module/celery/bin/celery_beat_reload.sh"
+
+
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

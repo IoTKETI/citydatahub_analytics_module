@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>데이터 분석 시스템 관리자</title>
+    
+    <!-- 공통 css, js, meta tag -->
+    <th:block th:replace="fragments/admin/adminHead"></th:block>
+</head>
+<body>
+	<div id="loading" style="display:none;">
+		<div class="loading">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+     	</div>
+    	<div class="loadingBox"></div>
+    </div>
+  <!-- wrap -->
+  <div class="wrap">
+    <!-- aside -->
+    <div class="aside">
+      <div class="aside__header">
+        <h1 class="aside__logo">
+        <a th:href="@{${session.cityHubUrl} + '/main/pageMain.do'}"><span class="hidden">데이터 분석 시스템</span></a></h1>
+      </div>
+      <div class="aside__content">
+        <h2 class="hidden">주메뉴</h2>
+        <div class="aside__user">
+          <p class="aside__user-message"><strong class="aside__user-message--strong"><span th:text="${session.userNickname}"></span></strong></p>
+        </div>
+        
+        <!-- nav -->
+        <nav class="nav"> 
+        	<th:block th:replace="fragments/admin/adminMenu"></th:block>
+        </nav>
+        <!-- //nav -->
+        
+      </div>
+    </div>
+    <!-- //aside -->
+    <hr>
+    <!-- main -->
+    <main class="main">
+      <h2 class="hidden">본문</h2>
+      <header class="header">
+        <div class="header__util">
+          <button class="button__nav--toggle" type="button"><i class="nav__icon"><span class="hidden">주메뉴 확장/축소 하기</span></i></button>
+          <span class="header__user">
+          	<span th:text="${session.userNickname}"></span>
+          	<a class="aside__logo" href="/admin/logout">로그아웃</a>
+          </span>
+        </div>
+        <div class="breadcrumb">
+          <a class="breadcrumb__list--home" href="#none"><span class="hidden">Home</span></a><span class="breadcrumb__list">데이터 분석 시스템</span><span class="breadcrumb__list--current"></span>
+        </div>
+      </header>
+      <div class="content">
+      
+      	<input type="hidden" id="userId" th:value="${session.userId}" />
+	    <input type="hidden" id="userRole" th:value="${session.userRole}" />
+	    
+      	<!-- content -->
+      	<th:block layout:fragment="content"></th:block>
+      	<!-- //content -->
+      	
+      	<!-- footer -->
+        <footer class="footer"><span class="footer__copyright">Copyright © 2019 N2M co.,Ltd All right reserved</span></footer>
+        <!-- //footer -->
+        
+      </div>
+    </main>
+    <!-- //main -->
+  </div>
+  <!-- //wrap -->
+  <hr>
+
+	<!-- 공통 javascript -->
+    <th:block th:replace="fragments/admin/adminScript"></th:block>
+    
+</body>
+</html>

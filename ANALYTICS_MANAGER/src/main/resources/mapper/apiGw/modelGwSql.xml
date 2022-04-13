@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vaiv.analyticsManager.apiGw.mapper.ProjectGwMapper">
+	
+   	<select id="modelsListGw" resultType="java.util.HashMap" parameterType="com.vaiv.analyticsManager.apiGw.domain.ModelGw">
+		SELECT 
+			"MODEL_SEQUENCE_PK" AS "id"
+			,"COMMAND" AS "command"
+			,"NAME" AS "name"
+			,"FILEPATH" AS "filepath"
+			,"FILENAME" AS "filename"
+			,"TRAIN_SUMMARY" AS "trainSummary"
+			,"VALIDATION_SUMMARY" AS "validationSummary"
+			, to_char ("CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+			,"PROGRESS_STATE" AS "progressState"
+			, to_char ("PROGRESS_START_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "progressStartedAt"
+			, to_char ("PROGRESS_END_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "progressEndedAt"
+			,"LOAD_STATE" AS "loadState"
+			,"LOAD_PROCESS_ID" AS "loadProcessId"
+			,"INSTANCE_SEQUENCE_FK3" AS "instanceId"
+		FROM "MODEL" 
+		WHERE "DELETE_FLAG" = FALSE
+			AND "PROJECT_SEQUENCE_FK4" = #{projectId}
+		<if test='preprocessedDataId != null and preprocessedDataId != ""' >
+			AND "PREPROCESSED_DATA_SEQUENCE_FK2" = #{preprocessedDataId}
+		</if>
+		ORDER BY "MODEL_SEQUENCE_PK" DESC
+	</select>
+	
+	<select id="modelGw" resultType="java.util.HashMap" parameterType="int">
+		SELECT 
+			"MODEL_SEQUENCE_PK" AS "id"
+			,"COMMAND" AS "command"
+			,"NAME" AS "name"
+			,"FILEPATH" AS "filepath"
+			,"FILENAME" AS "filename"
+			,"TRAIN_SUMMARY" AS "trainSummary"
+			,"VALIDATION_SUMMARY" AS "validationSummary"
+			, to_char ("CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+			,"PROGRESS_STATE" AS "progressState"
+			, to_char ("PROGRESS_START_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "progressStartedAt"
+			, to_char ("PROGRESS_END_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "progressEndedAt"
+			,"LOAD_STATE" AS "loadState"
+			,"LOAD_PROCESS_ID" AS "loadProcessId"
+			,"INSTANCE_SEQUENCE_FK3" AS "instanceId"
+		FROM "MODEL" 
+		WHERE "DELETE_FLAG" = FALSE
+			AND "MODEL_SEQUENCE_PK" = #{modelId}
+			AND "PROJECT_SEQUENCE_FK4" = #{projectId}
+		ORDER BY "MODEL_SEQUENCE_PK" DESC
+	</select>
+ 
+    <insert id="insertModelGw" parameterType="com.vaiv.analyticsManager.apiGw.domain.ModelGw">
+   		INSERT INTO 
+   			"MODEL"(
+   				"MODEL_SEQUENCE_PK"
+   				, "COMMAND"
+   				, "NAME"
+   				, "CREATE_DATETIME"
+   				, "PROGRESS_STATE"
+   				, "PROGRESS_START_DATETIME"
+   				, "LOAD_STATE"
+   				, "ORIGINAL_DATA_SEQUENCE_FK1"
+   				, "PREPROCESSED_DATA_SEQUENCE_FK2"
+   				, "INSTANCE_SEQUENCE_FK3"
+   				, "PROJECT_SEQUENCE_FK4"
+   			) VALUES (
+   				#{modelId}
+   				,#{command}
+   				,#{name}
+   				,#{createDatetime}
+   				,#{progressState}
+   				,#{progressStartDatetime}
+   				,#{loadState}
+   				,#{originalDataId}
+   				,#{preprocessedDataId}
+   				,#{instanceId}
+   				,#{projectId}
+   			)
+   </insert>
+   
+      <update id="updateModelsGw" parameterType="com.vaiv.analyticsManager.apiGw.domain.ModelGw">
+   		UPDATE "MODEL"
+   		SET
+   		<trim prefixOverrides=",">
+   			<if test='filepath != null and filepath != ""' >,"FILEPATH" = #{filepath}</if>
+   			<if test='filename != null and filename != ""' >,"FILENAME" = #{filename}</if>
+   			<if test='trainSummary != null and trainSummary != ""' >,"TRAIN_SUMMARY" = #{trainSummary}</if>
+   			<if test='validationSummary != null and validationSummary != ""' >,"VALIDATION_SUMMARY" = #{validationSummary}</if>
+   			<if test='progressState != null and progressState != ""' >,"PROGRESS_STATE" = #{progressState}</if>
+   			<if test='progressEndDatetime != null and progressEndDatetime != ""' >,"PROGRESS_END_DATETIME" = #{progressEndDatetime}</if>
+   			<if test='loadState != null and loadState != ""' >,"LOAD_STATE" = #{loadState}</if>
+   			<if test='deleteFlag != null and deleteFlag != ""' >,"DELETE_FLAG" = #{deleteFlag}</if>
+		</trim>
+		WHERE "MODEL_SEQUENCE_PK" = #{modelId}
+   </update>
+</mapper>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vaiv.restFull.mapper.BatchMapper">
+
+	<select id="batchServicesAll" resultType="java.util.HashMap">
+		SELECT bs.*
+		FROM "BATCH_SERVICE" AS bs
+		WHERE bs."DELETE_FLAG" = FALSE
+		AND bs."USE_FLAG" = TRUE
+		ORDER BY "BATCH_SERVICE_SEQUENCE_PK"
+   </select>
+
+   <select id="batchServices" resultType="java.util.HashMap">
+		SELECT bs.*
+		FROM "BATCH_SERVICE" AS bs
+		WHERE "SANDBOX_INSTANCE_SEQUENCE_FK1" = #{sandboxInstanceSequence}
+			AND bs."DELETE_FLAG" = FALSE
+			AND bs."USE_FLAG" = TRUE
+		ORDER BY "BATCH_SERVICE_SEQUENCE_PK"
+   </select>
+
+	<select id="batchService" resultType="java.util.HashMap">
+		SELECT bs.*
+		FROM "BATCH_SERVICE" AS bs
+		WHERE "BATCH_SERVICE_SEQUENCE_PK" = #{batchServiceSequencePk}
+			AND bs."DELETE_FLAG" = FALSE
+		ORDER BY "BATCH_SERVICE_SEQUENCE_PK"
+	</select>
+	
+	<select id="instance" resultType="java.util.HashMap">
+		SELECT *
+		FROM "INSTANCE"
+		WHERE "INSTANCE_SEQUENCE_PK" = #{instancePk}
+	</select>
+
+	<insert id="insertLogBatch" parameterType="com.vaiv.restFull.domain.LogBatch"
+			useGeneratedKeys="true" keyProperty="logBatchSequencePk" keyColumn="LOG_BATCH_SEQUENCE_PK">
+		INSERT INTO
+			"LOG_BATCH"(
+				"CODE"
+				, "LOG_BATCH_GROUP_ID"
+				, "BATCH_INSTANCE_SEQUENCE_FK1"
+				, "USER_ID"
+				, "BATCH_SERVICE_REQUEST_SEQUENCE_FK2"
+				, "BATCH_SERVICE_SEQUENCE_FK3"
+				, "BATCH_TARGET_FILE_PATH"
+				, "BATCH_TARGET_FILE_SIZE"
+				, "BATCH_START_DATETIME"
+				, "BATCH_END_DATETIME"
+				, "BATCH_IS_SUCCESS"
+				, "BATCH_FAIL_REASON"
+				, "BATCH_RESULT"
+				, "STORE_METHOD"
+				, "UPDATE_ATTRIBUTE"
+				, "TRANSFER_DATA"
+				, "TRANSFER_URL"
+				, "RESULT_UPDATE_METHOD"
+				, "EXECUTION_CYCLE"
+			)VALUES(
+           		#{code}
+           		, #{logBatchGroupId}
+           		, #{batchInstanceSequenceFk1}
+           		, #{userId}
+           		, #{batchServiceRequestSequenceFk2}
+           		, #{batchServiceSequenceFk3}
+           		, #{batchTargetFilePath}
+           		, #{batchTargetFileSize}
+           		, #{batchStartDatetime}
+           		, #{batchEndDatetime}
+           		, #{batchIsSuccess}
+           		, #{batchFailReason}
+           		, #{batchResult}
+           		, #{storeMethod}
+           		, #{updateAttribute}
+           		, #{transferData}
+           		, #{transferUrl}
+           		, #{resultUpdateMethod}
+           		, #{executionCycle}
+
+          	)
+	</insert>
+
+	<update id="updateBatchServiceState" parameterType="com.vaiv.restFull.domain.BatchServiceState">
+		UPDATE "BATCH_SERVICE"
+		SET
+			"MODIFY_DATETIME" = NOW(),
+			"BATCH_STATE" = #{batchState}
+		WHERE "BATCH_SERVICE_SEQUENCE_PK" = #{batchServiceRequestSequencePk}
+	</update>
+</mapper>

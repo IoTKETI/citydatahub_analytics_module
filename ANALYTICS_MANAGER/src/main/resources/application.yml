@@ -1,0 +1,164 @@
+spring:
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+  thymeleaf:
+    prefix: classpath:templates/html/
+    check-template-location: true
+    suffix: .html
+    mode: HTML5
+    cache: false
+
+  datasource:
+    hikari:
+      driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+      jdbc-url: jdbc:log4jdbc:postgresql://localhost:5432/ANALYTICS_MANAGER?useUnicode=true&characterEncoding=utf-8
+      username: smartcity
+      password: smartcity
+      connection-test-query: SELECT 1
+  main:
+    allow-bean-definition-overriding: true
+
+  # spring-boot-devtool
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
+  application:
+    name: dh-analytics-manager
+
+# spring-boot-starter-actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+server:
+  tomcat:
+    uri-encoding: UTF-8
+  port: 2020
+
+cloudApi:
+  url: #Input URL
+  privateIpRange: #Input IP
+  publicIpRange: #Input IPs
+  credential: #Input Info
+  authorization: #Input Info
+  sandbox:
+    keyName: #Input Info
+    availabilityZone: #Input Info
+    networks: #Input Info
+    securityGroups: #Input Info
+  batch:
+    imageRef: #Input Info
+    flavorRef: 3 #m1.medium
+    keyName: #Input Info
+    availabilityZone: #Input Info
+    networks: #Input Info
+    securityGroups: #Input Info
+
+sso:
+  dataHubUrl_pri: #Input URL
+  dataHubUrl_pub: #Input URL
+  dataHubUrl_pri_admin: #Input URL
+  dataHubUrl_pub_admin: #Input URL
+  responseType: code
+  authEndpoint: oauth2.0/authorize
+  tokenEndpoint: oauth2.0/token
+  publicKeyEndPoint: security/publickey
+  userMethod: security/users
+  logoutMethod: security/logout
+  adminClientId: #Input Info
+  adminClientSecret: #Input Info
+  # 관리자 계정
+  # username: cityhub04
+  # password: cityhub04!
+  redirectUri_pri: #Input URL
+  redirectUri_pub: #Input URL
+  redirectUri_admin: /admin/main
+  grantTypeAuth: authorization_code
+  grantTypeClient: client_credentials
+  grantTypePassword: password
+  grantTypeRefresh: refresh_token
+  isDevTest: false
+  devUserRole: Analytics_Admin  # Analytics_Admin or Analytics_User
+  userId: #Input Info
+  userClientId: #Input Info
+  userClientSecret: #Input Info
+
+## N2M Authorized API
+authorizedModel:
+  modelListUrl: #Input URL
+  urlPrefix: /dataservice/analysisApprovalRequests/users
+  urlPostfix: /dataModel
+  devTest: false
+  devID: skdisk2
+
+## KETI API
+allModel:
+  modelListUrl: #Input URL
+  devTest: false
+  devSampleModels: '[#Input json]'
+
+module:
+  tempUrl: #Input URL
+  port: 8000
+  method: /modules/analyticsModule
+  localFiles: /localFiles?path=/&command=get_list
+  healthCheck: /healthCheck
+  asyncSecond: 5000
+  asyncPeriod: 360
+
+# zuul proxy 설정
+zuul:
+  routes:
+    modules:
+      stripPrefix: false
+      path: /modules/**
+      sensitiveHeaders:
+  isNotUseSandbox: false
+  hueServer: #Input URL
+  contextPortMap: analyticsModule:8000
+  contextSubpathMap: /modules/analyticsModule:/modules/analyticsModule
+
+
+ribbon:
+  eureka:
+    enabled: false
+
+modules:
+  ribbon:
+    listOfServers: 
+
+nfs:
+  path: /ANALYTICS_MANAGER_NFS/batchServer/batchService_
+  resultPath: /ANALYTICS_MANAGER_NFS/NIFI_RESULT
+
+analyticsBatchServer:
+  isDevTest: false
+  url: #Input URL
+
+cityHub:
+  url: #Input URL
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+     defaultZone: #Input URL/eureka
+
+admin:
+  nifiUrl: #Input URL/nifi
+  hueUrl: #Input URL/hue

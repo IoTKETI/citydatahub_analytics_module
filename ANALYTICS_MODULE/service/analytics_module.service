@@ -1,0 +1,18 @@
+[Unit]
+Description=Analytics Module
+
+After=network.target
+
+[Service]
+Type=forking
+User=centos
+Group=centos
+Restart=on-failure 
+
+ExecStart=/bin/sh -c "/home/centos/ANALYTICS_MODULE/analytics_module/bin/start.sh"
+ExecStop=/bin/sh -c "/home/centos/ANALYTICS_MODULE/analytics_module/bin/stop.sh"
+
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,24 @@
+[Unit]
+Description=Celery Worker
+
+Requires=rabbitmq-server
+After=rabbitmq-server
+After=network.target
+
+[Service]
+Type=forking
+User=centos
+Group=centos
+Restart=on-failure 
+
+ExecStart=/bin/sh -c "/home/centos/ANALYTICS_MODULE/analytics_module/celery/bin/celery_worker_start.sh"
+
+ExecStop=/bin/sh -c "/home/centos/ANALYTICS_MODULE/analytics_module/celery/bin/celery_worker_stop.sh"
+
+ExecReload=/bin/sh -c "/home/centos/ANALYTICS_MODULE/analytics_module/celery/bin/celery_worker_reload.sh"
+
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target
+

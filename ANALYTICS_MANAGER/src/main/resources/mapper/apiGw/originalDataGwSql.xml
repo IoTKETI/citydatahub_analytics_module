@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vaiv.analyticsManager.apiGw.mapper.ProjectGwMapper">
+	
+   	<select id="originalDataListGw" resultType="java.util.HashMap">
+		SELECT 
+		    "ORIGINAL_DATA_SEQUENCE_PK" AS "id"
+		    ,"NAME" AS "name"
+		    ,"FILEPATH" AS "filepath"
+		    ,"FILENAME" AS "filename"
+		    ,"EXTENSION" AS "extension"
+		    , to_char ("CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+		    ,"PROJECT_SEQUENCE_FK1" AS "projectId"
+		    ,"INSTANCE_SEQUENCE_FK2" AS "instanceId"
+		    ,"COLUMNS" AS "fields"
+		    ,"STATISTICS" AS "statistics"
+		    ,"SAMPLE_DATA" AS "sampleData"
+		    ,"AMOUNT" AS "numberOfData"
+		FROM "ORIGINAL_DATA" 
+		WHERE "DELETE_FLAG" = FALSE 
+			AND "PROJECT_SEQUENCE_FK1"=#{projectSequencePk}
+		ORDER BY "ORIGINAL_DATA_SEQUENCE_PK" DESC
+	</select>
+	
+	<select id="originalDataGw" resultType="java.util.HashMap" parameterType="int">
+		SELECT 
+		    "ORIGINAL_DATA_SEQUENCE_PK" AS "id"
+		    ,"NAME" AS "name"
+		    ,"FILEPATH" AS "filepath"
+		    ,"FILENAME" AS "filename"
+		    ,"EXTENSION" AS "extension"
+		    , to_char ("CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+		    ,"PROJECT_SEQUENCE_FK1" AS "projectId"
+		    ,"INSTANCE_SEQUENCE_FK2" AS "instanceId"
+		    ,"COLUMNS" AS "fields"
+		    ,"STATISTICS" AS "statistics"
+		    ,"SAMPLE_DATA" AS "sampleData"
+		    ,"AMOUNT" AS "numberOfData"
+		FROM "ORIGINAL_DATA"
+		WHERE "DELETE_FLAG" = FALSE
+		    AND "PROJECT_SEQUENCE_FK1"=#{projectSequencePk}
+		    AND "ORIGINAL_DATA_SEQUENCE_PK" = #{originalDataSequencePk}
+	</select>
+	
+	
+	<select id="preprocessFunctionListGw" resultType="java.util.HashMap">
+   		SELECT 
+   			"PREPROCESS_FUNCTION_SEQUENCE_PK" AS "id"
+			,"PREPROCESS_FUNCTION_NAME" AS "name"
+			,"LIBRARY_NAME" AS "libraryName"
+			,"LIBRARY_VERSION" AS "libraryVersion"
+			,"LIBRARY_DOCUMENT_URL" AS "libraryDocumentUrl"
+			,"LIBRARY_OBJECT_NAME" AS "libraryObjectName"
+			,"LIBRARY_FUNCTION_NAME" AS "libraryFunctionName"
+			,"LIBRARY_FUNCTION_DESCRIPTION" AS "libraryFunctionDescription"
+			,"LIBRARY_FUNCTION_USAGE" AS "libraryFunctionUsage"
+			,"PARAMETERS" AS "parameters"
+			,"SUPPORT_DATA_TYPE" AS "supportDataType"
+			, to_char ("CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+			,"WRITER" AS "writer"
+   		FROM "PREPROCESS_FUNCTION"
+		WHERE "USE_FLAG" = TRUE
+		ORDER BY "PREPROCESS_FUNCTION_NAME" ASC
+   </select>
+   
+   <select id="preprocessFunctionGw" resultType="java.util.HashMap">
+   		SELECT 
+   		   	"PREPROCESS_FUNCTION_SEQUENCE_PK" AS "id"
+			,"PREPROCESS_FUNCTION_NAME" AS "name"
+			,"LIBRARY_NAME" AS "libraryName"
+			,"LIBRARY_VERSION" AS "libraryVersion"
+			,"LIBRARY_DOCUMENT_URL" AS "libraryDocumentUrl"
+			,"LIBRARY_OBJECT_NAME" AS "libraryObjectName"
+			,"LIBRARY_FUNCTION_NAME" AS "libraryFunctionName"
+			,"LIBRARY_FUNCTION_DESCRIPTION" AS "libraryFunctionDescription"
+			,"LIBRARY_FUNCTION_USAGE" AS "libraryFunctionUsage"
+			,"PARAMETERS" AS "parameters"
+			,"SUPPORT_DATA_TYPE" AS "supportDataType"
+			, to_char ("CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+			,"WRITER" AS "writer"
+   		FROM "PREPROCESS_FUNCTION"
+		WHERE "USE_FLAG" = TRUE
+			AND "PREPROCESS_FUNCTION_SEQUENCE_PK" = #{preprocessFunctionSequencePk}
+   </select>
+	
+	
+	<insert id="insertOriginalDataGw" parameterType="com.vaiv.analyticsManager.apiGw.domain.OriginalDataGw">
+   		INSERT INTO 
+   			"ORIGINAL_DATA"(
+   				"ORIGINAL_DATA_SEQUENCE_PK"
+   				, "NAME"
+   				, "FILEPATH"
+   				, "FILENAME"
+   				, "EXTENSION"
+   				, "CREATE_DATETIME"
+   				, "PROJECT_SEQUENCE_FK1"
+   				, "INSTANCE_SEQUENCE_FK2"
+   				, "COLUMNS"
+   				, "STATISTICS"
+   				, "SAMPLE_DATA"
+   				, "AMOUNT"
+   			) VALUES (
+   				#{originalDataId}
+   				,#{name}
+   				,#{filepath}
+   				,#{filename}
+   				,#{extension}
+   				,#{createDatetime}
+   				,#{projectId}
+   				,#{instanceId}
+   				,#{columns}
+   				,#{statistics}
+   				,#{sampleData}
+   				,#{amount}
+   			)
+   </insert>
+   
+   <update id="deleteOriginalDataGw" parameterType="com.vaiv.analyticsManager.apiGw.domain.OriginalDataGw">
+   		UPDATE "ORIGINAL_DATA"
+   		SET
+   		<trim prefixOverrides=",">
+   			<if test='deleteFlag != null and deleteFlag != ""' >,"DELETE_FLAG" = #{deleteFlag}</if>
+		</trim>
+		WHERE "ORIGINAL_DATA_SEQUENCE_PK" = #{originalDataSequencePk}
+   </update>
+   
+	<select id="checkDuplicateOriginalDataGw" resultType="int" parameterType="com.vaiv.analyticsManager.apiGw.domain.OriginalDataGw">
+   		SELECT COUNT(*) FROM "ORIGINAL_DATA"
+		WHERE "PROJECT_SEQUENCE_FK1"=#{projectSequenceFk1} 
+			AND "FILENAME" = #{filename}
+			AND "DELETE_FLAG" = FALSE
+   </select>
+   
+</mapper>

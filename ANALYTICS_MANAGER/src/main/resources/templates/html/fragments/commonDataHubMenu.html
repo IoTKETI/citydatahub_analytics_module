@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <th:block th:fragment="commonDataHubMenu">
+          <h2 class="hidden">목차</h2>
+	      <ul class="nav-depth1__list clearfix">
+	        <li class="nav-depth1__item"><a href="#none" class="nav-depth1__link">소개</a>
+	          <ul class="nav-depth2__list">
+	            <li class="nav-depth2__item"><a th:href="@{${session.cityHubUrl} + '/intro/datahub/pageList.do?nav=MNU017'}" class="nav-depth2__link">데이터 허브 소개</a></li>
+	            <li class="nav-depth2__item"><a th:href="@{${session.cityHubUrl} + '/intro/provsvc/pageList.do?nav=MNU018'}" class="nav-depth2__link">제공 서비스 소개</a></li>
+	          </ul>
+	        </li>
+	        <li class="nav-depth1__item is-active"><a href="#none" class="nav-depth1__link">고객 서비스</a>	
+	          <ul class="nav-depth2__list">
+	            <li class="nav-depth2__item"><a th:href="@{${session.cityHubUrl} + '/cusvc/faq/pageList.do?nav=MNU020'}" class="nav-depth2__link">FAQ</a></li>
+	            <li class="nav-depth2__item"><a th:href="@{${session.cityHubUrl} + '/cusvc/qna/pageList.do?nav=MNU021'}" class="nav-depth2__link">묻고답하기</a></li>
+	            <li class="nav-depth2__item"><a th:href="@{${session.cityHubUrl} + '/datacomplaint/pageList.do?nav=MNU022'}" class="nav-depth2__link">신고하기</a></li>
+	            <li class="nav-depth2__item"><a th:href="@{${session.cityHubUrl} + '/cusvc/notice/pageList.do?nav=MNU023'}" class="nav-depth2__link">공지사항</a></li>
+	          </ul>
+	        </li>
+	        <li class="nav-depth1__item"><a href="#none" class="nav-depth1__link">데이터</a>
+	          <ul class="nav-depth2__list">
+	            <li class="nav-depth2__item"><a th:href="@{${session.cityHubUrl} + '/dataset/pageList.do?nav=MNU025'}" class="nav-depth2__link">데이터셋</a></li>
+	          </ul>
+	        </li>
+	        <li class="nav-depth1__item"><a href="#none" class="nav-depth1__link">통계</a>
+	          <ul class="nav-depth2__list">
+	            <li class="nav-depth2__item"><a th:href="@{${session.cityHubUrl} + '/analy/stat/datastat/pageList.do?nav=MNU054'}" class="nav-depth2__link">데이터제공현황</a></li>
+	          </ul>
+	        </li>
+	         <li class="nav-depth1__item"><a href="#none" class="nav-depth1__link">활용사례</a>
+	          <ul class="nav-depth2__list">
+	            <li class="nav-depth2__item"><a th:href="@{${session.cityHubUrl} + '/review/pageList.do?nav=MNU032'}" class="nav-depth2__link">활용후기</a></li>
+	          </ul>
+	        </li>
+	        <li class="nav-depth1__item"><a href="#none" class="nav-depth1__link">분석</a>
+	          <ul class="nav-depth2__list">
+	            <li class="nav-depth2__item"><a href="/algorithmManage" class="nav-depth2__link">데이터분석시스템</a>
+	            </li>
+	          </ul>
+	        </li>
+	      </ul>
+    </th:block>
+</html>

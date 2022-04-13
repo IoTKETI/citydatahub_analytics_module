@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vaiv.analyticsManager.restFullApi.mapper.AlgorithmRestMapper">
+
+   <select id="algorithms" resultType="java.util.HashMap">
+		SELECT * FROM "ALGORITHM"
+		ORDER BY "CREATE_DATETIME" DESC;
+   </select>
+
+	<select id="algorithm" resultType="java.util.HashMap">
+		SELECT * FROM "ALGORITHM" WHERE "ALGORITHM_SEQUENCE_PK" = #{id}
+   </select>
+
+	<select id="searchAlgorithms" resultType="java.util.HashMap">
+		SELECT * 
+		FROM "ALGORITHM"
+		<if test="searchValue != null and searchValue != 'null' and searchValue != ''">
+			WHERE "ALGORITHM_NAME" ILIKE concat('%', #{searchValue}, '%') 
+			OR "LIBRARY_FUNCTION_USAGE" ILIKE concat('%', #{searchValue}, '%')
+		</if>
+		ORDER BY "ALGORITHM_NAME"
+	</select> 
+	
+	
+</mapper>

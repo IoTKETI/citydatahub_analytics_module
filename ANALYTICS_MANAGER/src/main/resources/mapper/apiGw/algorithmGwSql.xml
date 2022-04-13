@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vaiv.analyticsManager.apiGw.mapper.AlgorithmGwMapper">
+
+	<select id="algorithmsGw" resultType="java.util.HashMap">
+		SELECT 
+			"ALGORITHM_SEQUENCE_PK" AS "id"
+			,"ALGORITHM_NAME" AS "name"
+			,"LIBRARY_NAME" AS "libraryName"
+			,"LIBRARY_VERSION" AS "libraryVersion"
+			,"LIBRARY_DOCUMENT_URL" AS "libraryDocumentUrl"
+			,"LIBRARY_OBJECT_NAME" AS "libraryObjectName"
+			,"LIBRARY_FUNCTION_NAME" AS "libraryFunctionName"
+			,"LIBRARY_FUNCTION_DESCRIPTION" AS "libraryFunctionDescription"
+			,"LIBRARY_FUNCTION_USAGE" AS "libraryFunctionUsage"
+			,"MODEL_PARAMETERS" AS "modelParameters"
+			,"TRAIN_PARAMETERS" AS "trainParameters"
+			,"SUPPORT_DATA_TYPE" AS "supportDataType"
+			, to_char ("CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+			,"WRITER" AS "writer"
+		FROM "ALGORITHM"
+		WHERE "USE_FLAG" = TRUE
+		ORDER BY "CREATE_DATETIME" DESC;
+   </select>
+
+	<select id="algorithmGw" resultType="java.util.HashMap">
+		SELECT 
+			"ALGORITHM_SEQUENCE_PK" AS "id"
+			,"ALGORITHM_NAME" AS "name"
+			,"LIBRARY_NAME" AS "libraryName"
+			,"LIBRARY_VERSION" AS "libraryVersion"
+			,"LIBRARY_DOCUMENT_URL" AS "libraryDocumentUrl"
+			,"LIBRARY_OBJECT_NAME" AS "libraryObjectName"
+			,"LIBRARY_FUNCTION_NAME" AS "libraryFunctionName"
+			,"LIBRARY_FUNCTION_DESCRIPTION" AS "libraryFunctionDescription"
+			,"LIBRARY_FUNCTION_USAGE" AS "libraryFunctionUsage"
+			,"MODEL_PARAMETERS" AS "modelParameters"
+			,"TRAIN_PARAMETERS" AS "trainParameters"
+			,"SUPPORT_DATA_TYPE" AS "supportDataType"
+			, to_char ("CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+			,"WRITER" AS "writer"
+		FROM "ALGORITHM" 
+		WHERE "ALGORITHM_SEQUENCE_PK" = #{id}
+			AND "USE_FLAG" = TRUE
+   </select>
+</mapper>

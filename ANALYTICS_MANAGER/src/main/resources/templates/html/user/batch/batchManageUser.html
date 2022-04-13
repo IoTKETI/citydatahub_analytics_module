@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+  layout:decorator="layout/defaultLayout">
+
+<head>
+	<meta charset="UTF-8">
+</head>
+<body>
+	<th:block layout:fragment="content">
+	<script th:src="@{js/user/batch/batchManageUser.js}"></script>
+	
+        <!-- page content -->
+        <!-- breadcrumb -->
+       <ul class="breadcrumb">
+         <li class="breadcrumb__list breadcrumb__list--home material-icons">Home</li>
+         <li class="breadcrumb__list">배치관리</li>
+         <li class="breadcrumb__list breadcrumb__list--current">배치 신청 목록</li>
+       </ul>
+       <!-- //breadcrumb -->
+       <h3 class="sub__heading1 posiRelative">배치 관리<small class="sub__heading1--small">사용자가 신청한 배치 목록을 보여준다.</small></h3>
+       
+       <div class="sub__content">
+			<ul class="contentsTab tab clearfix" id="contents_tab">
+				<li class="on">
+					<a href="javascript:void(0)" class="iconArea" onclick="fnSetTabMenu('#contents_tab','0');">배치 관리</a>
+				</li>
+				<li class="">
+					<a href="javascript:void(0)" class="iconArea" onclick="fnSetTabMenu('#contents_tab','1');">배치 신청 관리</a>
+				</li>
+				<li class="">
+					<a href="javascript:void(0)" class="iconArea" onclick="fnSetTabMenu('#contents_tab','1');">배치 이력 관리</a>
+				</li>
+			</ul>
+		 	<div class="contentsTab_con tab_con" id="contents_tab_con">
+		 		<!-- 배치목록 Tab -->
+			 	<div class="tabView tabViewOn">
+					  <table class="board-table" id="logTable_batchList">
+						<thead>
+						  <tr>
+							<th style="width:3%"><div class="checkboxCustom"><input type="checkbox" id="check-all_batchList"><label for="check-all_batchList"></label></div></th>
+							<th>projectSequencePk</th>
+							<th>배치명</th>
+							<th>프로젝트</th>
+							<th>모델명</th>
+							<th>데이터 생성</th>
+							<th>도메인명</th>
+							<th>결과반영방식</th>
+							<th>실행주기</th>
+							<th>사용여부</th>
+							<th>실행상태</th>
+							<th>요청시각</th>
+						  </tr>
+						</thead>
+						<tbody id="batchTbodyHtml">
+							
+						</tbody>
+					  </table>
+					  <div class="button__group" style="top: 20px">
+					  	<!-- <button type="button" class="button button__primary" onClick="fnStartAndStopBatch('start')">시작</button>
+					  	<button type="button" class="button button__primary" onClick="fnStartAndStopBatch('stop')">정지</button>
+					  	<button type="button" class="button button__outline--default" onClick="fnDeleteBatch()">삭제</button> -->
+					  </div>
+				</div>
+				<!-- //배치목록 Tab -->
+				
+				<!-- 배치 신청 목록 Tab -->
+			 	<div class="tabView ">
+					  <table class="board-table" id="logTable_batchRequestList">
+						<thead>
+						  <tr>
+								<th style="width:3%"><div class="checkboxCustom"><input type="checkbox" id="check-all_batchRequestList"><label for="check-all_batchRequestList"></label></div></th>
+								<th>projectSequencePk</th>
+								<th>배치명</th>
+								<th>프로젝트</th>
+								<th>모델명</th>
+								<th>데이터 생성</th>
+								<th>도메인명</th>
+								<th>결과반영방식</th>
+								<th>실행주기</th>
+								<th>요청시각</th>
+								<th>진행상태</th>
+							</tr>
+						</thead>
+						<tbody id="batchRequestTbodyHtml">
+
+						</tbody>
+					  </table>
+					  <div class="button__group" style="top: 20px">
+						<a class="button button__primary js-modal-show rightMargin" href="#batchModal" onclick='N2M.ui.toggleModal("#batchModal")' id="addBatchRequestModalBtn">배치 신청</a>
+						<button type="button" class="button button__outline--default" onClick="fnDeleteBatchRequest()">삭제</button>
+					  </div>
+				</div>
+				<!-- //배치목록 Tab -->
+				
+				<!-- 배치이력 Tab -->
+				<div class="tabView ">
+					  <table class="board-table" id="logBatchTable">
+						<thead>
+							<tr>
+								<th style="width:1%">logBatchSequencePk</th>
+								<th>배치명</th>
+								<th style="width:30%">이력</th>
+								<th>시작시간</th>
+								<th>종료시간</th>
+								<th>성공여부</th>
+								<th>생성일시</th>
+								<th>상세</th>
+							</tr>
+						  </thead>
+						  <tbody id="batchLogTbodyHtml">
+						  </tbody>
+					  </table>
+					  <div class="button__group" style="top: 20px">
+							<div class="col-md-9">
+								  <div class="datepicker">
+									<label class="label__datepicker material-icons"><input class="input input__datepicker" id="startDate" type="text"></label>
+									<label class="label__datepicker material-icons"><input class="input input__datepicker" id="endDate" type="text"></label>
+								  </div>
+							</div>
+							<a class="button button__primary js-modal-show" onclick="fnSearchBatchLog()">검색</a>
+					  </div>
+				</div>
+				<!-- //배치이력 Tab -->
+			</div>
+       	</div>
+		<!-- page content -->
+
+		
+		<!-- [배치 모달 팝업] -->
+		<div id="batchModal" class="modal ">
+			<div class="modal__outer">
+				<div class="modal__inner">
+					<div class="modal__header">
+						<h3 class="hidden">배치  팝업</h3>
+						<button class="modal__button--close js-modal-close material-icons" type="button"><span class="hidden">모달 닫기</span></button>
+					</div>
+					<div class="modal__body">
+						<section class="modal__service-request">
+							<h4 class="modal__heading1"><strong>배치 <span class="modalName"></span></strong></h4>
+							<form class="form-horizontal form-label-left" id="batchRequestForm">
+								<div class="bg_fff pd_15 mgTop_10">
+									<div class="form-group">
+										<div class="col-md-2 col-sm-4 col-xs-12">
+											<label class="control-label  text-left">배치명</label>
+										</div>
+										<div class="col-md-10 col-sm-10 col-xs-12">
+											<input type="text" class="form-control" id="name" placeholder="배치명">
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="col-md-12 col-sm-12 col-xs-12">
+											<label class="control-label  text-left">1. 학습된 모델 선택</label>
+										</div>
+									</div>
+									<div class="form-group registDiv" style="display: block;">
+										<div class="col-md-2 col-sm-4 col-xs-12">
+											<label class="control-label  text-left">&nbsp;&nbsp; 프로젝트</label>
+										</div>
+										<div class="col-md-10 col-sm-10 col-xs-12">
+											<div class="row ">
+												<div class="col-md-12 col-sm-12 col-xs-12 projList">
+													<div class="border_ccc ">
+														<ul class="select_list" id="selectedProject">
+														</ul>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div><!-- // form-group -->
+									<div class="form-group registDiv">
+										<div class="col-md-2 col-sm-4 col-xs-12">
+											<label class="control-label  text-left">&nbsp;&nbsp; 모델명</label>
+										</div>
+										<div class="col-md-10 col-sm-10 col-xs-12">
+											<div class="border_ccc ">
+												<ul class="select_list" id="selectedModel" style="overflow:scroll;height:100px;">
+												</ul>
+											</div>
+											<!-- <input type="text" class="form-control" id="selectedModel" placeholder="모델명" readonly> -->
+										</div>
+									</div><!-- // form-group -->
+									<div class="form-group">
+										<div class="col-md-12 col-sm-12 col-xs-12">
+											<label class="control-label  text-left">2. 예측용 데이터 생성</label>
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="col-md-2 col-sm-4 col-xs-12">
+											<label class="control-label text-left">&nbsp;&nbsp; 데이터 생성방법</label>
+										</div>
+										<div class="col-md-10 col-sm-10 col-xs-12">
+											<select class="select" id="makeDataMethod">
+												<option class="select"  value="nifi">NIFI 등록</option>
+												<option value="sql">SQL 등록</option>
+											</select>
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="col-md-2 col-sm-4 col-xs-12">
+											<label class="control-label  text-left">&nbsp;&nbsp; NIFI 템플릿명</label>
+										</div>
+										<div class="col-md-10 col-sm-10 col-xs-12">
+											<input type="text" class="form-control" id="nifiTemplateName" placeholder="배치용 데이터 생성에 사용한 NIFI 템플릿명">
+										</div>
+									</div>
+									<div class="form-group" style="display: none">
+										<div class="col-md-2 col-sm-4 col-xs-12">
+											<label class="control-label  text-left">&nbsp;&nbsp; SQL 문</label>
+										</div>
+										<div class="col-md-10 col-sm-10 col-xs-12">
+											<input type="text" class="form-control" id="sql" placeholder="배치용 데이터 생성에 사용한 SQL문">
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="col-md-12 col-sm-12 col-xs-12">
+											<label class="control-label  text-left">3. 예측결과 후처리</label>
+										</div>
+									</div>
+
+									<div class="form-group">
+										<div class="col-md-2 col-sm-4 col-xs-12">
+											<label class="control-label text-left">&nbsp;&nbsp; 후처리 방식</label>
+										</div>
+										<div class="col-md-10 col-sm-10 col-xs-12">
+											<select class="select" id="storeMethod">
+												<option class="select" value="rawData">없음</option>
+												<option value="percentage">백분율</option>
+											</select>
+										</div>
+									</div>
+
+									<div class="form-group" style="display: none">
+										<div class="col-md-2 col-sm-4 col-xs-12">
+											<label class="control-label  text-left">&nbsp;&nbsp; 전체값 컬럼이름</label>
+										</div>
+										<div class="col-md-10 col-sm-10 col-xs-12">
+											<input type="text" class="form-control" id="totalColumnName" placeholder="totalColumnName">
+										</div>
+									</div>
+
+									<div class="form-group" style="display: none">
+										<div class="col-md-2 col-sm-4 col-xs-12">
+											<label class="control-label  text-left">&nbsp;&nbsp; 타입변경</label>
+										</div>
+										<div class="col-md-10 col-sm-10 col-xs-12">
+											<select class="select" id="targetType">
+												<option value="double">Double</option>
+												<option value="integer">Integer</option>
+												<option value="string">String</option>
+											</select>
+										</div>
+									</div>
+
+									<div class="form-group">
+										<div class="col-md-12 col-sm-12 col-xs-12">
+											<label class="control-label  text-left">4. 코어모듈 저장방식</label>
+										</div>
+									</div>
+
+									<div class="form-group">
+										<div class="col-md-2 col-sm-4 col-xs-12">
+											<label class="control-label  text-left">&nbsp;&nbsp; 결과 반영 방식</label>
+										</div>
+										<div class="col-md-10 col-sm-10 col-xs-12">
+											<select class="select" id="resultUpdateMethod">
+												<option class="select"  value="replace">REPLACE</option>
+												<option value="update">UPDATE</option>
+											</select>
+										</div>
+									</div>
+
+									<div class="form-group" style="display: none;">
+										<div class="col-md-2 col-sm-4 col-xs-12">
+											<label class="control-label  text-left">&nbsp;&nbsp; 데이터 셋 아이디</label>
+										</div>
+										<div class="col-md-10 col-sm-10 col-xs-12">
+											<input type="text" class="form-control" id="datasetId" placeholder="datasetId">
+										</div>
+									</div>
+
+
+									<div class="form-group">
+										<div class="col-md-2 col-sm-4 col-xs-12">
+											<label class="control-label  text-left">&nbsp;&nbsp; 업데이트 도메인명</label>
+										</div>
+										<div class="col-md-10 col-sm-10 col-xs-12">
+											<select class="select" id="resultUpdateDomain">
+
+											</select>
+										</div>
+									</div>
+
+									<div class="form-group">
+										<div class="col-md-2 col-sm-4 col-xs-12">
+											<label class="control-label  text-left">&nbsp;&nbsp; 인스턴스 컬럼이름</label>
+										</div>
+										<div class="col-md-10 col-sm-10 col-xs-12">
+											<input type="text" class="form-control" id="domainIdColumnName" placeholder="parking_id">
+										</div>
+									</div>
+
+
+									<div class="form-group">
+										<div class="col-md-12 col-sm-12 col-xs-12">
+											<label class="control-label  text-left">5. 실행주기 및 요청사항</label>
+										</div>
+									</div>
+
+
+									<div class="form-group">
+										<div class="col-md-2 col-sm-4 col-xs-12">
+											<label class="control-label  text-left">&nbsp;&nbsp; 실행주기</label>
+										</div>
+										<div class="col-md-2 col-sm-8 col-xs-12">
+											<input type="text" class="form-control" id="executionCycle_0" placeholder="* 분(0~59)" onkeydown="return fnOnlyNumberCommaDot();">
+										</div>
+										<div class="col-md-2 col-sm-8 col-xs-12">
+											<input type="text" class="form-control" id="executionCycle_1" placeholder="* 시간(0~23)" onkeydown="return fnOnlyNumberCommaDot();">
+										</div>
+										<div class="col-md-2 col-sm-8 col-xs-12">
+											<input type="text" class="form-control" id="executionCycle_2" placeholder="* 일(1~31)" onkeydown="return fnOnlyNumberCommaDot();">
+										</div>
+										<div class="col-md-2 col-sm-8 col-xs-12">
+											<input type="text" class="form-control" id="executionCycle_3" placeholder="* 월(1~12)" onkeydown="return fnOnlyNumberCommaDot();">
+										</div>
+										<div class="col-md-2 col-sm-8 col-xs-12">
+											<input type="text" class="form-control" id="executionCycle_4" placeholder="* 요일(0~7)" onkeydown="return fnOnlyNumberCommaDot();">
+										</div>
+									</div>
+		
+
+		
+									<div class="form-group">
+										<div class="col-md-2 col-sm-4 col-xs-12">
+											<label class="control-label  text-left">&nbsp;&nbsp; 요청사항</label>
+										</div>
+										<div class="col-md-10 col-sm-10 col-xs-12">
+											<textarea class="form-control" rows="4" id="userRequestTerm"></textarea>
+										</div>
+									</div>
+		
+									<div class="modal__buttons ">
+										
+									</div>
+								</div><!-- // bg_fff -->
+		
+							</form>
+						</section>
+						<div class="modal__footer">
+							<div class="button__group">
+							<span class="rightMargin" id="saveBatchRequestText" style="display: none;">신청중일때만 수정이 가능합니다.</span>
+							<button type="button" class="button button__primary rightMargin modalName" onclick="fnSaveBatchRequest();" id="saveBatchRequestBtn"></button>
+							<a class="button button__outline--secondary js-modal-close" href="#none">닫기</a>
+						</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- //[배치신청 모달 팝업] -->
+        
+        <!-- 배치로그 모달 -->
+        <div id="batchLogModal" class="modal">
+			<div class="modal__outer">
+				<div class="modal__inner">
+					<div class="modal__header">
+						<h3 class="hidden">배치  팝업</h3>
+						<button class="modal__button--close js-modal-close material-icons" type="button"><span class="hidden">모달 닫기</span></button>
+					</div>
+					<div class="modal__body">
+						<section class="modal__service-request">
+							<h4 class="modal__heading1"><strong>배치 <span class="modalName"></span></strong></h4>
+							<form class="form-horizontal form-label-left" id="batchLogForm">
+								<div class="bg_fff pd_15 mgTop_10">
+									<div class="form-group">
+										<div class="col-md-2"><label class="control-label text-left">배치기록번호</label></div>
+										<div class="col-md-4"><input type="text" class="form-control" id="LOG_BATCH_SEQUENCE_PK" readonly></div>
+										<div class="col-md-2"><label class="control-label text-left">배치명</label></div>
+										<div class="col-md-4"><input type="text" class="form-control" id="batchName" readonly></div>
+									</div>
+									<div class="form-group">
+										<div class="col-md-2"><label class="control-label text-left">인스턴스명</label></div>
+										<div class="col-md-4"><input type="text" class="form-control" id="instanceName" readonly></div>
+										<div class="col-md-2"><label class="control-label text-left">프로젝트명</label></div>
+										<div class="col-md-4"><input type="text" class="form-control" id="projectName" readonly></div>
+									</div>
+									<div class="form-group">
+										<div class="col-md-2 col-sm-4 col-xs-12"><label class="control-label text-left">배치 이력</label></div>
+										<div class="col-md-10"><input type="text" class="form-control" id="codename" readonly></div>
+									</div>
+									<div class="form-group">
+										<div class="col-md-2"><label class="control-label text-left">배치 상세이력</label></div>
+										<div class="col-md-10"><input type="text" class="form-control" id="codedesc" readonly></div>
+									</div>
+									
+									<div class="form-group">
+										<div class="col-md-2"><label class="control-label text-left">대상파일</label></div>
+										<div class="col-md-6"><input type="text" class="form-control" id="BATCH_TARGET_FILE_PATH" readonly></div>
+										<div class="col-md-2"><label class="control-label text-left">대상파일 크기</label></div>
+										<div class="col-md-2"><input type="text" class="form-control" id="BATCH_TARGET_FILE_SIZE" readonly></div>
+									</div>
+									<div class="form-group">
+										<div class="col-md-2"><label class="control-label text-left">시작시간</label></div>
+										<div class="col-md-4"><input type="text" class="form-control" id="batchStartDateTime" readonly></div>
+										<div class="col-md-2"><label class="control-label text-left">종료시간</label></div>
+										<div class="col-md-4"><input type="text" class="form-control" id="batchEndDateTime" readonly></div>
+									</div>
+									<div class="form-group">
+										<div class="col-md-2"><label class="control-label text-left">성공여부</label></div>
+										<div class="col-md-2"><input type="text" class="form-control" id="BATCH_IS_SUCCESS" readonly></div>
+										<div class="col-md-2"><label class="control-label text-left">실패사유</label></div>
+										<div class="col-md-6"><input type="text" class="form-control" id="BATCH_FAIL_REASON" readonly></div>
+									</div>
+									<div class="form-group">
+										<div class="col-md-2"><label class="control-label text-left">저장방법</label></div>
+										<div class="col-md-4"><input type="text" class="form-control" id="STORE_METHOD" readonly></div>
+										<div class="col-md-2"><label class="control-label text-left">업데이트 속성</label></div>
+										<div class="col-md-4"><input type="text" class="form-control" id="UPDATE_ATTRIBUTE" readonly></div>
+									</div>
+									<div class="form-group">
+										<div class="col-md-2"><label class="control-label text-left">결과반영 방식</label></div>
+										<div class="col-md-4"><input type="text" class="form-control" id="RESULT_UPDATE_METHOD" readonly></div>
+										<div class="col-md-2"><label class="control-label text-left">실행주기</label></div>
+										<div class="col-md-4"><input type="text" class="form-control" id="EXECUTION_CYCLE" readonly></div>
+									</div>
+									<div class="form-group">
+										<div class="col-md-2"><label class="control-label text-left">저장 URL</label></div>
+										<div class="col-md-10"><input type="text" class="form-control" id="TRANSFER_URL" readonly></div>
+									</div>
+									<div class="form-group">
+										<div class="col-md-2"><label class="control-label text-left">생성일시</label></div>
+										<div class="col-md-10"><input type="text" class="form-control" id="createDataTime" readonly></div>
+									</div>
+									<div class="form-group">
+										<div class="col-md-2"><label class="control-label text-left">배치결과</label></div>
+										<div class="col-md-10 x_content" id="BATCH_RESULT"></div>
+									</div>
+									<div class="form-group">
+										<div class="col-md-2"><label class="control-label text-left">배치전송데이터</label></div>
+										<div class="col-md-10 x_content" id="TRANSFER_DATA"></div>
+									</div>
+								</div><!-- // bg_fff -->
+		
+							</form>
+						</section>
+						<div class="modal__footer">
+							<div class="button__group">
+							<a class="button button__outline--secondary js-modal-close" href="#none">닫기</a>
+						</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- //배치로그 모달 -->
+		
+	</th:block>
+</body>
+</html>

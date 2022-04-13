@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vaiv.analyticsManager.apiGw.mapper.BatchGwMapper">
+	
+	<select id="batchServiceRequestsGw" resultType="java.util.HashMap">
+		SELECT
+		   	"BATCH_SERVICE_REQUEST_SEQUENCE_PK" AS "id"
+            ,"NAME" AS "name"
+            ,"MODEL_SEQUENCE_FK1" AS "modelId"
+            ,"INSTANCE_SEQUENCE_FK2" AS "instanceId"
+            ,"PROJECT_SEQUENCE_FK3" AS "projectId"
+            ,"NIFI_TEMPLATE_NAME" AS "dataFlowName"
+            ,"RESULT_UPDATE_DOMAIN_ID" AS "targetEntityId"
+            ,"RESULT_UPDATE_DOMAIN_NAME" AS "targetEntityName"
+            ,"UPDATE_ATTRIBUTE" AS "targetAttributeName"
+            ,"EXECUTION_CYCLE" AS "executionCycle"
+            ,"RESULT_UPDATE_METHOD" AS "resultUpdateMethod"
+            ,"USER_REQUEST_TERM" AS "userRequestTerm"
+            ,"PROGRESS_STATE" AS "progressState"
+            ,"MANAGER_REJECT_REASON" AS "rejectReason"
+            , to_char (bsReq."CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+            , to_char (bsReq."MODIFY_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "modifiedAt"
+            ,"USER_ID" AS "creatorId"
+            ,"STORE_METHOD" AS "postprocessingType"
+            ,"TOTAL_COLUMN_NAME" AS "denominatorFieldName"
+            ,"DOMAIN_ID_COLUMN_NAME" AS "dataEntityFieldName"
+
+			, "MAKE_DATA_METHOD" AS "makeDataMethod"
+			, "SQL" AS "sql"
+			, "TARGET_TYPE" AS "targetType"
+			, "DATASET_ID" AS "datasetId"
+		FROM "BATCH_SERVICE_REQUEST" AS bsReq
+		WHERE bsReq."DELETE_FLAG" = FALSE
+			<if test="userId != null and userId != 'null' and userId != ''">
+        		AND bsReq."USER_ID" = #{userId}
+        	</if>
+		ORDER BY bsReq."CREATE_DATETIME" DESC
+	</select>
+	
+	<select id="batchServiceRequestGw" resultType="java.util.HashMap" parameterType="int">
+		SELECT
+		    "BATCH_SERVICE_REQUEST_SEQUENCE_PK" AS "id"
+            ,"NAME" AS "name"
+            ,"MODEL_SEQUENCE_FK1" AS "modelId"
+            ,"INSTANCE_SEQUENCE_FK2" AS "instanceId"
+            ,"PROJECT_SEQUENCE_FK3" AS "projectId"
+            ,"NIFI_TEMPLATE_NAME" AS "dataFlowName"
+            ,"RESULT_UPDATE_DOMAIN_ID" AS "targetEntityId"
+            ,"RESULT_UPDATE_DOMAIN_NAME" AS "targetEntityName"
+            ,"UPDATE_ATTRIBUTE" AS "targetAttributeName"
+            ,"EXECUTION_CYCLE" AS "executionCycle"
+            ,"RESULT_UPDATE_METHOD" AS "resultUpdateMethod"
+            ,"USER_REQUEST_TERM" AS "userRequestTerm"
+            ,"PROGRESS_STATE" AS "progressState"
+            ,"MANAGER_REJECT_REASON" AS "rejectReason"
+            , to_char (bsReq."CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+            , to_char (bsReq."MODIFY_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "modifiedAt"
+            ,"USER_ID" AS "creatorId"
+            ,"STORE_METHOD" AS "postprocessingType"
+			,"TOTAL_COLUMN_NAME" AS "denominatorFieldName"
+            ,"DOMAIN_ID_COLUMN_NAME" AS "dataEntityFieldName"
+
+			, "MAKE_DATA_METHOD" AS "makeDataMethod"
+			, "SQL" AS "sql"
+			, "TARGET_TYPE" AS "targetType"
+			, "DATASET_ID" AS "datasetId"
+		FROM "BATCH_SERVICE_REQUEST" AS bsReq
+		WHERE bsReq."DELETE_FLAG" = FALSE
+			AND bsReq."BATCH_SERVICE_REQUEST_SEQUENCE_PK" = #{batchServiceRequestId}
+        <if test="userId != null and userId != 'null' and userId != ''">
+            AND bsReq."USER_ID" = #{userId}
+        </if>
+	</select>
+	
+	
+	<insert id="insertBatchServiceRequestGw" parameterType="com.vaiv.analyticsManager.apiGw.domain.BatchGw" 
+			useGeneratedKeys="true" keyProperty="batchServiceRequestId" keyColumn="BATCH_SERVICE_REQUEST_SEQUENCE_PK">
+		INSERT INTO 
+			"BATCH_SERVICE_REQUEST"(
+				"NAME"
+				, "MODEL_SEQUENCE_FK1"
+				, "INSTANCE_SEQUENCE_FK2"
+				, "PROJECT_SEQUENCE_FK3"
+				, "NIFI_TEMPLATE_NAME"
+				, "RESULT_UPDATE_DOMAIN_ID"
+				, "RESULT_UPDATE_DOMAIN_NAME"
+				, "EXECUTION_CYCLE"
+				, "RESULT_UPDATE_METHOD"
+				, "USER_REQUEST_TERM"
+				, "PROGRESS_STATE"
+				, "MANAGER_REJECT_REASON"
+				, "CREATE_DATETIME"
+				, "USER_ID"
+				, "DOMAIN_ID_COLUMN_NAME"
+				, "STORE_METHOD"
+				, "TOTAL_COLUMN_NAME"
+				, "UPDATE_ATTRIBUTE"
+				, "MAKE_DATA_METHOD"
+				, "SQL"
+				, "TARGET_TYPE"
+				, "DATASET_ID"
+			)VALUES(
+           		#{name}
+           		, #{modelId}
+           		, #{instanceId}
+           		, #{projectId}
+           		, #{dataFlowName}
+           		, #{targetEntityId}
+           		, #{targetEntityName}
+           		, #{executionCycle}
+           		, #{resultUpdateMethod}
+           		, #{userRequestTerm}
+           		, 'standby'
+           		, ''
+           		, NOW()
+           		, #{userId}
+           		, #{dataEntityFieldName}
+           		, #{postprocessingType}
+           		, #{denominatorFieldName}
+           		, #{targetAttributeName}
+           		, #{makeDataMethod}
+				, #{sql}
+				, #{targetType}
+				, #{datasetId}
+          	)
+	</insert>
+	
+	<update id="updateBatchServiceRequestGw" parameterType="com.vaiv.analyticsManager.apiGw.domain.BatchGw">
+		UPDATE "BATCH_SERVICE_REQUEST"
+		SET 
+		<trim prefixOverrides=",">
+			"MODIFY_DATETIME" = NOW()
+			<if test='progressState != null and progressState != ""' >,"PROGRESS_STATE" = #{progressState}</if>
+			<if test='rejectReason != null and rejectReason != ""' >,"MANAGER_REJECT_REASON" = #{rejectReason}</if>
+			<if test='deleteFlag != null and deleteFlag != ""' >,"DELETE_FLAG" = #{deleteFlag}</if>
+		</trim>
+		WHERE "BATCH_SERVICE_REQUEST_SEQUENCE_PK" = #{batchServiceRequestId}
+	</update>
+	
+	<select id="batchServicesGw" resultType="java.util.HashMap" parameterType="com.vaiv.analyticsManager.apiGw.domain.BatchGw">
+		SELECT
+			"BATCH_SERVICE_SEQUENCE_PK" AS "id"
+            ,"NAME" AS "name"
+            ,"SANDBOX_INSTANCE_SEQUENCE_FK1" AS "sandboxInstanceId"
+            ,"BATCH_INSTANCE_SEQUENCE_FK2" AS "batchInstanceId"
+            ,"MODEL_SEQUENCE_FK4" AS "modelId"
+            ,"PROJECT_SEQUENCE_FK3" AS "projectId"
+            ,"NIFI_TEMPLATE_NAME" AS "dataFlowName"
+            ,"RESULT_UPDATE_DOMAIN_ID" AS "targetEntityId"
+            ,"RESULT_UPDATE_DOMAIN_NAME" AS "targetEntityName"
+            ,"UPDATE_ATTRIBUTE" AS "targetAttributeName"
+            ,"EXECUTION_CYCLE" AS "executionCycle"
+            ,"RESULT_UPDATE_METHOD" AS "resultUpdateMethod"
+            , to_char (bs."CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+            , to_char (bs."MODIFY_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "modifiedAt"
+            ,"APPLY_DATA_PATH" AS "applyDataPath"            
+            ,"APPLY_DATA_NAME_RULE" AS "applyDataNameRule"
+            ,"STORE_METHOD" AS "postprocessingType"
+			,"TOTAL_COLUMN_NAME" AS "denominatorFieldName"
+            ,"USER_ID" AS "creatorId"
+            ,"ENROLLEMENT_ID" AS "managerId"
+            ,"ENROLLMENT_TERM" AS "description"
+            ,"USE_FLAG" AS "isRunning"
+            ,"BATCH_STATE" AS "lastBatchState"
+            
+            ,"DOMAIN_ID_COLUMN_NAME" AS "dataEntityFieldName"
+
+			, "MAKE_DATA_METHOD" AS "makeDataMethod"
+			, "SQL" AS "sql"
+			, "TARGET_TYPE" AS "targetType"
+			, "DATASET_ID" AS "datasetId"
+		FROM "BATCH_SERVICE" AS bs
+        WHERE "DELETE_FLAG" = FALSE
+        	<if test="userId != null and userId != 'null' and userId != ''">
+        		AND "ENROLLEMENT_ID" = #{userId}
+        	</if>
+		ORDER BY "CREATE_DATETIME" DESC
+	</select>
+	
+	<select id="batchServiceGw" resultType="java.util.HashMap" parameterType="int">
+		SELECT
+			"BATCH_SERVICE_SEQUENCE_PK" AS "id"
+            ,"NAME" AS "name"
+            ,"SANDBOX_INSTANCE_SEQUENCE_FK1" AS "sandboxInstanceId"
+            ,"BATCH_INSTANCE_SEQUENCE_FK2" AS "batchInstanceId"
+            ,"MODEL_SEQUENCE_FK4" AS "modelId"
+            ,"PROJECT_SEQUENCE_FK3" AS "projectId"
+            ,"NIFI_TEMPLATE_NAME" AS "dataFlowName"
+            ,"RESULT_UPDATE_DOMAIN_ID" AS "targetEntityId"
+            ,"RESULT_UPDATE_DOMAIN_NAME" AS "targetEntityName"
+            ,"UPDATE_ATTRIBUTE" AS "targetAttributeName"
+            ,"EXECUTION_CYCLE" AS "executionCycle"
+            ,"RESULT_UPDATE_METHOD" AS "resultUpdateMethod"
+            , to_char (bs."CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+            , to_char (bs."MODIFY_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "modifiedAt"
+            ,"APPLY_DATA_PATH" AS "applyDataPath"            
+            ,"APPLY_DATA_NAME_RULE" AS "applyDataNameRule"
+            ,"STORE_METHOD" AS "postprocessingType"
+			,"TOTAL_COLUMN_NAME" AS "denominatorFieldName"
+            ,"USER_ID" AS "creatorId"
+            ,"ENROLLEMENT_ID" AS "managerId"
+            ,"ENROLLMENT_TERM" AS "description"
+            ,"USE_FLAG" AS "isRunning"
+            ,"BATCH_STATE" AS "lastBatchState"
+            
+            ,"DOMAIN_ID_COLUMN_NAME" AS "dataEntityFieldName"
+
+			, "MAKE_DATA_METHOD" AS "makeDataMethod"
+			, "SQL" AS "sql"
+			, "TARGET_TYPE" AS "targetType"
+			, "DATASET_ID" AS "datasetId"
+		FROM "BATCH_SERVICE" AS bs
+        WHERE bs."DELETE_FLAG" = FALSE
+        	AND "BATCH_SERVICE_SEQUENCE_PK" = #{batchServiceId}
+		<if test="userId != null and userId != 'null' and userId != ''">
+			AND "ENROLLEMENT_ID" = #{userId}
+		</if>
+	</select>
+	
+	<select id="checkBatchNameGw" resultType="int" parameterType="com.vaiv.analyticsManager.apiGw.domain.BatchGw">
+		SELECT count(*) 
+		FROM "BATCH_SERVICE"
+		WHERE "NAME" = #{name}
+			AND "DELETE_FLAG" = FALSE
+			<if test='batchServiceId != null and batchServiceId != ""' >
+				AND "BATCH_SERVICE_SEQUENCE_PK" NOT IN(#{batchServiceId})
+			</if>
+	</select>
+   
+   	<insert id="insertBatchServicesGw" parameterType="com.vaiv.analyticsManager.apiGw.domain.BatchGw" 
+			useGeneratedKeys="true" keyProperty="batchServiceId" keyColumn="BATCH_SERVICE_SEQUENCE_PK">
+		INSERT INTO 
+			"BATCH_SERVICE"(
+				"NAME"
+				, "SANDBOX_INSTANCE_SEQUENCE_FK1"
+				, "BATCH_INSTANCE_SEQUENCE_FK2"
+				, "PROJECT_SEQUENCE_FK3"
+				, "MODEL_SEQUENCE_FK4"
+				, "NIFI_TEMPLATE_NAME"
+				, "APPLY_DATA_PATH"
+				, "APPLY_DATA_NAME_RULE"
+				, "RESULT_UPDATE_DOMAIN_ID"
+				, "RESULT_UPDATE_DOMAIN_NAME"
+				, "EXECUTION_CYCLE"
+				, "RESULT_UPDATE_METHOD"
+				, "ENROLLMENT_TERM"
+				, "CREATE_DATETIME"
+				, "USER_ID"
+				, "ENROLLEMENT_ID"
+				, "DOMAIN_ID_COLUMN_NAME"
+				, "STORE_METHOD"
+				, "TOTAL_COLUMN_NAME"
+				, "UPDATE_ATTRIBUTE"
+				, "BATCH_STATE"
+				, "MAKE_DATA_METHOD"
+				, "SQL"
+				, "TARGET_TYPE"
+				, "DATASET_ID"
+			)VALUES(
+           		#{name}
+           		, #{sandboxInstanceId}
+           		, #{batchInstanceId}
+           		, #{projectId}
+           		, #{modelId}
+           		, #{dataFlowName}
+           		, #{applyDataPath}
+           		, #{applyDataNameRule}
+           		, #{targetEntityId}
+           		, #{targetEntityName}
+           		, #{executionCycle}
+           		, #{resultUpdateMethod}
+           		, #{description}
+           		, NOW()
+           		, #{userId}
+           		, #{managerId}
+           		, #{dataEntityFieldName}
+           		, #{postprocessingType}
+           		, #{denominatorFieldName}
+           		, #{targetAttributeName}
+           		, 'stop'
+           		, #{makeDataMethod}
+				, #{sql}
+				, #{targetType}
+				, #{datasetId}
+          	)
+	</insert>
+	
+	
+	<update id="updateBatchServiceGw" parameterType="com.vaiv.analyticsManager.apiGw.domain.BatchGw">
+		UPDATE "BATCH_SERVICE"
+		SET 
+		<trim prefixOverrides=",">
+			"MODIFY_DATETIME" = NOW()
+   			<if test='name != null and name != ""' >,"NAME" = #{name}</if>
+			<if test='dataFlowName != null and dataFlowName != ""' >,"NIFI_TEMPLATE_NAME" = #{dataFlowName}</if>
+			<if test='applyDataPath != null and applyDataPath != ""' >,"APPLY_DATA_PATH" = #{applyDataPath}</if>
+			<if test='applyDataNameRule != null and applyDataNameRule != ""' >,"APPLY_DATA_NAME_RULE" = #{applyDataNameRule}</if>
+			<if test='targetEntityId != null and targetEntityId != ""' >,"RESULT_UPDATE_DOMAIN_ID" = #{targetEntityId}</if>
+			<if test='targetEntityName != null and targetEntityName != ""' >,"RESULT_UPDATE_DOMAIN_NAME" = #{targetEntityName}</if>
+			<if test='executionCycle != null and executionCycle != ""' >,"EXECUTION_CYCLE" = #{executionCycle}</if>
+			<if test='resultUpdateMethod != null and resultUpdateMethod != ""' >,"RESULT_UPDATE_METHOD" = #{resultUpdateMethod}</if>
+			<if test='description != null and description != ""' >,"ENROLLMENT_TERM" = #{description}</if>
+			<if test='deleteFlag != null and deleteFlag != ""' >,"DELETE_FLAG" = #{deleteFlag}</if>
+			<if test='dataEntityFieldName != null and dataEntityFieldName != ""' >,"DOMAIN_ID_COLUMN_NAME" = #{dataEntityFieldName}</if>
+			<if test='postprocessingType != null and postprocessingType != ""' >,"STORE_METHOD" = #{postprocessingType}</if>
+			<if test='denominatorFieldName != null and denominatorFieldName != ""' >,"TOTAL_COLUMN_NAME" = #{denominatorFieldName}</if>
+			<if test='targetAttributeName != null and targetAttributeName != ""' >,"UPDATE_ATTRIBUTE" = #{targetAttributeName}</if>
+			<if test='makeDataMethod != null and makeDataMethod != ""' >,"MAKE_DATA_METHOD" = #{makeDataMethod}</if>
+			<if test='sql != null and sql != ""' >,"SQL" = #{sql}</if>
+			<if test='targetType != null and targetType != ""' >,"TARGET_TYPE" = #{targetType}</if>
+			<if test='datasetId != null and datasetId != ""' >,"DATASET_ID" = #{datasetId}</if>
+		</trim>
+		WHERE "BATCH_SERVICE_SEQUENCE_PK" = #{batchServiceId}
+	</update>
+	
+	<select id="batchServiceRequestsByinstanceIdGw" resultType="java.util.HashMap">
+		SELECT *
+		FROM "BATCH_SERVICE_REQUEST"
+		WHERE "DELETE_FLAG" = FALSE
+		    AND "INSTANCE_SEQUENCE_FK2" = #{instancePk}
+	</select>
+	
+	<select id="batchServiceByinstanceIdGw" resultType="java.util.HashMap">
+		SELECT *
+		FROM "BATCH_SERVICE"
+        WHERE "DELETE_FLAG" = FALSE
+		    AND "SANDBOX_INSTANCE_SEQUENCE_FK1" = #{instancePk}
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	<select id="batchServersGw" resultType="java.util.HashMap">
+		SELECT
+			"INSTANCE_SEQUENCE_PK" AS "id"
+            ,"NAME" AS "name"
+            ,"SERVER_STATE" AS "serverState"
+            ,"MODULE_STATE" AS "moduleState"
+            , to_char ("CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+            , to_char ("MODIFY_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "modifiedAt"
+            ,"CLOUD_INSTNSCE_FAILED_MESSAGE" AS "cloudInstnsceFailedMessage"
+            ,"INSTANCE_ID" AS "cloudInstanceId"
+            ,"USER_ID" AS "userId"
+		FROM "INSTANCE"
+        WHERE "DELETE_FLAG" = false
+        	AND "ANALYSIS_INSTANCE_SERVER_TYPE" = 'batch'
+		ORDER BY "CREATE_DATETIME" DESC
+	</select>
+	
+	<select id="batchServerGw" resultType="java.util.HashMap" parameterType="int">
+		SELECT
+			"INSTANCE_SEQUENCE_PK" AS "id"
+            ,"NAME" AS "name"
+            ,"SERVER_STATE" AS "serverState"
+            ,"MODULE_STATE" AS "moduleState"
+            , to_char ("CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+            , to_char ("MODIFY_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "modifiedAt"
+            ,"CLOUD_INSTNSCE_FAILED_MESSAGE" AS "cloudInstnsceFailedMessage"
+            ,"INSTANCE_ID" AS "cloudInstanceId"
+            ,"USER_ID" AS "userId"
+		FROM "INSTANCE"
+        WHERE "DELETE_FLAG" = false
+        	AND "ANALYSIS_INSTANCE_SERVER_TYPE" = 'batch'
+        	AND "INSTANCE_SEQUENCE_PK" = #{batchInstanceId}
+	</select>
+	
+	<update id="updateBatchServiceUseFlagGW" parameterType="com.vaiv.analyticsManager.apiGw.domain.BatchGw">
+		UPDATE "BATCH_SERVICE"
+		SET 
+		<trim prefixOverrides=",">
+			"MODIFY_DATETIME" = NOW()
+			,"USE_FLAG" = #{useFlag}
+			<if test="!useFlag">
+			,"BATCH_STATE" = 'stop'
+			</if>
+		</trim>
+		WHERE "BATCH_SERVICE_SEQUENCE_PK" = #{batchServiceId}
+	</update>
+	
+	<select id="batchServiceByinstancePkGw" resultType="java.util.HashMap">
+		SELECT *
+		FROM "BATCH_SERVICE"
+        WHERE "DELETE_FLAG" = FALSE
+		    AND "SANDBOX_INSTANCE_SEQUENCE_FK1" = #{instancePk}
+	</select>
+	
+	<select id="batchServiceRequestsByinstancePkGw" resultType="java.util.HashMap">
+		SELECT *
+		FROM "BATCH_SERVICE_REQUEST"
+		WHERE "DELETE_FLAG" = FALSE
+		    AND "INSTANCE_SEQUENCE_FK2" = #{instancePk}
+	</select>
+	
+	<select id="batchLogsGw" parameterType="String" resultType="java.util.HashMap">
+		SELECT
+			log."LOG_BATCH_SEQUENCE_PK" AS "id"
+			, COALESCE((SELECT "NAME" FROM "BATCH_SERVICE" WHERE "BATCH_SERVICE_SEQUENCE_PK" = log."BATCH_SERVICE_SEQUENCE_FK3"),'') AS "name"
+		    , (SELECT "CODE_NAME" FROM "CODE" WHERE "CODE" = log."CODE") AS "groupId"
+		    , (SELECT "DESCRIPTION" FROM "CODE" WHERE "CODE" = log."CODE") AS "description"
+		    , log."BATCH_INSTANCE_SEQUENCE_FK1" AS "batchInstanceId"
+		    , log."BATCH_SERVICE_SEQUENCE_FK3" AS "batchServiceId"
+		    , log."BATCH_TARGET_FILE_PATH" AS "batchTargetFilePath"
+		    , log."BATCH_TARGET_FILE_SIZE" AS "batchTargetFileSize"
+		    , to_char ("BATCH_START_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "batchStartedAt"
+		    , to_char ("BATCH_END_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "batchEndedAt"
+            , log."BATCH_IS_SUCCESS" AS "batchIsSuccess"
+            , log."BATCH_FAIL_REASON" AS "batchFailReason"
+		    , to_char ("CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+            , log."BATCH_RESULT" AS "batchResult"
+            , log."STORE_METHOD" AS "postprocessingType"
+            , log."UPDATE_ATTRIBUTE" AS "targetAttributeName"
+            , log."TRANSFER_DATA" AS "transferData"
+            , log."TRANSFER_URL" AS "transferUrl"
+            , log."RESULT_UPDATE_METHOD" AS "resultUpdateMethod"
+            , log."EXECUTION_CYCLE" AS "executionCycle"
+		FROM "LOG_BATCH" AS log
+		WHERE 1=1
+		<if test="userId != null and userId != 'null' and userId != ''">
+			AND log."BATCH_SERVICE_SEQUENCE_FK3" IN (
+				SELECT "BATCH_SERVICE_SEQUENCE_PK" 
+				FROM "BATCH_SERVICE" 
+				WHERE "ENROLLEMENT_ID" = #{userId}
+			)
+       	</if>
+		<if test="startDate != null and startDate != 'null' and startDate != '' and endDate != null and endDate != 'null' and endDate != ''">
+			AND "CREATE_DATETIME" BETWEEN to_timestamp(#{startDate}, 'YYYY-MM-DD') AND (to_timestamp( #{endDate}, 'YYYY-MM-DD'))  + interval '1' day
+		</if>
+	</select>
+	
+	<select id="batchLogGw" resultType="java.util.HashMap">
+		SELECT
+			log."LOG_BATCH_SEQUENCE_PK" AS "id"
+			, COALESCE((SELECT "NAME" FROM "BATCH_SERVICE" WHERE "BATCH_SERVICE_SEQUENCE_PK" = log."BATCH_SERVICE_SEQUENCE_FK3"),'') AS "name"
+		    , (SELECT "CODE_NAME" FROM "CODE" WHERE "CODE" = log."CODE") AS "groupId"
+		    , (SELECT "DESCRIPTION" FROM "CODE" WHERE "CODE" = log."CODE") AS "description"
+		    , log."BATCH_INSTANCE_SEQUENCE_FK1" AS "batchInstanceId"
+		    , log."BATCH_SERVICE_SEQUENCE_FK3" AS "batchServiceId"
+		    , log."BATCH_TARGET_FILE_PATH" AS "batchTargetFilePath"
+		    , log."BATCH_TARGET_FILE_SIZE" AS "batchTargetFileSize"
+		    , to_char ("BATCH_START_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "batchStartedAt"
+		    , to_char ("BATCH_END_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "batchEndedAt"
+            , log."BATCH_IS_SUCCESS" AS "batchIsSuccess"
+            , log."BATCH_FAIL_REASON" AS "batchFailReason"
+		    , to_char ("CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+            , log."BATCH_RESULT" AS "batchResult"
+            , log."STORE_METHOD" AS "postprocessingType"
+            , log."UPDATE_ATTRIBUTE" AS "targetAttributeName"
+            , log."TRANSFER_DATA" AS "transferData"
+            , log."TRANSFER_URL" AS "transferUrl"
+            , log."RESULT_UPDATE_METHOD" AS "resultUpdateMethod"
+            , log."EXECUTION_CYCLE" AS "executionCycle"
+		FROM "LOG_BATCH" AS log
+		WHERE log."LOG_BATCH_SEQUENCE_PK" = #{logBatchId}
+		<if test="userId != null and userId != 'null' and userId != ''">
+			AND log."BATCH_SERVICE_SEQUENCE_FK3" IN (
+			SELECT "BATCH_SERVICE_SEQUENCE_PK"
+			FROM "BATCH_SERVICE"
+			WHERE "ENROLLEMENT_ID" = #{userId}
+			)
+		</if>
+	</select>
+   
+	
+</mapper>

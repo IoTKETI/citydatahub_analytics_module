@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vaiv.analyticsManager.apiGw.mapper.SandboxGwMapper">
+
+      <select id="instancesGw" resultType="java.util.HashMap">
+		SELECT 
+			"INSTANCE_SEQUENCE_PK" AS "id"
+            ,"NAME" AS "name"
+            ,"SERVER_STATE" AS "serverState"
+            ,"MODULE_STATE" AS "moduleState"
+            , to_char ("CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+            , to_char ("MODIFY_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "modifiedAt"
+            ,"CLOUD_INSTNSCE_FAILED_MESSAGE" AS "cloudInstnsceFailedMessage"
+            ,"CLOUD_INSTNACE_SERVER_ID" AS "cloudInstnaceServerId"
+            ,"ANALYSIS_TEMPLATE_SEQUENCE_FK1" AS "analysisTemplateId"
+            ,"INSTANCE_ID" AS "cloudInstanceId"
+            ,"USER_ID" AS "creatorId"
+       		, (SELECT "NAME" 
+       			FROM "ANALYSIS_TEMPLATE" 
+       			WHERE "ANALYSIS_TEMPLATE_SEQUENCE_PK" = ist."ANALYSIS_TEMPLATE_SEQUENCE_FK1"
+       		) AS "analysisTemplateName"
+		    ,detail."DATA_SUMMARY" AS "entities"
+            ,detail."DATA_STARTDATE" AS "dataStartDate"
+            ,detail."DATA_ENDDATE" AS "dataEndDate"
+            ,detail."SNAPSHOT_ID" AS "snapshotId"
+		FROM "INSTANCE" AS ist
+			LEFT OUTER JOIN "INSTANCE_DETAIL" AS detail
+			ON ist."INSTANCE_SEQUENCE_PK" = detail."INSTANCE_SEQUENCE_FK1"
+        WHERE ist."DELETE_FLAG" = FALSE
+        	AND ist."ANALYSIS_INSTANCE_SERVER_TYPE" = 'sandbox'
+        	<if test="userId != null and userId != 'null' and userId != ''">
+        		AND "USER_ID" = #{userId}
+        	</if>
+		ORDER BY "CREATE_DATETIME" DESC
+   </select>
+
+	<select id="instanceGw" resultType="java.util.HashMap">
+		SELECT 
+			ist."INSTANCE_SEQUENCE_PK" AS "id"
+            ,ist."NAME" AS "name"
+            ,ist."SERVER_STATE" AS "serverState"
+            ,ist."MODULE_STATE" AS "moduleState"
+            , to_char (ist."CREATE_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "createdAt"
+            , to_char ("MODIFY_DATETIME"::timestamp at time zone 'KST', 'YYYY-MM-DD"T"HH24:MI:SS,MSOF:00"') as "modifiedAt"
+            ,ist."CLOUD_INSTNSCE_FAILED_MESSAGE" AS "cloudInstnsceFailedMessage"
+            ,ist."CLOUD_INSTNACE_SERVER_ID" AS "cloudInstnaceServerId"
+            ,ist."ANALYSIS_TEMPLATE_SEQUENCE_FK1" AS "analysisTemplateId"
+            ,ist."INSTANCE_ID" AS "cloudInstanceId"
+            ,ist."USER_ID" AS "creatorId"
+			, (SELECT "NAME"
+       			FROM "ANALYSIS_TEMPLATE"
+       			WHERE "ANALYSIS_TEMPLATE_SEQUENCE_PK" = ist."ANALYSIS_TEMPLATE_SEQUENCE_FK1"
+       		) AS "analysisTemplateName"
+            ,detail."DATA_SUMMARY" AS "entities"
+            ,detail."DATA_STARTDATE" AS "dataStartDate"
+            ,detail."DATA_ENDDATE" AS "dataEndDate"
+            ,detail."SNAPSHOT_ID" AS "snapshotId"
+            , "ANALYSIS_INSTANCE_SERVER_TYPE" AS "analysisInstanceServerType"
+		FROM "INSTANCE" AS ist
+			LEFT OUTER JOIN "INSTANCE_DETAIL" AS detail
+			ON ist."INSTANCE_SEQUENCE_PK" = detail."INSTANCE_SEQUENCE_FK1"
+		WHERE
+			ist."DELETE_FLAG" = FALSE 
+			AND "INSTANCE_SEQUENCE_PK" = #{instanceId}
+   </select>
+   
+   <select id="checkInstanceNameGw" resultType="int">
+		SELECT COUNT(*) FROM "INSTANCE"
+		WHERE "NAME" = #{name}
+			AND "DELETE_FLAG" = FALSE
+   </select>
+   
+   <insert id="insertInstanceGw" parameterType="com.vaiv.analyticsManager.apiGw.domain.InstanceGw" 
+		useGeneratedKeys="true" keyProperty="instanceId" keyColumn="INSTANCE_SEQUENCE_PK">
+   		INSERT INTO 
+   			"INSTANCE"(
+                 "NAME"
+                 ,"KEYPAIR_NAME"
+                 ,"SERVER_STATE"
+                 ,"MODULE_STATE"
+                 ,"PRIVATE_IP"
+                 ,"PUBLIC_IP"
+                 ,"AVAILABILITY_ZONE"
+                 ,"CREATE_DATETIME"
+                 ,"CLOUD_INSTNACE_SERVER_ID"
+                 ,"ANALYSIS_TEMPLATE_SEQUENCE_FK1"
+                 ,"USER_ID"
+                 ,"ANALYSIS_INSTANCE_SERVER_TYPE"
+			) VALUES(
+            	#{name},
+            	#{keypairName},
+                #{serverState},
+                #{moduleState},
+                #{privateIp},
+                #{publicIp},
+                #{availabilityZone},
+                NOW(),
+                #{cloudInstanceServerId},
+                #{templateId},
+                #{userId},
+                #{analysisInstanceServerType}
+        	)
+   </insert>
+   
+      <insert id="insertInstanceDetailGw" parameterType="com.vaiv.analyticsManager.apiGw.domain.InstanceGw">
+   		INSERT INTO 
+   			"INSTANCE_DETAIL"(
+   				"INSTANCE_SEQUENCE_FK1",
+                 "DATA_SUMMARY",
+                 "DATA_STARTDATE",
+                 "DATA_ENDDATE",
+                 "SNAPSHOT_ID"
+			) VALUES(
+				#{instanceId},
+            	#{dataSummaryToString},
+            	#{dataStartDate},
+                #{dataEndDate},
+                #{snapshotId}
+        	)
+   </insert>
+   
+      <update id="updateInstanceGw" parameterType="com.vaiv.analyticsManager.apiGw.domain.InstanceGw">
+   		UPDATE "INSTANCE" 
+   		SET
+   		<trim prefixOverrides=",">
+   			,"MODIFY_DATETIME" = NOW()
+   			<if test='cloudInstanceId != null and cloudInstanceId != ""' >,"INSTANCE_ID" = #{cloudInstanceId}</if>
+			<if test='serverState != null and serverState != ""' >,"SERVER_STATE" = #{serverState}</if>
+			<if test='moduleState != null and moduleState != ""' >,"MODULE_STATE" = #{moduleState}</if>
+			<if test='privateIp != null and privateIp != ""' >,"PRIVATE_IP" = #{privateIp}</if>
+			<if test='publicIp != null and publicIp != ""' >,"PUBLIC_IP" = #{publicIp}</if>
+			<if test='deleteFlag != null and deleteFlag != ""' >,"DELETE_FLAG" = #{deleteFlag}</if>
+		</trim>
+   			
+		WHERE "INSTANCE_SEQUENCE_PK" = #{instanceId}
+   </update>
+   
+</mapper>

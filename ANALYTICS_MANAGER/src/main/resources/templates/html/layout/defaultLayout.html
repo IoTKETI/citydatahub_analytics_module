@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>스마트 시티</title>
+    
+    <!-- 공통 css, js, meta tag -->
+    <th:block th:replace="fragments/commonHead"></th:block>
+</head>
+<body>
+	<div id="loading" style="display:none;">
+		<div class="loading">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+     	</div>
+    	<div class="loadingBox"></div>
+    </div>
+
+  <!-- skip-nav -->
+   <div class="skip-nav">
+    <ul class="skip-nav--list">
+      <li class="skip-nav__item"><a class="skip-nav__link" href="#nav">목차 바로가기</a></li>
+      <li class="skip-nav__item"><a class="skip-nav__link" href="#main">본문 바로가기</a></li>
+    </ul>
+  </div>
+  <!-- //skip-nav -->
+  <hr>
+  <!-- wrap -->
+  <div class="wrap">
+    <!-- header -->
+    <header class="header">
+    	<!-- 공통 데이터 허브 TopNavi 구성 -->
+		<th:block th:replace="fragments/commonDataHubTopNavi"></th:block>
+    </header>
+    <!-- //header -->
+    <hr>
+    <!-- nav -->
+    <nav class="nav" id="nav">
+    	<!-- 공통 데이터 허브 메뉴 구성 -->
+		<th:block th:replace="fragments/commonDataHubMenu"></th:block>
+    </nav>
+    <!-- //nav -->
+    <hr>
+    <!-- main -->
+    <main class="main" id="main">
+      <h2 class="hidden">본문</h2>
+      <!-- sub-cover -->
+      <section class="sub-cover">
+        <h3 class="sub-cover__title sub-cover__title--mypage material-icons">데이터 분석 시스템 <small class="sub-cover__title--small">Smart City Data Hub</small></h3>
+      </section>
+      <hr>
+      <!-- sub-nav -->
+      <nav class="sub-nav">
+      	<!-- 공통 데이터분석 시스템 메뉴 구성 -->
+		<th:block th:replace="fragments/commonMenu"></th:block>
+      </nav>
+      <!-- sub-nav -->
+      <hr>
+      <div class="sub__container">
+		<!-- content body 구성 -->
+		<th:block layout:fragment="content"></th:block>
+      </div>
+    </main>
+    <!-- //main -->
+    <hr>
+    
+    <!-- 공통 footer -->
+	<footer th:replace="fragments/commonFooter :: commonFooter"></footer>
+  </div>
+  <!-- //wrap -->
+  
+  	<!-- 공통 javascript -->
+    <th:block th:replace="fragments/commonScript"></th:block>
+</body>
+</html>

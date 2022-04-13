@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vaiv.analyticsManager.restFullApi.mapper.ProjectRestMapper">
+	
+	<select id="originalDataList" resultType="java.util.HashMap">
+		SELECT * 
+		FROM "ORIGINAL_DATA" 
+		WHERE "DELETE_FLAG" = FALSE 
+			AND "PROJECT_SEQUENCE_FK1"=#{projectSequencePk}
+		ORDER BY "ORIGINAL_DATA_SEQUENCE_PK" DESC
+	</select>
+	
+	<select id="originalData" resultType="java.util.HashMap" parameterType="int">
+		SELECT *
+		FROM "ORIGINAL_DATA"
+		WHERE "DELETE_FLAG" = FALSE
+		    AND "PROJECT_SEQUENCE_FK1"=#{projectSequencePk}
+		    AND "ORIGINAL_DATA_SEQUENCE_PK" = #{originalDataSequencePk}
+	</select>
+   
+   <insert id="insertOriginalData" parameterType="com.vaiv.analyticsManager.restFullApi.domain.OriginalData">
+   		INSERT INTO 
+   			"ORIGINAL_DATA"(
+   				"ORIGINAL_DATA_SEQUENCE_PK"
+   				, "NAME"
+   				, "FILEPATH"
+   				, "FILENAME"
+   				, "EXTENSION"
+   				, "CREATE_DATETIME"
+   				, "PROJECT_SEQUENCE_FK1"
+   				, "INSTANCE_SEQUENCE_FK2"
+   				, "COLUMNS"
+   				, "STATISTICS"
+   				, "SAMPLE_DATA"
+   				, "AMOUNT"
+   			) VALUES (
+   				#{originalDataSequencePk}
+   				,#{name}
+   				,#{filepath}
+   				,#{filename}
+   				,#{extension}
+   				,#{createDatetime}
+   				,#{projectSequenceFk1}
+   				,#{instanceSequenceFk2}
+   				,#{columns}
+   				,#{statistics}
+   				,#{sampleData}
+   				,#{amount}
+   			)
+   </insert>
+   
+   <update id="deleteOriginalData" parameterType="com.vaiv.analyticsManager.restFullApi.domain.OriginalData">
+   		UPDATE "ORIGINAL_DATA"
+   		SET
+   		<trim prefixOverrides=",">
+   			<if test='deleteFlag != null and deleteFlag != ""' >,"DELETE_FLAG" = #{deleteFlag}</if>
+		</trim>
+		WHERE "ORIGINAL_DATA_SEQUENCE_PK" = #{originalDataSequencePk}
+   </update>
+   
+   <select id="preprocessFunctionList" resultType="java.util.HashMap">
+   		SELECT * FROM "PREPROCESS_FUNCTION"
+		WHERE "USE_FLAG" = TRUE
+		ORDER BY "PREPROCESS_FUNCTION_NAME" ASC
+   </select>
+   
+   <select id="preprocessFunction" resultType="java.util.HashMap">
+   		SELECT * FROM "PREPROCESS_FUNCTION"
+		WHERE "PREPROCESS_FUNCTION_SEQUENCE_PK" = #{preprocessFunctionSequencePk}
+   </select>
+   
+   <select id="checkDuplicateOriginalData" resultType="int" parameterType="com.vaiv.analyticsManager.restFullApi.domain.OriginalData">
+   		SELECT COUNT(*) FROM "ORIGINAL_DATA"
+		WHERE "PROJECT_SEQUENCE_FK1"=#{projectSequenceFk1} 
+			AND "FILENAME" = #{filename}
+			AND "DELETE_FLAG" = FALSE
+   </select>
+   
+	
+</mapper>

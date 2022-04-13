@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <th:block th:fragment="commonMenu">
+        <h3 class="hidden">하위 목차</h3>
+        <ul class="sub-nav-depth1__list commonMenuUl">
+	          <li class="sub-nav-depth1__item is-active is-only-depth1 algorithmActive"><a href="/algorithmManage" class="sub-nav-depth1__link">알고리즘</a>
+	          </li>
+	          <li class="sub-nav-depth1__item is-only-depth1 sandboxManageActive"><a href="/sandboxManage" class="sub-nav-depth1__link">샌드박스 관리</a>
+	          </li>
+	          <li class="sub-nav-depth1__item is-only-depth1 projectManageActive"><a href="/projectManage" class="sub-nav-depth1__link">프로젝트 관리</a>
+	          </li>
+	          <li class="sub-nav-depth1__item is-only-depth1 batchManageActive"><a href="/batchManage" class="sub-nav-depth1__link">배치관리</a>
+	          </li>
+        </ul>
+    </th:block>
+</html>

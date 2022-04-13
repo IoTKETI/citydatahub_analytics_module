@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vaiv.analyticsManager.restFullApi.mapper.BatchRestMapper">
+	
+	<select id="batchServiceRequests" resultType="java.util.HashMap" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Batch">
+		SELECT
+		    *
+		    , to_char(bsReq."CREATE_DATETIME", 'YYYY-MM-DD') as "createDataTime"
+		     , (SELECT "NAME"
+                 FROM "ORIGINAL_DATA"
+                 WHERE "INSTANCE_SEQUENCE_FK2" = bsReq."INSTANCE_SEQUENCE_FK2"
+                     AND "ORIGINAL_DATA_SEQUENCE_PK" =
+                         (SELECT "ORIGINAL_DATA_SEQUENCE_FK1"
+                             FROM "MODEL"
+                             WHERE "INSTANCE_SEQUENCE_FK3"= bsReq."INSTANCE_SEQUENCE_FK2"
+                             AND "MODEL_SEQUENCE_PK" = bsReq."MODEL_SEQUENCE_FK1"
+                         )
+             ) AS "dataName"
+             , (SELECT "NAME" FROM "PROJECT" WHERE "SELECTED_INSTANCE" =bsReq."INSTANCE_SEQUENCE_FK2" LIMIT 1) AS "projectName"
+            , (SELECT "NAME"
+		    	FROM "MODEL"
+		    	WHERE "INSTANCE_SEQUENCE_FK3"= bsReq."INSTANCE_SEQUENCE_FK2"
+		    		AND "MODEL_SEQUENCE_PK" = bsReq."MODEL_SEQUENCE_FK1"
+		    ) AS "modelName"
+		FROM "BATCH_SERVICE_REQUEST" AS bsReq
+		WHERE bsReq."DELETE_FLAG" = FALSE
+			<if test="userId != null and userId != 'null' and userId != ''">
+        		AND bsReq."USER_ID" = #{userId}
+        	</if>
+		ORDER BY bsReq."CREATE_DATETIME" DESC
+	</select>
+	
+	<select id="batchServiceRequest" resultType="java.util.HashMap" parameterType="int">
+		SELECT
+		    *
+		    , to_char(bsReq."CREATE_DATETIME", 'YYYY-MM-DD') as "createDataTime"
+		    , (SELECT "NAME"
+                 FROM "ORIGINAL_DATA"
+                 WHERE "INSTANCE_SEQUENCE_FK2" = bsReq."INSTANCE_SEQUENCE_FK2"
+                     AND "ORIGINAL_DATA_SEQUENCE_PK" =
+                         (SELECT "ORIGINAL_DATA_SEQUENCE_FK1"
+                             FROM "MODEL"
+                             WHERE "INSTANCE_SEQUENCE_FK3"= bsReq."INSTANCE_SEQUENCE_FK2"
+                             AND "MODEL_SEQUENCE_PK" = bsReq."MODEL_SEQUENCE_FK1"
+                         )
+             ) AS "dataName"
+             , (SELECT "NAME" FROM "PROJECT" WHERE "SELECTED_INSTANCE" =bsReq."INSTANCE_SEQUENCE_FK2" LIMIT 1) AS "projectName"
+            , (SELECT "NAME"
+		    	FROM "MODEL"
+		    	WHERE "INSTANCE_SEQUENCE_FK3"= bsReq."INSTANCE_SEQUENCE_FK2"
+		    		AND "MODEL_SEQUENCE_PK" = bsReq."MODEL_SEQUENCE_FK1"
+		    ) AS "modelName"
+		FROM "BATCH_SERVICE_REQUEST" AS bsReq
+		WHERE bsReq."BATCH_SERVICE_REQUEST_SEQUENCE_PK" = #{batchServiceRequestSequencePk}
+	</select>
+	
+	<insert id="insertBatchServiceRequest" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Batch" 
+			useGeneratedKeys="true" keyProperty="batchServiceRequestSequencePk" keyColumn="BATCH_SERVICE_REQUEST_SEQUENCE_PK">
+		INSERT INTO 
+			"BATCH_SERVICE_REQUEST"(
+				"NAME"
+				, "MODEL_SEQUENCE_FK1"
+				, "INSTANCE_SEQUENCE_FK2"
+				, "PROJECT_SEQUENCE_FK3"
+				, "NIFI_TEMPLATE_NAME"
+				, "RESULT_UPDATE_DOMAIN_ID"
+				, "RESULT_UPDATE_DOMAIN_NAME"
+				, "EXECUTION_CYCLE"
+				, "RESULT_UPDATE_METHOD"
+				, "USER_REQUEST_TERM"
+				, "PROGRESS_STATE"
+				, "MANAGER_REJECT_REASON"
+				, "CREATE_DATETIME"
+				, "USER_ID"
+				, "DOMAIN_ID_COLUMN_NAME"
+				, "STORE_METHOD"
+				, "UPDATE_ATTRIBUTE"
+				, "MAKE_DATA_METHOD"
+				, "SQL"
+				, "TARGET_TYPE"
+				, "DATASET_ID"
+				, "TOTAL_COLUMN_NAME"
+
+			)VALUES(
+           		#{name}
+           		, #{modelSequenceFk1}
+           		, #{instanceSequenceFk2}
+           		, #{projectSequenceFk3}
+           		, #{nifiTemplateName}
+           		, #{resultUpdateDomainId}
+           		, #{resultUpdateDomainName}
+           		, #{executionCycle}
+           		, #{resultUpdateMethod}
+           		, #{userRequestTerm}
+           		, 'standby'
+           		, #{managerRejectReason}
+           		, NOW()
+           		, #{userId}
+           		, #{domainIdColumnName}
+           		, #{storeMethod}
+           		, #{updateAttribute}
+           		, #{makeDataMethod}
+           		, #{sql}
+           		, #{targetType}
+           		, #{datasetId}
+           		, #{totalColumnName}
+          	)
+	</insert>
+	
+	<update id="updateBatchServiceRequest" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Batch">
+		UPDATE "BATCH_SERVICE_REQUEST"
+		SET 
+		<trim prefixOverrides=",">
+			"MODIFY_DATETIME" = NOW()
+   			<if test='name != null and name != ""' >,"NAME" = #{name}</if>
+			<if test='nifiTemplateName != null and nifiTemplateName != ""' >,"NIFI_TEMPLATE_NAME" = #{nifiTemplateName}</if>
+			<if test='resultUpdateDomainId != null and resultUpdateDomainId != ""' >,"RESULT_UPDATE_DOMAIN_ID" = #{resultUpdateDomainId}</if>
+			<if test='resultUpdateDomainName != null and resultUpdateDomainName != ""' >,"RESULT_UPDATE_DOMAIN_NAME" = #{resultUpdateDomainName}</if>
+			<if test='executionCycle != null and executionCycle != ""' >,"EXECUTION_CYCLE" = #{executionCycle}</if>
+			<if test='resultUpdateMethod != null and resultUpdateMethod != ""' >,"RESULT_UPDATE_METHOD" = #{resultUpdateMethod}</if>
+			<if test='userRequestTerm != null and userRequestTerm != ""' >,"USER_REQUEST_TERM" = #{userRequestTerm}</if>
+			<if test='progressState != null and progressState != ""' >,"PROGRESS_STATE" = #{progressState}</if>
+			<if test='managerRejectReason != null and managerRejectReason != ""' >,"MANAGER_REJECT_REASON" = #{managerRejectReason}</if>
+			<if test='useFlag != null and useFlag != ""' >,"USE_FLAG" = #{useFlag}</if>
+			<if test='deleteFlag != null and deleteFlag != ""' >,"DELETE_FLAG" = #{deleteFlag}</if>
+			<if test='domainIdColumnName != null and domainIdColumnName != ""' >,"DOMAIN_ID_COLUMN_NAME" = #{domainIdColumnName}</if>
+			<if test='storeMethod != null and storeMethod != ""' >,"STORE_METHOD" = #{storeMethod}</if>
+			<if test='updateAttribute != null and updateAttribute != ""' >,"UPDATE_ATTRIBUTE" = #{updateAttribute}</if>
+			<if test='modelSequenceFk1 != null and modelSequenceFk1 != ""' >,"MODEL_SEQUENCE_FK1" = #{modelSequenceFk1}</if>
+			<if test='makeDataMethod != null and makeDataMethod != ""' >,"MAKE_DATA_METHOD" = #{makeDataMethod}</if>
+			<if test='sql != null and sql != ""' >,"SQL" = #{sql}</if>
+			<if test='targetType != null and targetType != ""' >,"TARGET_TYPE" = #{targetType}</if>
+			<if test='datasetId != null and datasetId != ""' >,"DATASET_ID" = #{datasetId}</if>
+			<if test='totalColumnName != null and totalColumnName != ""' >,"TOTAL_COLUMN_NAME" = #{totalColumnName}</if>
+		</trim>
+   			
+		WHERE "BATCH_SERVICE_REQUEST_SEQUENCE_PK" = #{batchServiceRequestSequencePk}
+	</update>
+	
+	<select id="batchServices" resultType="java.util.HashMap" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Batch">
+		SELECT
+			*
+			, to_char("CREATE_DATETIME", 'YYYY-MM-DD') as "createDataTime"
+		    , (SELECT "NAME" FROM "INSTANCE" WHERE "INSTANCE_SEQUENCE_PK" =bs."BATCH_INSTANCE_SEQUENCE_FK2") AS "batchServer"
+		    , (SELECT "NAME" FROM "PROJECT" WHERE "SELECTED_INSTANCE" =bs."SANDBOX_INSTANCE_SEQUENCE_FK1" LIMIT 1) AS "projectName"
+		    , (SELECT "NAME" 
+		    	FROM "ORIGINAL_DATA" 
+		    	WHERE "INSTANCE_SEQUENCE_FK2" = bs."SANDBOX_INSTANCE_SEQUENCE_FK1" 
+		    		AND "ORIGINAL_DATA_SEQUENCE_PK" = 
+		    			(SELECT "ORIGINAL_DATA_SEQUENCE_FK1" 
+		    				FROM "MODEL" 
+		    				WHERE "INSTANCE_SEQUENCE_FK3"= bs."SANDBOX_INSTANCE_SEQUENCE_FK1" 
+		    				AND "MODEL_SEQUENCE_PK" = bs."MODEL_SEQUENCE_FK4"
+		    			)
+		    ) AS "dataName"
+		    , (SELECT "NAME" 
+		    	FROM "MODEL" 
+		    	WHERE "INSTANCE_SEQUENCE_FK3"= bs."SANDBOX_INSTANCE_SEQUENCE_FK1" 
+		    		AND "MODEL_SEQUENCE_PK" = bs."MODEL_SEQUENCE_FK4"
+		    ) AS "modelName"
+		FROM "BATCH_SERVICE" AS bs
+        WHERE "DELETE_FLAG" = FALSE
+        	<if test="userId != null and userId != 'null' and userId != ''">
+        		AND "ENROLLEMENT_ID" = #{userId}
+        	</if>
+		ORDER BY "CREATE_DATETIME" DESC
+	</select>
+	
+	<select id="batchService" resultType="java.util.HashMap" parameterType="int">
+		SELECT
+			*
+			, to_char("CREATE_DATETIME", 'YYYY-MM-DD') as "createDataTime"
+		    , (SELECT "NAME" FROM "INSTANCE" WHERE "INSTANCE_SEQUENCE_PK" =bs."BATCH_INSTANCE_SEQUENCE_FK2") AS "batchServer"
+		    , (SELECT "NAME" FROM "PROJECT" WHERE "SELECTED_INSTANCE" =bs."SANDBOX_INSTANCE_SEQUENCE_FK1" LIMIT 1) AS "projectName"
+   		    , (SELECT "NAME" 
+		    	FROM "ORIGINAL_DATA" 
+		    	WHERE "INSTANCE_SEQUENCE_FK2" = bs."SANDBOX_INSTANCE_SEQUENCE_FK1" 
+		    		AND "ORIGINAL_DATA_SEQUENCE_PK" = 
+		    			(SELECT "ORIGINAL_DATA_SEQUENCE_FK1" 
+		    				FROM "MODEL" 
+		    				WHERE "INSTANCE_SEQUENCE_FK3"= bs."SANDBOX_INSTANCE_SEQUENCE_FK1" 
+		    				AND "MODEL_SEQUENCE_PK" = bs."MODEL_SEQUENCE_FK4"
+		    			)
+		    ) AS "dataName"
+		    , (SELECT "NAME" 
+		    	FROM "MODEL" 
+		    	WHERE "INSTANCE_SEQUENCE_FK3"= bs."SANDBOX_INSTANCE_SEQUENCE_FK1" 
+		    		AND "MODEL_SEQUENCE_PK" = bs."MODEL_SEQUENCE_FK4"
+		    ) AS "modelName"
+		FROM "BATCH_SERVICE" AS bs
+        WHERE "BATCH_SERVICE_SEQUENCE_PK" = #{batchServiceSequencePk}
+	</select>
+	
+	<select id="checkBatchName" resultType="int" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Batch">
+		SELECT count(*) 
+		FROM "BATCH_SERVICE"
+		WHERE "NAME" = #{name}
+			AND "DELETE_FLAG" = FALSE
+			<if test='batchServiceSequencePk != null and batchServiceSequencePk != ""' >
+				AND "BATCH_SERVICE_SEQUENCE_PK" NOT IN(#{batchServiceSequencePk})
+			</if>
+	</select>
+	
+	<insert id="insertBatchServices" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Batch" 
+			useGeneratedKeys="true" keyProperty="batchServiceSequencePk" keyColumn="BATCH_SERVICE_SEQUENCE_PK">
+		INSERT INTO 
+			"BATCH_SERVICE"(
+				"NAME"
+				, "SANDBOX_INSTANCE_SEQUENCE_FK1"
+				, "BATCH_INSTANCE_SEQUENCE_FK2"
+				, "PROJECT_SEQUENCE_FK3"
+				, "MODEL_SEQUENCE_FK4"
+				, "NIFI_TEMPLATE_NAME"
+				, "APPLY_DATA_PATH"
+				, "APPLY_DATA_NAME_RULE"
+				, "RESULT_UPDATE_DOMAIN_ID"
+				, "RESULT_UPDATE_DOMAIN_NAME"
+				, "EXECUTION_CYCLE"
+				, "RESULT_UPDATE_METHOD"
+				, "ENROLLMENT_TERM"
+				, "CREATE_DATETIME"
+				, "USER_ID"
+				, "ENROLLEMENT_ID"
+				, "DOMAIN_ID_COLUMN_NAME"
+				, "STORE_METHOD"
+				, "UPDATE_ATTRIBUTE"
+				, "BATCH_STATE"
+				, "MAKE_DATA_METHOD"
+				, "SQL"
+				, "TARGET_TYPE"
+				, "DATASET_ID"
+				, "TOTAL_COLUMN_NAME"
+			)VALUES(
+           		#{name}
+           		, #{sandboxInstanceSequenceFk1}
+           		, #{batchInstanceSequenceFk2}
+           		, #{projectSequenceFk3}
+           		, #{modelSequenceFk4}
+           		, #{nifiTemplateName}
+           		, #{applyDataPath}
+           		, #{applyDataNameRule}
+           		, #{resultUpdateDomainId}
+           		, #{resultUpdateDomainName}
+           		, #{executionCycle}
+           		, #{resultUpdateMethod}
+           		, #{enrollmentTerm}
+           		, NOW()
+           		, #{userId}
+           		, #{enrollementId}
+           		, #{domainIdColumnName}
+           		, #{storeMethod}
+           		, #{updateAttribute}
+           		, 'stop'
+           		, #{makeDataMethod}
+				, #{sql}
+				, #{targetType}
+				, #{datasetId}
+				, #{totalColumnName}
+
+          	)
+	</insert>
+	
+	
+	<update id="updateBatchService" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Batch">
+		UPDATE "BATCH_SERVICE"
+		SET 
+		<trim prefixOverrides=",">
+			"MODIFY_DATETIME" = NOW()
+   			<if test='name != null and name != ""' >,"NAME" = #{name}</if>
+			<if test='nifiTemplateName != null and nifiTemplateName != ""' >,"NIFI_TEMPLATE_NAME" = #{nifiTemplateName}</if>
+			<if test='applyDataPath != null and applyDataPath != ""' >,"APPLY_DATA_PATH" = #{applyDataPath}</if>
+			<if test='applyDataNameRule != null and applyDataNameRule != ""' >,"APPLY_DATA_NAME_RULE" = #{applyDataNameRule}</if>
+			<if test='resultUpdateDomainId != null and resultUpdateDomainId != ""' >,"RESULT_UPDATE_DOMAIN_ID" = #{resultUpdateDomainId}</if>
+			<if test='resultUpdateDomainName != null and resultUpdateDomainName != ""' >,"RESULT_UPDATE_DOMAIN_NAME" = #{resultUpdateDomainName}</if>
+			<if test='executionCycle != null and executionCycle != ""' >,"EXECUTION_CYCLE" = #{executionCycle}</if>
+			<if test='resultUpdateMethod != null and resultUpdateMethod != ""' >,"RESULT_UPDATE_METHOD" = #{resultUpdateMethod}</if>
+			<if test='enrollmentTerm != null and enrollmentTerm != ""' >,"ENROLLMENT_TERM" = #{enrollmentTerm}</if>
+			<if test='deleteFlag != null and deleteFlag != ""' >,"DELETE_FLAG" = #{deleteFlag}</if>
+			<if test='domainIdColumnName != null and domainIdColumnName != ""' >,"DOMAIN_ID_COLUMN_NAME" = #{domainIdColumnName}</if>
+			<if test='storeMethod != null and storeMethod != ""' >,"STORE_METHOD" = #{storeMethod}</if>
+			<if test='updateAttribute != null and updateAttribute != ""' >,"UPDATE_ATTRIBUTE" = #{updateAttribute}</if>
+			<if test='makeDataMethod != null and makeDataMethod != ""' >,"MAKE_DATA_METHOD" = #{makeDataMethod}</if>
+			<if test='sql != null and sql != ""' >,"SQL" = #{sql}</if>
+			<if test='targetType != null and targetType != ""' >,"TARGET_TYPE" = #{targetType}</if>
+			<if test='datasetId != null and datasetId != ""' >,"DATASET_ID" = #{datasetId}</if>
+			<if test='totalColumnName != null and totalColumnName != ""' >,"TOTAL_COLUMN_NAME" = #{totalColumnName}</if>
+		</trim>
+		WHERE "BATCH_SERVICE_SEQUENCE_PK" = #{batchServiceSequencePk}
+	</update>
+	
+	<update id="updateBatchServiceUseFlag" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Batch">
+		UPDATE "BATCH_SERVICE"
+		SET 
+		<trim prefixOverrides=",">
+			"MODIFY_DATETIME" = NOW()
+			,"USE_FLAG" = #{useFlag}
+			<if test="!useFlag">
+			,"BATCH_STATE" = 'stop'
+			</if>
+		</trim>
+		WHERE "BATCH_SERVICE_SEQUENCE_PK" = #{batchServiceSequencePk}
+	</update>
+	
+	<select id="batchServers" resultType="java.util.HashMap">
+		SELECT
+			ist.*
+		FROM "INSTANCE" AS ist
+        WHERE ist."DELETE_FLAG" = false
+        	AND ist."ANALYSIS_INSTANCE_SERVER_TYPE" = 'batch'
+		ORDER BY "CREATE_DATETIME" DESC
+	</select>
+	
+	<select id="batchServiceByinstancePk" resultType="java.util.HashMap">
+		SELECT *
+		FROM "BATCH_SERVICE"
+        WHERE "DELETE_FLAG" = FALSE
+		    AND "SANDBOX_INSTANCE_SEQUENCE_FK1" = #{instancePk}
+	</select>
+	
+	<select id="batchServiceRequestsByinstancePk" resultType="java.util.HashMap">
+		SELECT *
+		FROM "BATCH_SERVICE_REQUEST"
+		WHERE "DELETE_FLAG" = FALSE
+		    AND "INSTANCE_SEQUENCE_FK2" = #{instancePk}
+	</select>
+	
+	<select id="batchLogs" parameterType="com.vaiv.analyticsManager.restFullApi.domain.SearchData" resultType="java.util.HashMap">
+		SELECT
+			lg."LOG_BATCH_SEQUENCE_PK" 
+			, COALESCE((SELECT "NAME" FROM "BATCH_SERVICE" WHERE "BATCH_SERVICE_SEQUENCE_PK" = lg."BATCH_SERVICE_SEQUENCE_FK3"),'') AS "batchName"
+		    , cd."CODE_NAME" AS codeName
+		    , abstime(lg."BATCH_START_DATETIME") as "batchStartDateTime"
+			, abstime(lg."BATCH_END_DATETIME") as "batchEndDateTime"
+			, lg."BATCH_IS_SUCCESS"
+		    , abstime(lg."CREATE_DATETIME") as "createDataTime"
+		    , lg."LOG_BATCH_SEQUENCE_PK" AS "detail"
+		FROM (SELECT * FROM "LOG_BATCH" WHERE "CREATE_DATETIME" BETWEEN to_timestamp(#{startDate}, 'YYYY-MM-DD') AND (to_timestamp( #{endDate}, 'YYYY-MM-DD'))  + interval '1' day ) AS lg
+		INNER JOIN "CODE" AS cd
+			ON lg."CODE" = cd."CODE"
+		WHERE 1=1
+			<if test="userId != null and userId != 'null' and userId != ''">
+				AND lg."BATCH_SERVICE_SEQUENCE_FK3" IN (
+					SELECT "BATCH_SERVICE_SEQUENCE_PK" 
+					FROM "BATCH_SERVICE" 
+					WHERE "ENROLLEMENT_ID" = #{userId}
+				)
+        	</if>
+        	<if test="sSortCol != null">
+                   ORDER BY "${sSortCol}"
+            </if>
+            <if test="sSortCol != null and sSortDir_0 != null">
+                   ${sSortDir_0}
+            </if>
+		LIMIT #{iDisplayLength} OFFSET #{iDisplayStart}
+	</select>
+	
+	<select id="batchLogsSearchTotalCount" parameterType="com.vaiv.analyticsManager.restFullApi.domain.SearchData" resultType="java.lang.Integer">
+		SELECT 
+			count(*)
+		FROM "LOG_BATCH"
+		WHERE "CREATE_DATETIME" BETWEEN to_timestamp(#{startDate}, 'YYYY-MM-DD') AND (to_timestamp( #{endDate}, 'YYYY-MM-DD'))  + interval '1' day
+			<if test="userId != null and userId != 'null' and userId != ''">
+				AND "BATCH_SERVICE_SEQUENCE_FK3" IN (
+					SELECT "BATCH_SERVICE_SEQUENCE_PK" 
+					FROM "BATCH_SERVICE" 
+					WHERE "ENROLLEMENT_ID" = #{userId}
+				)
+        	</if>
+	</select>
+	
+	<select id="batchLogsTotalCount" parameterType="com.vaiv.analyticsManager.restFullApi.domain.SearchData" resultType="java.lang.Integer">
+		SELECT 
+			count(*)
+		FROM "LOG_BATCH"
+		WHERE 1=1
+			<if test="userId != null and userId != 'null' and userId != ''">
+				AND "BATCH_SERVICE_SEQUENCE_FK3" IN (
+					SELECT "BATCH_SERVICE_SEQUENCE_PK" 
+					FROM "BATCH_SERVICE" 
+					WHERE "ENROLLEMENT_ID" = #{userId}
+				)
+        	</if>
+	</select>
+	
+	<select id="batchLog" resultType="java.util.HashMap">
+		SELECT lg.*
+			, abstime(lg."CREATE_DATETIME") as "createDataTime"
+			, abstime(lg."BATCH_START_DATETIME") as "batchStartDateTime"
+			, abstime(lg."BATCH_END_DATETIME") as "batchEndDateTime"
+			,(SELECT "NAME" FROM "BATCH_SERVICE" WHERE "BATCH_SERVICE_SEQUENCE_PK" = lg."BATCH_SERVICE_SEQUENCE_FK3") AS "batchName"
+		    , cd."CODE_NAME" AS codeName
+		    , cd."DESCRIPTION" AS codeDesc
+		    , (SELECT "NAME" FROM "PROJECT" WHERE "PROJECT_SEQUENCE_PK" = bs."PROJECT_SEQUENCE_FK3") AS "projectName"
+            , (SELECT "NAME" FROM "INSTANCE" WHERE "INSTANCE_SEQUENCE_PK" = bs."SANDBOX_INSTANCE_SEQUENCE_FK1") AS "instanceName"
+            , (SELECT "NAME" FROM "INSTANCE" WHERE "INSTANCE_SEQUENCE_PK" = bs."BATCH_INSTANCE_SEQUENCE_FK2") AS "batchServerName"
+		FROM "LOG_BATCH" AS lg
+		INNER JOIN "CODE" AS cd
+			ON lg."CODE" = cd."CODE"
+		INNER JOIN "BATCH_SERVICE" AS bs
+			ON lg."BATCH_SERVICE_SEQUENCE_FK3" = bs."BATCH_SERVICE_SEQUENCE_PK"
+		WHERE lg."LOG_BATCH_SEQUENCE_PK" = #{logBatchSequencePk}
+	</select>
+   
+</mapper>

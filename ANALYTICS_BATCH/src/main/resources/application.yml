@@ -1,0 +1,45 @@
+spring:
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  batch:
+    job:
+      enabled: false
+
+  datasource:
+    hikari:
+      driver-class-name: org.postgresql.Driver
+      jdbc-url: jdbc:postgresql://localhost:5432/ANALYTICS_MANAGER?useUnicode=true&characterEncoding=utf-8
+      username: smartcity
+      password: smartcity
+      
+      
+server:
+  tomcat:
+    uri-encoding: UTF-8
+  port: 3030
+  servlet:
+    application-display-name: smartCity
+    
+module:
+  tempUrl:
+  port: 8000
+  method: /modules/analyticsModule
+
+nfs:
+  resultPath: /ANALYTICS_MANAGER_NFS/NIFI_RESULT
+  
+batchServer:
+  devTest: false
+  url: http://localhost:8000/modules/analyticsModule
+
+coreModuleApiServer:
+  url: http://ip:port/entities/
+  method: /attrs/congestionIndexPrediction
+
+coreModuleIngestServer:
+  url: http://ip:port/entityOperations/upsert?options=update
+  datasetId: pocOffStreetParking
+  type: http://uri.citydatahub.kr/ngsi-ld/parking/OffStreetParking

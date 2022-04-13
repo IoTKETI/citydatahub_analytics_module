@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <th:block th:fragment="commonDataHubTopNavi">
+          <h1 class="header-logo"><a class="header-logo__link" th:href="@{${session.cityHubUrl} + '/main/pageMain.do'}"><img src="./img/common/logo.png" alt="시티 허브"></a></h1>
+	      <form class="header-search">
+	        <fieldset>
+	          <legend>검색 영역</legend>
+	          <div class="header-search__field">
+	            <input class="header-search__input" type="search" placeholder="검색어를 입력하세요">
+	            <button class="header-search__submit" type="button"><span class="hidden">검색</span></button>
+	            <button class="header-search__close" type="button"><span class="hidden">검색창 닫기</span></button>
+	          </div>
+	        </fieldset>
+	      </form>
+
+	      <!-- [D] 로그인 후 -->
+	      <input type="hidden" id="userId" th:value="${session.userId}" />
+	      <input type="hidden" id="userRole" th:value="${session.userRole}" />
+	      <ul class="header-util__list">
+	        <li class="header-util__item"><a class="header-util__link header-util__link--user material-icons" href="#none"><strong class="header-util__link--emphasis"><span th:text="${session.userNickname}"></span></strong> 님</a></li>
+	        <li class="header-util__item"><a class="header-util__link header-util__link--mypage material-icons" th:href="@{${session.cityHubUrl} + '/mypage/wishlist/pageList.do?nav=MNU038'}" >마이페이지</a></li>
+	        <li class="header-util__item"><a class="header-util__link header-util__link--logout material-icons" href="/logout">로그아웃</a></li>
+	      </ul>
+	      <!-- //[D] 로그인 후 -->
+	      <button class="all-menu" type="button"><i class="all-menu__icon"><span class="hidden">전체 메뉴 보기</span></i></button>
+    </th:block>
+</html>
