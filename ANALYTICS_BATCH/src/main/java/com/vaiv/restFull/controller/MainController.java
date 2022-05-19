@@ -25,11 +25,12 @@ public class MainController {
 	 */
 	@GetMapping(value="/list")
 	public ResponseEntity<JSONObject> batchListAllEnrolled(){
-		JSONObject result = new JSONObject();
+		JSONObject result = null;
 		try {
 			result = batchService.list();
 			return new ResponseEntity<JSONObject>(result, HttpStatus.OK);
 		}catch (Exception e) {
+			result = new JSONObject();
 			result.put("type", "5000");
 			result.put("detail", e.toString());
 			MakeUtil.printErrorLogger(e, "list");
@@ -42,20 +43,21 @@ public class MainController {
 	 * @param sandboxInstanceSequence
 	 * @return
 	 */
-	@GetMapping(value="/batch/{sandboxInstanceSequence}/refrash")
-	public ResponseEntity<JSONObject> refrash(@PathVariable Long sandboxInstanceSequence){
-		JSONObject result = new JSONObject();
+	@GetMapping(value="/batch/{sandboxInstanceSequence}/refresh")
+	public ResponseEntity<JSONObject> refresh(@PathVariable Long sandboxInstanceSequence){
+		JSONObject result = null;
 		try {
 			if( MakeUtil.isNotNullAndEmpty(sandboxInstanceSequence) ) {
-				result = batchService.refrash(sandboxInstanceSequence);
+				result = batchService.refresh(sandboxInstanceSequence);
 				return new ResponseEntity<JSONObject>(result, HttpStatus.OK);
         	}else {
         		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
         	}
 		}catch (Exception e) {
+			result = new JSONObject();
 			result.put("type", "5000");
 			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "refrash");
+			MakeUtil.printErrorLogger(e, "refresh");
 			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
 		}
 	}
@@ -67,7 +69,7 @@ public class MainController {
 	 */
 	@GetMapping(value="/batch/{sandboxInstanceSequence}/allStop")
 	public ResponseEntity<JSONObject> allStop(@PathVariable Long sandboxInstanceSequence){
-		JSONObject result = new JSONObject();
+		JSONObject result = null;
 		try {
 			if( MakeUtil.isNotNullAndEmpty(sandboxInstanceSequence) ) {
 				result = batchService.allStop(sandboxInstanceSequence);
@@ -76,6 +78,7 @@ public class MainController {
         		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
         	}
 		}catch (Exception e) {
+			result = new JSONObject();
 			result.put("type", "5000");
 			result.put("detail", e.toString());
 			MakeUtil.printErrorLogger(e, "allStop");
@@ -91,7 +94,7 @@ public class MainController {
 	 */
 	@GetMapping(value="/batchStart/{batchServiceSequencePk}")
 	public ResponseEntity<JSONObject> batchStart(@PathVariable Long batchServiceSequencePk){
-		JSONObject result = new JSONObject();
+		JSONObject result = null;
 		try {
 			if( MakeUtil.isNotNullAndEmpty(batchServiceSequencePk) ) {
                 batchService.batchStop(batchServiceSequencePk);
@@ -101,6 +104,7 @@ public class MainController {
         		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
         	}
 		}catch (Exception e) {
+			result = new JSONObject();
 			result.put("type", "5000");
 			result.put("detail", e.toString());
 			MakeUtil.printErrorLogger(e, "start");
@@ -116,7 +120,7 @@ public class MainController {
 	 */
 	@GetMapping(value="/batchStop/{batchServiceSequencePk}")
 	public ResponseEntity<JSONObject> batchStop(@PathVariable Long batchServiceSequencePk){
-		JSONObject result = new JSONObject();
+		JSONObject result = null;
 		try {
 			if( MakeUtil.isNotNullAndEmpty(batchServiceSequencePk) ) {
 				result = batchService.batchStop(batchServiceSequencePk);
@@ -125,6 +129,7 @@ public class MainController {
         		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
         	}
 		}catch (Exception e) {
+			result = new JSONObject();
 			result.put("type", "5000");
 			result.put("detail", e.toString());
 			MakeUtil.printErrorLogger(e, "stop");

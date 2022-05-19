@@ -74,7 +74,7 @@ var fnCreateListHtml = function(projects){
 		html += "	<td scope='row' class='pointerCorsor'>"+data.NAME+"</td>";
 		html += "	<td>"+data.DESCRIPTION+"</td>";
 		html += "	<td>"+data.createDataTime+"</td>";
-		html += "	<td>"+data.instanceName+"</td>";
+		// html += "	<td>"+data.instanceName+"</td>";
 		if( userRole == "Analytics_Admin" )	html += "	<td>"+data.USER_ID+"</td>";
 		html += "	<td><button class='button__primary' onclick='fnUpdateModal(\""+data.PROJECT_SEQUENCE_PK+"\");'>수정</button></td>";
 		html += "</tr>";
@@ -191,13 +191,13 @@ var fnUpdateTable = function(data, option){
 		if( userRole == "Analytics_Admin" ){
 			$("#logTable").dataTable().fnAddData([
 				checkbox, data.PROJECT_SEQUENCE_PK, data.NAME, data.DESCRIPTION
-				, data.createDataTime, data.instanceName, data.USER_ID, modifyBtn
+				, data.createDataTime, data.USER_ID, modifyBtn
 			]);
-		}else{
-			$("#logTable").dataTable().fnAddData([
-				checkbox, data.PROJECT_SEQUENCE_PK, data.NAME, data.DESCRIPTION
-				, data.createDataTime, data.instanceName, modifyBtn
-			]);
+		// }else{
+		// 	$("#logTable").dataTable().fnAddData([
+		// 		checkbox, data.PROJECT_SEQUENCE_PK, data.NAME, data.DESCRIPTION
+		// 		, data.createDataTime, data.instanceName, modifyBtn
+		// 	]);
 		}
 		$("#logTable").DataTable().order([1, "desc"]).draw();
 		
@@ -205,14 +205,14 @@ var fnUpdateTable = function(data, option){
 		if( userRole == "Analytics_Admin" ){
 			$("#logTable").dataTable().fnUpdate([
 				checkbox, data.PROJECT_SEQUENCE_PK, data.NAME, data.DESCRIPTION
-				, data.createDataTime, data.instanceName, data.USER_ID, modifyBtn
+				, data.createDataTime, data.USER_ID, modifyBtn
 			], clickRow);
 			
-		}else{
-			$("#logTable").dataTable().fnUpdate([
-				checkbox, data.PROJECT_SEQUENCE_PK, data.NAME, data.DESCRIPTION
-				, data.createDataTime, data.instanceName, modifyBtn
-			], clickRow);
+		// }else{
+		// 	$("#logTable").dataTable().fnUpdate([
+		// 		checkbox, data.PROJECT_SEQUENCE_PK, data.NAME, data.DESCRIPTION
+		// 		, data.createDataTime, data.instanceName, modifyBtn
+		// 	], clickRow);
 		}
 	}
 }

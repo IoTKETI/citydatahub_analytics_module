@@ -29,9 +29,6 @@ public class AdminController {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	@Value("${sso.username}")
-	private String ssoUsername;
-
 	@Autowired
 	private AuthService authService;
 
@@ -90,17 +87,6 @@ public class AdminController {
 	@GetMapping("/admin/algorithmManage")
 	public String algorithm(HttpServletRequest request, HttpSession session) {
 		return "admin/algorithm/algorithmManageAdmin";
-	}
-
-	/**
-	 * 샌드박스 관리
-	 * 
-	 * @return
-	 * @throws SchedulerException
-	 */
-	@GetMapping("/admin/sandboxManage")
-	public String algorithm(HttpSession session) throws SchedulerException {
-		return "admin/sandbox/sandboxManageAdmin";
 	}
 
 	/**

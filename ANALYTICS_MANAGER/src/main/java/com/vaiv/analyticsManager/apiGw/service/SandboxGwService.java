@@ -450,117 +450,120 @@ public class SandboxGwService {
 	 * @throws Exception 
 	 * @throws InterruptedException 
 	 */
-	public JSONObject instancesAsPostGw(InstanceGw instanceGw, HttpSession session) throws Exception{
+	// public JSONObject instancesAsPostGw(InstanceGw instanceGw, HttpSession session) throws Exception{
 
-		JSONObject returnJson = new JSONObject();
+	// 	JSONObject returnJson = new JSONObject();
 		
-		// 중복체크
-		if( sandboxGwMapper.checkInstanceNameGw(instanceGw.getName()) > 0 ) {
-			return restFullReturnService.alreadyExists("duplicate Name");
+	// 	// 중복체크
+	// 	if( sandboxGwMapper.checkInstanceNameGw(instanceGw.getName()) > 0 ) {
+	// 		return restFullReturnService.alreadyExists("duplicate Name");
 			
-		}else {
-			// 템플릿 데이터 가져오기
-			Map<String, Object> templateDetail = sandboxGwMapper.analysisTemplateGw(instanceGw.getTemplateId());
+	// 	}else {
+	// 		// 템플릿 데이터 가져오기
+	// 		Map<String, Object> templateDetail = sandboxGwMapper.analysisTemplateGw(instanceGw.getTemplateId());
 
-			String url = cloudApiUrl+CLOUD_API_SERVER_POST_FIX;
+	// 		String url = cloudApiUrl+CLOUD_API_SERVER_POST_FIX;
 
-			// 인스턴스 생성
-			//Headers headers=new Headers.Builder().add(CLOUD_API_CREDENTIAL_KEY, cloudApiCredential).build();
-			Headers headers = new Headers.Builder().add(CLOUD_API_CREDENTIAL_KEY, cloudApiCredential)
-													.add(CLOUD_API_AUTHORIZATIONV_KEY, cloudApiAuthorization)
-													.add("Content-Type", "application/json").build();
+	// 		// 인스턴스 생성
+	// 		//Headers headers=new Headers.Builder().add(CLOUD_API_CREDENTIAL_KEY, cloudApiCredential).build();
+	// 		Headers headers = new Headers.Builder().add(CLOUD_API_CREDENTIAL_KEY, cloudApiCredential)
+	// 												.add(CLOUD_API_AUTHORIZATIONV_KEY, cloudApiAuthorization)
+	// 												.add("Content-Type", "application/json").build();
 
-			JSONObject paramJson = new JSONObject();
-			JSONArray jsonTempArr = new JSONArray();
-			JSONObject  httpResponseJson= new JSONObject();
-			paramJson.put("name", instanceGw.getName());
-			paramJson.put("sourceType", "image");
-			paramJson.put("volumeCreated", "false");
+	// 		// String jsonMessage = ""; // TODO:refactoring
+	// 		// JSONObject json = new JSONObject(); // TODO:refactoring
+	// 		JSONObject paramJson = new JSONObject();
+	// 		JSONArray jsonTempArr = new JSONArray();
+	// 		// JSONObject jsonTemp = new JSONObject(); // TODO:refactoring
+	// 		JSONObject  httpResponseJson= new JSONObject();
+	// 		paramJson.put("name", instanceGw.getName());
+	// 		paramJson.put("sourceType", "image");
+	// 		paramJson.put("volumeCreated", "false");
 
-			paramJson.put("imageId", templateDetail.get("snapshotId"));
-			paramJson.put("flavorName", instanceGw.getCloudInstanceServerId());
-			paramJson.put("keyPair", keyName);
-			paramJson.put("zone", availabilityZone);
+	// 		paramJson.put("imageId", templateDetail.get("snapshotId"));
+	// 		paramJson.put("flavorName", instanceGw.getCloudInstanceServerId());
+	// 		paramJson.put("keyPair", keyName);
+	// 		paramJson.put("zone", availabilityZone);
 
-			jsonTempArr.add(networks);
-			paramJson.put("networkId", jsonTempArr);
+	// 		jsonTempArr.add(networks);
+	// 		paramJson.put("networkId", jsonTempArr);
 
-			jsonTempArr = new JSONArray();
-			jsonTempArr.add(securityGroups);
-			paramJson.put("securityGroupName", jsonTempArr);
+	// 		jsonTempArr = new JSONArray();
+	// 		jsonTempArr.add(securityGroups);
+	// 		paramJson.put("securityGroupName", jsonTempArr);
 
-			httpResponseJson = httpService.httpServicePOST(url, headers, paramJson.toString());
+	// 		httpResponseJson = httpService.httpServicePOST(url, headers, paramJson.toString());
 
-			if( "201".equals(httpResponseJson.get("type")) ) {
-				logger.info("Server creation completed... ");
+	// 		if( "201".equals(httpResponseJson.get("type")) ) {
+	// 			logger.info("Server creation completed... ");
 
-				instanceGw.setUserId(""+session.getAttribute("userId"));
-				instanceGw.setKeypairName(keyName); // 키페어 이름
-				instanceGw.setAvailabilityZone(availabilityZone);// 가용구역
-				instanceGw.setServerState("create_call"); // 서버상태
-				instanceGw.setModuleState("checking");
-				instanceGw.setAnalysisInstanceServerType("sandbox"); // 서버타입(sandbox, batch)
+	// 			instanceGw.setUserId(""+session.getAttribute("userId"));
+	// 			instanceGw.setKeypairName(keyName); // 키페어 이름
+	// 			instanceGw.setAvailabilityZone(availabilityZone);// 가용구역
+	// 			instanceGw.setServerState("create_call"); // 서버상태
+	// 			instanceGw.setModuleState("checking");
+	// 			instanceGw.setAnalysisInstanceServerType("sandbox"); // 서버타입(sandbox, batch)
 				
-				/* 인스턴스 저장 */
-				sandboxGwMapper.insertInstanceGw(instanceGw);
-				logger.info("Instance insert completed...");
+	// 			/* 인스턴스 저장 */
+	// 			sandboxGwMapper.insertInstanceGw(instanceGw);
+	// 			logger.info("Instance insert completed...");
 
-				/* 인스턴스 상세 저장 */
-				instanceGw.setDataSummaryToString(""+templateDetail.get("entities"));// 데이터 내역
-				instanceGw.setDataStartDate(""+templateDetail.get("dataStartDate"));// 데이터 시작일자
-				instanceGw.setDataEndDate(""+templateDetail.get("dataEndDate"));// 데이터 종료일자
-				instanceGw.setSnapshotId(""+templateDetail.get("snapshotId")); // 스냅샷 아이디
+	// 			/* 인스턴스 상세 저장 */
+	// 			instanceGw.setDataSummaryToString(""+templateDetail.get("entities"));// 데이터 내역
+	// 			instanceGw.setDataStartDate(""+templateDetail.get("dataStartDate"));// 데이터 시작일자
+	// 			instanceGw.setDataEndDate(""+templateDetail.get("dataEndDate"));// 데이터 종료일자
+	// 			instanceGw.setSnapshotId(""+templateDetail.get("snapshotId")); // 스냅샷 아이디
 				
-				sandboxGwMapper.insertInstanceDetailGw(instanceGw);
-				logger.info("InstanceDetail insert completed...");
+	// 			sandboxGwMapper.insertInstanceDetailGw(instanceGw);
+	// 			logger.info("InstanceDetail insert completed...");
 				
-			}else if( "400".equals(httpResponseJson.get("type")) ) { // Bad Request
-				JSONObject errorJson = new JSONObject().fromObject(returnJson.get("data"));
-				errorJson = new JSONObject().fromObject(errorJson.get("badRequest"));
-				String message = errorJson.get("message")+"";
+	// 		}else if( "400".equals(httpResponseJson.get("type")) ) { // Bad Request
+	// 			JSONObject errorJson = new JSONObject().fromObject(returnJson.get("data"));
+	// 			errorJson = new JSONObject().fromObject(errorJson.get("badRequest"));
+	// 			String message = errorJson.get("message")+"";
 				
-				if( message.indexOf("disk is smaller than the minimum") > -1 ) { // 디스크가 이미지보다 작다
-					returnJson.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
-					returnJson.put("type", "Operation Not Supported");
-					returnJson.put("detail", "disk is smaller than the minimum");
-				}else {
-					returnJson.put("type", "http://citydatahub.kr/errors/InternalError");
-					returnJson.put("title", "Internal Error");
-					returnJson.put("detail", httpResponseJson.get("data"));
+	// 			if( message.indexOf("disk is smaller than the minimum") > -1 ) { // 디스크가 이미지보다 작다
+	// 				returnJson.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
+	// 				returnJson.put("type", "Operation Not Supported");
+	// 				returnJson.put("detail", "disk is smaller than the minimum");
+	// 			}else {
+	// 				returnJson.put("type", "http://citydatahub.kr/errors/InternalError");
+	// 				returnJson.put("title", "Internal Error");
+	// 				returnJson.put("detail", httpResponseJson.get("data"));
 					
-				}
+	// 			}
 					
 			
-			}else if( "403".equals(httpResponseJson.get("type")) ) { // Forbidden
-				JSONObject errorJson = new JSONObject().fromObject(httpResponseJson.get("data"));
-				errorJson = new JSONObject().fromObject(errorJson.get("forbidden"));
-				String message = errorJson.get("message")+"";
+	// 		}else if( "403".equals(httpResponseJson.get("type")) ) { // Forbidden
+	// 			JSONObject errorJson = new JSONObject().fromObject(httpResponseJson.get("data"));
+	// 			errorJson = new JSONObject().fromObject(errorJson.get("forbidden"));
+	// 			String message = errorJson.get("message")+"";
 				
-				if( message.indexOf("Quota exceeded for ram:") > -1 ) { // 할당 메모리 초과
-					returnJson.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
-					returnJson.put("type", "Operation Not Supported");
-					returnJson.put("detail", "Quota exceeded for ram:");
+	// 			if( message.indexOf("Quota exceeded for ram:") > -1 ) { // 할당 메모리 초과
+	// 				returnJson.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
+	// 				returnJson.put("type", "Operation Not Supported");
+	// 				returnJson.put("detail", "Quota exceeded for ram:");
 					
-				}else if( message.indexOf("Quota exceeded for cores:") > -1 ) { // 할당 코어 초과
-					returnJson.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
-					returnJson.put("type", "Operation Not Supported");
-					returnJson.put("detail", "Quota exceeded for cores:");
+	// 			}else if( message.indexOf("Quota exceeded for cores:") > -1 ) { // 할당 코어 초과
+	// 				returnJson.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
+	// 				returnJson.put("type", "Operation Not Supported");
+	// 				returnJson.put("detail", "Quota exceeded for cores:");
 					
-				}else {
-					returnJson.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
-					returnJson.put("type", "Operation Not Supported");
-					returnJson.put("detail", httpResponseJson.get("data"));
-				}
+	// 			}else {
+	// 				returnJson.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
+	// 				returnJson.put("type", "Operation Not Supported");
+	// 				returnJson.put("detail", httpResponseJson.get("data"));
+	// 			}
 					
 				
-			}else {
-				returnJson.put("type", "http://citydatahub.kr/errors/InternalError");
-				returnJson.put("title", "Internal Error");
-				returnJson.put("detail", httpResponseJson.get("data"));
-			}
-		}
-		return returnJson;
-	}
+	// 		}else {
+	// 			returnJson.put("type", "http://citydatahub.kr/errors/InternalError");
+	// 			returnJson.put("title", "Internal Error");
+	// 			returnJson.put("detail", httpResponseJson.get("data"));
+	// 		}
+	// 	}
+	// 	return returnJson;
+	// }
 
 	/**
 	 * 샌드박스 시작/정지
@@ -707,13 +710,13 @@ public class SandboxGwService {
 		JSONArray fileListJson = null;
 		
 		// 인스턴스가 있는지 확인
-		Map<String, Object> detail = sandboxGwMapper.instanceGw(selectedInstance);
-		if( detail == null ) {
-			return restFullReturnService.resourceNotFound("Not found instance");
-		}
+		// Map<String, Object> detail = sandboxGwMapper.instanceGw(selectedInstance);
+		// if( detail == null ) {
+		// 	return restFullReturnService.resourceNotFound("Not found instance");
+		// }
 		
 		// 실행중인지 확인
-		if( "start_done".equals(detail.get("SERVER_STATE")) ) {
+		// if( "start_done".equals(detail.get("SERVER_STATE")) ) {
 			// 인스턴스 내부IP 가져오기
 			String ip = getInstanceIp(selectedInstance);
 			String listUrl = ip + moduleLocalFiles;
@@ -728,12 +731,12 @@ public class SandboxGwService {
 			result.put("localFiles", fileListJson);
 			return result;
 			
-		}else {
-			result.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
-			result.put("title", "Operation Not Supported");
-			result.put("detail", "Instance Stop Status");
-			return result;
-		}
+		// }else {
+		// 	result.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
+		// 	result.put("title", "Operation Not Supported");
+		// 	result.put("detail", "Instance Stop Status");
+			// return result;
+		// }
 	}
 
 	/**
@@ -748,13 +751,13 @@ public class SandboxGwService {
 		JSONObject result = new JSONObject();
 		
 		// 인스턴스가 있는지 확인
-		Map<String, Object> detail = sandboxGwMapper.instanceGw(selectedInstance);
-		if( detail == null ) {
-			return restFullReturnService.resourceNotFound("Not found instance");
-		}
+		// Map<String, Object> detail = sandboxGwMapper.instanceGw(selectedInstance);
+		// if( detail == null ) {
+		// 	return restFullReturnService.resourceNotFound("Not found instance");
+		// }
 		
 		// 실행중인지 확인
-		if( "start_done".equals(detail.get("SERVER_STATE")) ) {
+		// if( "start_done".equals(detail.get("SERVER_STATE")) ) {
 			// 인스턴스 내부IP 가져오기
 			String ip = getInstanceIp(selectedInstance);
 			String listUrl = ip + "/localFiles?path=/"+localFile+"&&command=get_sample";
@@ -764,12 +767,12 @@ public class SandboxGwService {
 			result.put("localFile", httpResult.get("data"));
 			return result;
 			
-		}else {
-			result.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
-			result.put("title", "Operation Not Supported");
-			result.put("detail", "Instance Stop Status");
-			return result;
-		}
+		// }else {
+		// 	result.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
+		// 	result.put("title", "Operation Not Supported");
+		// 	result.put("detail", "Instance Stop Status");
+		// 	return result;
+		// }
 	}
 	
 	

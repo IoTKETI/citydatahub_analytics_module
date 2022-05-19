@@ -28,8 +28,8 @@ public class PreFilter extends ZuulFilter {
 
     @Value("${zuul.isNotUseSandbox}")
     private Boolean isNotUseSandbox;
-    @Value("${zuul.hueServer}")
-    private String hueServer;
+    @Value("${zuul.analyticsModuleServer}")
+    private String analyticsModuleServer;
     @Value("${zuul.contextPortMap}")
     private String contextPortString;
     @Value("${zuul.contextSubpathMap}")
@@ -125,9 +125,7 @@ public class PreFilter extends ZuulFilter {
         // 2.2.2. Forward 할 IP를 디비에서 가져옴
 
         if(isNotUseSandbox !=null && isNotUseSandbox){
-            forwardIp=hueServer;
-        }else if(instanceIdNum != -1 && userId !=null && userRole.equals("general") || userRole.equals("Analytics_User")){
-            forwardIp=sandboxRestService.getPrivateIpaddressWithUserIdAndInstancetId(userId,instanceIdNum);
+            forwardIp=analyticsModuleServer;
         }else if(instanceIdNum != -1 && userId !=null && (userRole.equals("admin") || userRole.equals("Analytics_Admin"))) {
             forwardIp=sandboxRestService.getPrivateIpaddressWithInstanceId(instanceIdNum);
         }else{
@@ -137,10 +135,10 @@ public class PreFilter extends ZuulFilter {
 
         log.info("forwardIp : " + forwardIp);
 
-        if(forwardIp == null || forwardIp.equals("")){
-            log.info("instanceId:"+instanceIdNum+", userId : "+userId+", userRole : "+userRole+"데이터베이스에 해당 정보가 인스턴스 정보가 없습니다.");
-            return null;
-        }
+        // if(forwardIp == null || forwardIp.equals("")){
+        //     log.info("instanceId:"+instanceIdNum+", userId : "+userId+", userRole : "+userRole+"데이터베이스에 해당 정보가 인스턴스 정보가 없습니다.");
+        //     return null;
+        // }
 
         //2.2.3. Forward 할 URL을 구성
         String forwardUrl=request.getScheme()+"://";

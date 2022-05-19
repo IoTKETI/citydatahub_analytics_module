@@ -272,13 +272,11 @@ public class MakeUtil {
 	 * @param log
 	 * @throws Exception
 	 */
-	@SuppressWarnings("static-access")
 	public static void printForJsonArr(JSONArray jsonArr, boolean log) throws Exception{
 		JSONObject json = null;
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		for (int i = 0; i < jsonArr.size(); i++) {
-			json = new JSONObject();
-			json = new JSONObject().fromObject(jsonArr.get(i));
+			json = JSONObject.fromObject(jsonArr.get(i));
 			
 			if( log ) logger.info(i+" "+gson.toJson(json));
 			else System.out.println(i+" "+gson.toJson(json));
@@ -414,12 +412,10 @@ public class MakeUtil {
 	 * @param jsonArr
 	 * @return
 	 */
-	@SuppressWarnings("static-access")
 	public static JSONArray nvlJsonArray(JSONArray jsonArr){
 		JSONArray moveJsonArr = new JSONArray();
 		if( MakeUtil.isNotNullAndEmpty(jsonArr) && jsonArr instanceof JSONArray ){
-			JSONObject json = null;
-			
+
 			try {
 				for (int i = 0; i < jsonArr.size(); i++) {
 					
@@ -427,8 +423,7 @@ public class MakeUtil {
 						moveJsonArr.add(nvlJsonArray((JSONArray)jsonArr.get(i)));
 						
 					}else if( MakeUtil.isNotNullAndEmpty(jsonArr.get(i)) && jsonArr.get(i) instanceof JSONObject ){
-						json = new JSONObject().fromObject(jsonArr.get(i));
-						moveJsonArr.add(nvlJson(json));
+						moveJsonArr.add(nvlJson(JSONObject.fromObject(jsonArr.get(i))));
 						
 					}else{
 						moveJsonArr.add(jsonArr.get(i));
@@ -451,7 +446,7 @@ public class MakeUtil {
 	 */
 	public static boolean chkDuplicationKey(JSONArray jsonArr, String key, String value) throws Exception {
 		if( isNotNullAndEmpty(key) && isNotNullAndEmpty(value) ){
-			JSONObject json = new JSONObject();
+			JSONObject json = null;
 			for (int i = 0; i < jsonArr.size(); i++) {
 				json = JSONObject.fromObject(jsonArr.get(i));
 				if( value.equals(json.get(key)+"") )

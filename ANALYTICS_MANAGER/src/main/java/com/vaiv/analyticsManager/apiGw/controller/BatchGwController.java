@@ -82,26 +82,6 @@ public class BatchGwController {
 	}
 	
 	/**
-	 * 배치신청 수정
-	 * @param batchServiceId
-	 * @param batch
-	 * @param session
-	 * @return
-	 */
-	@PatchMapping(value="/batchServiceRequests/{batchServiceRequestSequencePk}")
-	public ResponseEntity<Object> batchServiceRequestsAsPatchGw(@PathVariable String batchServiceRequestSequencePk, @RequestBody BatchGw batchGw, HttpSession session){
-		JSONObject result = new JSONObject();
-		
-		try {
-			result = batchGwService.batchServiceRequestsAsPatchGw(session, batchServiceRequestSequencePk, batchGw);
-			return restFullReturnService.restReturn(result, "ok");
-			
-		}catch (Exception e) {
-			return restFullReturnService.exceptionFailed("batchServiceRequestsAsPatch",e);
-		}
-	}
-	
-	/**
 	 * 배치 신청 삭제
 	 * @param batchServiceId
 	 * @return
@@ -254,14 +234,14 @@ public class BatchGwController {
 	 * @return
 	 */
 	@PostMapping(value="/batch/instances")
-	public ResponseEntity<Object> batchServersAsPostGw(@RequestBody InstanceGw instanceGw, HttpSession session){
-		try {
-        	return new ResponseEntity<Object>(batchGwService.batchServersAsPostGw(session, instanceGw),HttpStatus.OK);
+	// public ResponseEntity<Object> batchServersAsPostGw(@RequestBody InstanceGw instanceGw, HttpSession session){
+	// 	try {
+    //     	return new ResponseEntity<Object>(batchGwService.batchServersAsPostGw(session, instanceGw),HttpStatus.OK);
 			
-		}catch (Exception e) {
-			return restFullReturnService.exceptionFailed("batchServersAsPostGw",e);
-		}
-	}
+	// 	}catch (Exception e) {
+	// 		return restFullReturnService.exceptionFailed("batchServersAsPostGw",e);
+	// 	}
+	// }
 
 
 	/**

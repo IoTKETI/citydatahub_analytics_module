@@ -30,15 +30,10 @@ $(function(){
 		$("#batchNifiButton").show();
 		// 등록할 배치서버 가져오기
 		fnGetBatchServerList();
-		// if( $("#batchInstanceSequenceFk2").val() == null ){
-		// 	fnComNotify("warning", "배치서버를 생성해주세요.");
-		// 	return false;
-		// }
 		
-		// 사용자별 프로젝트, 모델 목록 가져오기
-		fnGetProjectOfUserId();
+		// 프로젝트, 모델 목록 가져오기
+		fnGetProject();
 		if( $("#selectedProject li").length == 0 ){
-			// fnComNotify("warning", "샌드박스를 생성해주세요.");
 			return false;
 		}
 		
@@ -53,13 +48,13 @@ $(function(){
 		$("#updateAttribute li[data-attribute='predictValue']").each(function(){$(this).addClass("active")});
 		$("#updateAttribute li[data-attribute='observedAt']").each(function(){$(this).addClass("active")});
 
-		// 도메인명 가져오기(템플릿 허용 데이터 가져오기)
+		// 도메인명 가져오기
 		fnGetRequestTemplateAvailable();
 
 		showMakeDataMethod();
 		showStoreMethod();
 
-		$(".rejectBtn").hide();
+		// $(".rejectBtn").hide();
 		$(".registDiv").show();
 
 		fnOpenModal("batchModal");
@@ -75,10 +70,11 @@ $(function(){
 			batchServiceSequencePk = data[1];
 			
 			$(".modalName").text("수정");
-			$("#batchNifiButton").hide();
+			// $("#batchNifiButton").hide();
 			
-			// 도메인명 가져오기(템플릿 허용 데이터 가져오기)
-			fnGetRequestTemplateAvailable();
+			// 프로젝트, 모델 목록 가져오기
+			fnGetProject();
+			
 			var batch = fnGetBatchServiceByAjax(batchServiceSequencePk);
 			
 			var executionCycleArr = batch.EXECUTION_CYCLE.split(" ");
@@ -87,20 +83,18 @@ $(function(){
 			}
 			
 			$("#name").val(batch.NAME); // 배치명
+			// 예측용 데이터 생성
 			$("#nifiTemplateName").val(batch.NIFI_TEMPLATE_NAME); // NIFI 템를릿명
 			$("#applyDataPath").val(batch.APPLY_DATA_PATH); // 파일 생성 위치
-			$("#applyDataNameRule").val(batch.APPLY_DATA_NAME_RULE); // 파일 생성 규칙			
+			$("#applyDataNameRule").val(batch.APPLY_DATA_NAME_RULE); // 파일 생성 규칙
+			// 예측결과 후처리
+			$("#storeMethod").val(batch.STORE_METHOD); // 후처리방식
+			$("#totalColumnName").val(batch.TOTAL_COLUMN_NAME); // (후처리에 사용하는)전체값을 포함하는 컬럼이름
+			// 코어모듈 저장방식
+			$("#resultUpdateMethod").val(batch.RESULT_UPDATE_METHOD); // 결과반영방식(replace, update)
 			$("#resultUpdateDomain").val(batch.RESULT_UPDATE_DOMAIN_ID); // 도메인명
-			$("#executionCycle").val(batch.EXECUTION_CYCLE); // 실행주기
-			$("#resultUpdateMethod").val(batch.RESULT_UPDATE_METHOD); // 결과만영방식
-			$("#enrollmentTerm").val(batch.ENROLLMENT_TERM); // 요청사항
-			$("#storeMethod").val(batch.STORE_METHOD); // 저장방법
-			$("#totalColumnName").val(batch.TOTAL_COLUMN_NAME); // 전체값을 포함하는 컬럼이름
-			$("#domainIdColumnName").val(batch.DOMAIN_ID_COLUMN_NAME); // 도메인컬럼이름
-
-
-			$("#updateAttribute li.active").each(function (){$(this).removeClass("active");});
-
+			$("#updateAttribute li.active").each(function (){$(this).removeClass("active");}); // 업데이트하는 속성 inactive
+			// 저장된 업데이트하는 속성 active
 			if(batch.UPDATE_ATTRIBUTE!=null){
 				res=batch.UPDATE_ATTRIBUTE.split(",");
 
@@ -108,6 +102,10 @@ $(function(){
 					$("#updateAttribute li[data-attribute='"+res[i]+"']").each(function(){$(this).addClass("active")});
 				}
 			}
+			$("#domainIdColumnName").val(batch.DOMAIN_ID_COLUMN_NAME); // 인스턴스 컬럼이름
+			// 실행주기, 기타사항
+			$("#executionCycle").val(batch.EXECUTION_CYCLE); // 실행주기
+			$("#enrollmentTerm").val(batch.ENROLLMENT_TERM); // 기타사항
 
 
 			$("#makeDataMethod").val(batch.MAKE_DATA_METHOD); //  데이터 생성방식
@@ -116,9 +114,12 @@ $(function(){
 			$("#datasetId").val(batch.DATASET_ID); // 코어모듈 저장 시 데이터셋 아이디
 
 			
-			$(".rejectBtn").hide();
-			$(".registDiv").hide();
+			// $(".rejectBtn").hide();
+			$(".registDiv").prop("disabled", true); // .show() 또는 주석처리
+			// $(".registDiv").hide(); // .show() 또는 주석처리
 
+			// 도메인명 가져오기
+		fnGetRequestTemplateAvailable();
 			showMakeDataMethod();
 			showStoreMethod();
 
@@ -252,14 +253,6 @@ var fnSearch = function(){
 	var batchList = fnGetBatchServicesByAjax();
 	$("#batchTbodyHtml").html(fnCreateBatchListHtml(batchList));
 	
-	// 배치 신청 목록 조회
-	// var batchRequestList = fnGetbatchServiceRequestsByAjax();
-	// $("#batchRequestTbodyHtml").html(fnCreateBatchRequestListHtml(batchRequestList));
-	
-	// 배치 서버 목록 조회
-	// var batchServerList = fnGetBatchServerListByAjax();
-	// $("#tbodyHtml").html(fnCreateBatchServerListHtml(batchServerList));
-	
 	// 배치 이력 목록 조회
 	var batchLogList = fnGetBatchLogListByAjax($("#startDate").val(), $("#endDate").val());
 	$("#batchLogTbodyHtml").html(fnCreateBatchLogListHtml(batchLogList));
@@ -278,15 +271,11 @@ var fnCreateBatchListHtml = function(list){
 		html += "	<td><a class='js-modal-show' href='#batchModal' title="+data.NAME+">"+data.NAME+"</a></td>";
 		html += "	<td title='"+data.projectName+"'>"+data.projectName+"</td>";
 		html += "	<td title="+data.modelName+">"+data.modelName+"</td>";
-		// html += "	<td title='"+data.batchServer+"'>"+data.batchServer+"</td>";
 		html += "	<td title="+data.MAKE_DATA_METHOD+">"+data.MAKE_DATA_METHOD+"</td>";
 		html += "	<td title="+data.RESULT_UPDATE_DOMAIN_NAME+">"+data.RESULT_UPDATE_DOMAIN_NAME+"</td>";
 		if( data.RESULT_UPDATE_METHOD == "replace" )	html += "	<td title=REPLACE>REPLACE</td>";
 		else 	html += "	<td title=UPDATE>UPDATE</td>";
 		html += "	<td>"+data.EXECUTION_CYCLE+"</td>";
-		
-		// if( data.USE_FLAG == "true" )		html += "	<td>작동중</td>";
-		// else 								html += "	<td>정지</td>";
 		
 		if( data.BATCH_STATE == "success" )		html += "	<td><div class='batchState' data-batchState="+data.BATCH_STATE+" data-pk='"+data.BATCH_SERVICE_SEQUENCE_PK+"'>성공<div></td>";
 		else if( data.BATCH_STATE == "stop" && data.USE_FLAG == "true")		html += "	<td><div class='batchState' data-batchState="+data.BATCH_STATE+" data-pk='"+data.BATCH_SERVICE_SEQUENCE_PK+"'>시작 대기중</div>";
@@ -295,75 +284,11 @@ var fnCreateBatchListHtml = function(list){
 		else 									html += "	<td><div class='batchState' data-batchState="+data.BATCH_STATE+" data-pk='"+data.BATCH_SERVICE_SEQUENCE_PK+"'>에러<div></td>";
 		
 		html += "	<td title="+data.createDataTime+">"+data.createDataTime+"</td>";
-		// if( fnNotNullAndEmpty(data.ENROLLEMENT_ID) )
-		// 	html += "	<td title="+data.ENROLLEMENT_ID+">"+data.ENROLLEMENT_ID+"</td>";
-		// else
-		// 	html += "	<td title="+data.USER_ID+">"+data.USER_ID+"</td>";
 		html += "</tr>";
 	}
 	return html;
 }
 
-/*배치신청 목록 생성*/
-// var fnCreateBatchRequestListHtml = function(list){
-// 	var html = "";
-// 	for( var i in list ){
-// 		var data = list[i];
-// 		var addBatchHtml = "<button class='button__primary' onclick=fnApprovalBatchRequest('"+data.BATCH_SERVICE_REQUEST_SEQUENCE_PK+"')>승인</button>";
-// 		if( data.PROGRESS_STATE == "reject" ) addBatchHtml = "거절";
-		
-// 		if( data.PROGRESS_STATE != "done" ){
-// 			html += "<tr>";
-// 			html += "	<td><div class='checkboxCustom'><input type='checkbox' name='table_records' id='"+data.BATCH_SERVICE_REQUEST_SEQUENCE_PK+"'><label for='"+data.BATCH_SERVICE_REQUEST_SEQUENCE_PK+"'></label></div></td>";
-// 			html += "	<td>"+data.BATCH_SERVICE_REQUEST_SEQUENCE_PK+"</td>";
-// 			html += "	<td title="+data.NAME+">"+data.NAME+"</td>";
-// 			html += "	<td title="+data.MAKE_DATA_METHOD+">"+data.MAKE_DATA_METHOD+"</td>";
-// 			html += "	<td title="+data.modelName+">"+data.modelName+"</td>";
-// 			html += "	<td title="+data.RESULT_UPDATE_DOMAIN_NAME+">"+data.RESULT_UPDATE_DOMAIN_NAME+"</td>";
-// 			if( data.RESULT_UPDATE_METHOD == "replace" )	html += "	<td title=REPLACE>REPLACE</td>";
-// 			else 	html += "	<td title=UPDATE>UPDATE</td>";
-// 			html += "	<td title="+data.EXECUTION_CYCLE+">"+data.EXECUTION_CYCLE+"</td>";
-// 			html += "	<td title="+data.createDataTime+">"+data.createDataTime+"</td>";
-// 			html += "	<td title="+fnConvertProgressState(data.PROGRESS_STATE)+">"+fnConvertProgressState(data.PROGRESS_STATE)+"</td>";
-// 			html += "	<td title="+data.USER_ID+">"+data.USER_ID+"</td>";
-// 			html += "	<td>"+addBatchHtml+"</td>";
-// 			html += "</tr>";
-// 		}
-// 	}
-// 	return html;
-// }
-
-/*배치서버 목록 생성*/
-// var fnCreateBatchServerListHtml = function(list){
-// 	var html = "";
-// 	for( var i in list ){
-// 		var data = list[i];
-// 		html += "";
-// 		html += "<tr>";
-// 		html += "	<td><div class='checkboxCustom'><input type='checkbox' name='table_records' id='"+data.INSTANCE_SEQUENCE_PK+"'><label for='"+data.INSTANCE_SEQUENCE_PK+"'></label></div></td>";
-// 		html += "	<td><a class='js-modal-show' href='#templateInfo_modal' onclick='fnSetInfoModal(\""+data.CLOUD_INSTNACE_SERVER_ID+"\")'>"+data.NAME+"</a></td>";
-// 		html += "	<td>"+data.AVAILABILITY_ZONE+"</td>";
-// 		if( data.SERVER_STATE.indexOf('call') > -1 ){
-// 			html += "	<td><div class='serverState' data-serverState="+data.SERVER_STATE+" data-pk='"+data.INSTANCE_SEQUENCE_PK+"'>" +
-// 					"			<div class='progress' style='margin-bottom:0px;'>" +
-// 					"				<div class='progress-bar progress-bar-striped active serverState' role='progressbar' style='width:100%'>"+convertServerState(data.SERVER_STATE)+"중</div></div></td>";
-// 		}else{
-// 			html += "	<td><div class='serverState' data-serverState="+data.SERVER_STATE+" data-pk='"+data.INSTANCE_SEQUENCE_PK+"'>"+convertServerState(data.SERVER_STATE)+"</div></td>";
-// 		}
-		
-// 		if( data.MODULE_STATE == "checking" ){
-// 			html += "	<td><div class='moduleState' data-serverState="+data.MODULE_STATE+" data-pk='"+data.INSTANCE_SEQUENCE_PK+"'>" +
-// 			"			<div class='progress' style='margin-bottom:0px;'>" +
-// 			"				<div class='progress-bar progress-bar-striped active serverState' role='progressbar' style='width:100%'>체크중</div></div></td>";
-			
-// 		}else{
-// 			html += "	<td><div class='moduleState' data-serverState="+data.MODULE_STATE+" data-pk='"+data.INSTANCE_SEQUENCE_PK+"'>"+convertModuleState(data.MODULE_STATE)+"</div></td>";			
-// 		}
-		
-// 		html += "</tr>";
-// 	}
-// 	return html;
-// }
 
 /*배치로그 목록 생성*/
 var fnCreateBatchLogListHtml = function(list){
@@ -419,12 +344,9 @@ var fnApprovalBatchRequest = function(batchRequestPk){
 	$("#userRequestTerm").val("");
 	$(".modalName").text("승인");
 		
-	// 사용자별 프로젝트, 모델 목록 가져오기
-	fnGetProjectOfUserId();
-	
-	// 도메인명 가져오기(템플릿 허용 데이터 가져오기)
-	fnGetRequestTemplateAvailable();
-	
+	// 프로젝트, 모델 목록 가져오기
+	fnGetProject();
+
 	var batchRequest = fnGetbatchServiceRequestByAjax(batchRequestPk);
 	
 	$("#name").val(batchRequest.NAME); // 배치명
@@ -671,18 +593,8 @@ var fnNewPageForAdminNifi = function(){
 };
 
 /*Nifi, Hue 새창*/
-var fnNewPage = function(instanceSequencePk, type){
-	var url = fnSandboxSetInstancePkInSessionByAjax(instanceSequencePk);
-
-	alert(type);
-	if(type == "Nifi"){
-		url = url + "/nifi/";
-	} else if(type == "Hue"){
-		url = url + "/hue/";
-	}else{
-		url = url + "/unknown/";
-	}
-
+var fnNewPage = function(type){
+	var url = fngetUrlInSessionByAjax(type);
 	window.open(url);
 };
 
@@ -690,7 +602,7 @@ var fnNewPage = function(instanceSequencePk, type){
 var fnOpenPageForNifi = function(){
 	var instanceSeq=$("#selectedModel .active").data("instancesequencefk2");
 	if(instanceSeq!=null){
-		fnNewPage(instanceSeq, "Nifi");
+		fnNewPage("Nifi");
 	}else{
 		fnComNotify("warning", "모델을 먼저 선택하세요.");
 	}
@@ -1086,29 +998,3 @@ var fnBatchLogDetail = function(logBatchSequencePk){
 	
 	fnOpenModal("batchLogModal");
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

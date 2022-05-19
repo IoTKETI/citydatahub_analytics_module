@@ -43,22 +43,17 @@ public class AuthService {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	@Value("${sso.dataHubUrl_pri}")
-	private String dataHubUrlPri;
-	@Value("${sso.dataHubUrl_pub}")
-	private String dataHubUrlPub;
-
-	@Value("${sso.dataHubUrl_pri_admin}")
-	private String dataHubUrlPriAdmin;
 	@Value("${sso.dataHubUrl_pub_admin}")
 	private String dataHubUrlPubAdmin;
+	// If "dataHubUrlPubAdmin" does not work, you can use "dataHubUrlPriAdmin".
+	@Value("${sso.dataHubUrl_pri_admin}")
+	private String dataHubUrlPriAdmin;
 
 	@Value("${sso.authEndpoint}")
 	private String authEndpoint;
 	@Value("${sso.responseType}")
 	private String responseType;
-	@Value("${sso.redirectUri_pri}")
-	private String redirectUriPri;
+
 	@Value("${sso.redirectUri_pub}")
 	private String redirectUriPub;
 	@Value("${sso.redirectUri_admin}")
@@ -68,10 +63,6 @@ public class AuthService {
 	private String adminClientId;
 	@Value("${sso.adminClientSecret}")
 	private String adminClientSecret;
-	@Value("${sso.userClientId}")
-	private String userClientId;
-	@Value("${sso.userClientSecret}")
-	private String userClientSecret;
 
 	@Value("${sso.tokenEndpoint}")
 	private String tokenEndpoint;
@@ -90,20 +81,17 @@ public class AuthService {
 	private String userMethod;
 	@Value("${sso.logoutMethod}")
 	private String logoutMethod;
-	@Value("${sso.username}")
-	private String username;
-	@Value("${sso.password}")
-	private String password;
+	
+	@Value("${sso.cookieInTokenName}")
+	private String COOKIE_IN_TOKEN_NAME;
 
 	@Value("${cityHub.url}")
 	private String cityHubUrl;
 
 	private OkHttpClient client = new OkHttpClient();
 
-	private final String COOKIE_IN_TOKEN_NAME = "chaut";
-
-	private static String cityhub04_token;
-	private static String cityhub04_refreshToken = "";
+	private static String user_token;
+	private static String user_refreshToken = "";
 
 	/**
 	 * String token 쿠키에서 토큰을 파싱해 반환
@@ -120,7 +108,7 @@ public class AuthService {
 		if (cookies != null) {
 			for (Cookie itr : cookies) {
 				logger.info(itr.toString());
-				if (itr.getName().equals(COOKIE_IN_TOKEN_NAME)) { // COOKIE_IN_TOKEN_NAME => chaut
+				if (itr.getName().equals(COOKIE_IN_TOKEN_NAME)) {
 					accessToken = itr.getValue();
 					break;
 				}
@@ -141,15 +129,11 @@ public class AuthService {
 	 */
 	public String getAuthCode(HttpServletRequest request, String requestUrl) {
 		String state = EncryptionUtil.sha256Encoder(request);
-		String clientId = requestUrl.contains("/admin/") ? adminClientId : userClientId;
-		String redirectUri = requestUrl.contains("/admin/") ? redirectUriPub + redirectUriAdmin : redirectUriPub;
+		String redirectUri = redirectUriPub;
 
-		String urlParam = "?response_type=" + responseType + "&redirect_uri=" + redirectUri + "&client_id=" + clientId
-				+ "&state=" + state + "";
+		String urlParam = "?response_type=" + responseType + "&redirect_uri=" + redirectUri + "&client_id=" + adminClientId + "&state=" + state + "";
 
-		String apiUri = (requestUrl.contains("/admin/") ? dataHubUrlPubAdmin : dataHubUrlPub) + authEndpoint + urlParam;
-
-		return apiUri;
+		return dataHubUrlPubAdmin + authEndpoint + urlParam;
 	}
 
 	/**
@@ -160,19 +144,21 @@ public class AuthService {
 	 */
 	public String getTokenByAuthorizationCode(String code, String requestUrl) {
 
-		String tokenUrl = (requestUrl.contains("/admin/") ? dataHubUrlPriAdmin : dataHubUrlPri) + tokenEndpoint;
-		JsonObject object = new JsonObject();
+		String tokenUrl = dataHubUrlPubAdmin + tokenEndpoint;
+		// If "dataHubUrlPubAdmin" does not work, you can use "dataHubUrlPriAdmin".
+		if(!"".equals(dataHubUrlPriAdmin)){
+			tokenUrl = dataHubUrlPriAdmin + tokenEndpoint;
+		}
+		JsonObject jsonObject = new JsonObject();
 
-		String clientId = requestUrl.contains("/admin/") ? adminClientId : userClientId;
-		String clientSecret = requestUrl.contains("/admin/") ? adminClientSecret : userClientSecret;
-		String redirectUri = requestUrl.contains("/admin/") ? redirectUriPub + redirectUriAdmin : redirectUriPub;
-		object.addProperty("grant_type", grantAuthorizationCode);
-		object.addProperty("client_id", clientId);
-		object.addProperty("client_secret", clientSecret);
-		object.addProperty("redirect_uri", redirectUri);
-		object.addProperty("code", code);
+		String redirectUri = redirectUriPub;
+		jsonObject.addProperty("grant_type", grantAuthorizationCode);
+		jsonObject.addProperty("client_id", adminClientId);
+		jsonObject.addProperty("client_secret", adminClientSecret);
+		jsonObject.addProperty("redirect_uri", redirectUri);
+		jsonObject.addProperty("code", code);
 
-		RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), object.toString());
+		RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonObject.toString());
 		Request okRequest = new Request.Builder().url(tokenUrl).post(requestBody).build();
 		Response response = null;
 		String resMessage = "";
@@ -215,7 +201,6 @@ public class AuthService {
 
 			cookie.setHttpOnly(true);
 			cookie.setSecure(false);
-			// cookie.setDomain("192.168.123.140:8083/");
 			cookie.setMaxAge(60 * 60 * 24);
 			response.addCookie(cookie);
 		}
@@ -275,8 +260,6 @@ public class AuthService {
 				String publicKeyContent = publicKeyResponse.replaceAll("\r\n", "").replaceAll("-----BEGIN PUBLIC KEY-----", "")
 						.replaceAll("-----END PUBLIC KEY-----", "").replaceAll("\"", "");
 
-				// X509EncodedKeySpec keySpecX509 = new
-				// X509EncodedKeySpec(Base64Utils.decodeFromString(publicKeyContent));
 				Decoder decoder = Base64.getDecoder();
 				X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(decoder.decode(publicKeyContent));
 
@@ -311,7 +294,11 @@ public class AuthService {
 	 * @return
 	 */
 	public String getPublicKey(String requestUrl) {
-		String publicKeyUrl = (requestUrl.contains("/admin/") ? dataHubUrlPriAdmin : dataHubUrlPri) + publicKeyEndPoint;
+		String publicKeyUrl = dataHubUrlPubAdmin + publicKeyEndPoint;
+		// If "dataHubUrlPubAdmin" does not work, you can use "dataHubUrlPriAdmin".
+		if(!"".equals(dataHubUrlPriAdmin)){
+			publicKeyUrl = dataHubUrlPriAdmin + publicKeyEndPoint;
+		}
 
 		Request request = new Request.Builder().url(publicKeyUrl).get().build();
 		String resMessage = "";
@@ -360,24 +347,26 @@ public class AuthService {
 	 */
 	public boolean callRefreshToken(HttpServletRequest request, HttpServletResponse response, String option,
 			String requestUrl) {
-		String tokenUrl = (requestUrl.contains("/admin/") ? dataHubUrlPriAdmin : dataHubUrlPri) + tokenEndpoint;
-		String clientId = requestUrl.contains("/admin/") ? adminClientId : userClientId;
-		String clientSecret = requestUrl.contains("/admin/") ? adminClientSecret : userClientSecret;
-		String base64IdPw = clientId + ":" + clientSecret;
+		String tokenUrl = dataHubUrlPubAdmin + tokenEndpoint;
+		// If "dataHubUrlPubAdmin" does not work, you can use "dataHubUrlPriAdmin".
+		if(!"".equals(dataHubUrlPriAdmin)){
+			tokenUrl = dataHubUrlPriAdmin + tokenEndpoint;
+		}
+		String base64IdPw = adminClientId + ":" + adminClientSecret;
 		String refreshHeader = "Basic " + Base64Utils.encodeToString(base64IdPw.getBytes());
 		String refreshToken = getRefreshTokenFromSession(request);
-		JsonObject object = new JsonObject();
+		JsonObject jsonObject = new JsonObject();
 
 		if (refreshToken == null)
 			return false;
 
-		object.addProperty("grant_type", grantRefreshToken);
+		jsonObject.addProperty("grant_type", grantRefreshToken);
 		if ("owner".equals(option))
-			object.addProperty("refresh_token", cityhub04_refreshToken);
+			jsonObject.addProperty("refresh_token", user_refreshToken);
 		else
-			object.addProperty("refresh_token", refreshToken);
+			jsonObject.addProperty("refresh_token", refreshToken);
 
-		RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), object.toString());
+		RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), jsonObject.toString());
 		Request okRequest = new Request.Builder().url(tokenUrl).addHeader("Authorization", refreshHeader).post(requestBody)
 				.build();
 		Response okResponse = null;
@@ -402,10 +391,10 @@ public class AuthService {
 				if (MakeUtil.isNotNullAndEmpty(resMessage)) {
 					JsonObject token = new JsonParser().parse(resMessage).getAsJsonObject();
 					if (token.get("access_token") != null)
-						cityhub04_token = token.get("access_token").getAsString();
+						user_token = token.get("access_token").getAsString();
 
 					if (token.get("refresh_token") != null)
-						cityhub04_refreshToken = token.get("refresh_token").getAsString();
+						user_refreshToken = token.get("refresh_token").getAsString();
 				}
 			} else {
 				cookieAddTokenByJson(request, response, resMessage, requestUrl); // 쿠키
@@ -469,29 +458,32 @@ public class AuthService {
 	 */
 	public String getUserInfo(String userId, HttpServletRequest request, HttpServletResponse response, String requestUrl)
 			throws Exception {
-		if (cityhub04_token == null || cityhub04_token == "") {
-			// cityhub04의 토큰발급
+		if (user_token == null || user_token == "") {
+			// user의 토큰발급
 			String cityhubToken = getCityhubToken(requestUrl);
 			if (MakeUtil.isNotNullAndEmpty(cityhubToken)) {
 				JsonObject token = new JsonParser().parse(cityhubToken).getAsJsonObject();
 				if (token.get("access_token") != null)
-					cityhub04_token = token.get("access_token").getAsString();
+					user_token = token.get("access_token").getAsString();
 
 				if (token.get("refresh_token") != null)
-					cityhub04_refreshToken = token.get("refresh_token").getAsString();
+					user_refreshToken = token.get("refresh_token").getAsString();
 			}
 		}
 
 		// 유효기간 체크
-		ValidateToken(getPublicKey(requestUrl), cityhub04_token, request, response, "owner", requestUrl);
+		ValidateToken(getPublicKey(requestUrl), user_token, request, response, "owner", requestUrl);
 
-		String userUrl = ((requestUrl.contains("/admin/") ? dataHubUrlPriAdmin : dataHubUrlPri)) + userMethod + "/"
-				+ userId;
+		String userUrl = dataHubUrlPubAdmin + userMethod + "/" + userId;
+		// If "dataHubUrlPubAdmin" does not work, you can use "dataHubUrlPriAdmin".
+		if(!"".equals(dataHubUrlPriAdmin)){
+			userUrl = dataHubUrlPriAdmin + userMethod + "/" + userId;
+		}
 		Request okRrequest = null;
 		Response okResponse = null;
 		String resMessage = "";
 		try {
-			okRrequest = new Request.Builder().url(userUrl).get().addHeader("Authorization", "Bearer " + cityhub04_token)
+			okRrequest = new Request.Builder().url(userUrl).get().addHeader("Authorization", "Bearer " + user_token)
 					.build();
 			okResponse = client.newCall(okRrequest).execute();
 			resMessage = okResponse.body().string();
@@ -507,28 +499,26 @@ public class AuthService {
 	}
 
 	/**
-	 * 클라이언트 오너(cityhub04) 토큰값 가져오기
+	 * 클라이언트 오너(user) 토큰값 가져오기
 	 * 
 	 * @return
 	 */
 	public String getCityhubToken(String requestUrl) {
-		String tokenUrl = ((requestUrl.contains("/admin/") ? dataHubUrlPriAdmin : dataHubUrlPri)) + tokenEndpoint;
-		String clientId = requestUrl.contains("/admin/") ? adminClientId : userClientId;
-		String clientSecret = requestUrl.contains("/admin/") ? adminClientSecret : userClientSecret;
-		String hederString = clientId + ":" + clientSecret;
+		String tokenUrl = dataHubUrlPubAdmin + tokenEndpoint;
+		String hederString = adminClientId + ":" + adminClientSecret;
 		String apiheader = "Basic " + Base64Utils.encodeToString(hederString.getBytes());
-		JsonObject object = new JsonObject();
+		JsonObject jsonObject = new JsonObject();
 		Request okRequest = null;
 		Response response = null;
 		String resMessage = "";
 
 		try {
-			object.addProperty("grant_type", grantPasswordCredentials);
-			object.addProperty("username", username);
-			object.addProperty("password", password);
+			jsonObject.addProperty("grant_type", grantPasswordCredentials);
+			// jsonObject.addProperty("username", username);
+			// jsonObject.addProperty("password", password);
 
 			RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"),
-					object.toString());
+					jsonObject.toString());
 			okRequest = new Request.Builder().url(tokenUrl).get().addHeader("Authorization", apiheader).post(requestBody)
 					.build();
 			response = client.newCall(okRequest).execute();
@@ -573,8 +563,6 @@ public class AuthService {
 			Decoder decoder = Base64.getDecoder();
 			X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(decoder.decode(publicKeyContent));
 
-			// X509EncodedKeySpec keySpecX509 = new
-			// X509EncodedKeySpec(Base64Utils.decodeFromString(publicKeyContent));
 			PublicKey publicKey = kf.generatePublic(keySpecX509);
 			Jws<Claims> claims = Jwts.parser().setSigningKey(publicKey).parseClaimsJws(token);
 
@@ -586,7 +574,8 @@ public class AuthService {
 
 			// User(name, phone)정보 가져오기
 			if ("Analytics_Admin".equals(session.getAttribute("userRole")))
-				cityhub04_token = token;
+				user_token = token;
+
 			String userInfo = getUserInfo("" + session.getAttribute("userId"), request, response, requestUrl);
 			if (MakeUtil.isNotNullAndEmpty(userInfo)) {
 				JSONObject userInfoJson = new JSONObject().fromObject(userInfo);
@@ -609,16 +598,21 @@ public class AuthService {
 	 * @return
 	 */
 	public String logout(String userId, HttpServletRequest request, String requestUrl) {
-		String logoutUrl = ((requestUrl.contains("/admin/") ? dataHubUrlPriAdmin : dataHubUrlPri)) + logoutMethod;
-		JsonObject object = new JsonObject();
+		String logoutUrl = dataHubUrlPubAdmin + logoutMethod;
+		// If "dataHubUrlPubAdmin" does not work, you can use "dataHubUrlPriAdmin".
+		if(!"".equals(dataHubUrlPriAdmin)){
+			logoutUrl = dataHubUrlPriAdmin + logoutMethod;
+		}
+		
+		JsonObject jsonObject = new JsonObject();
 		Request okRequest = null;
 		Response response = null;
 		String resMessage = "";
 
 		try {
-			object.addProperty("userId", userId);
+			jsonObject.addProperty("userId", userId);
 			RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"),
-					object.toString());
+					jsonObject.toString());
 			okRequest = new Request.Builder().url(logoutUrl).get()
 					.addHeader("Authorization", "Bearer " + getAccessTokenFromCookie(request, requestUrl)).post(requestBody)
 					.build();
@@ -648,62 +642,37 @@ public class AuthService {
 	 * @return
 	 */
 	@SuppressWarnings("static-access")
-	public boolean userRoleCheck(HttpServletRequest request, HttpServletResponse response, String option,
-			String accessToken, String requestUrl) {
+	public boolean userRoleCheck(HttpServletRequest request, HttpServletResponse response, String option, String accessToken, String requestUrl) {
 		String userRole = null;
 		try {
 			// 세션체크
 			HttpSession session = request.getSession();
-			if (MakeUtil.isNotNullAndEmpty(session.getAttribute("userRole"))) {
+			if(MakeUtil.isNotNullAndEmpty(session.getAttribute("userRole"))) {
 				userRole = "" + session.getAttribute("userRole");
 
-			} else {
+			}else {
 				JSONObject publicKeyResponseJson = new JSONObject().fromObject(getPublicKey(requestUrl));
 				String publicKeyResponse = "" + publicKeyResponseJson.get("publickey");
 
 				KeyFactory kf = KeyFactory.getInstance("RSA");
-				String publicKeyContent = publicKeyResponse.replaceAll("\r\n", "").replaceAll("-----BEGIN PUBLIC KEY-----", "")
-						.replaceAll("-----END PUBLIC KEY-----", "").replaceAll("\"", "");
+				String publicKeyContent = publicKeyResponse.replaceAll("\r\n", "").replaceAll("-----BEGIN PUBLIC KEY-----", "").replaceAll("-----END PUBLIC KEY-----", "").replaceAll("\"", "");
 
-				// X509EncodedKeySpec keySpecX509 = new
-				// X509EncodedKeySpec(Base64Utils.decodeFromString(publicKeyContent));
 				Decoder decoder = Base64.getDecoder();
 				X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(decoder.decode(publicKeyContent));
 				PublicKey publicKey = kf.generatePublic(keySpecX509);
-
+				
 				Jws<Claims> claims = Jwts.parser().setSigningKey(publicKey).parseClaimsJws(accessToken);
-				if (claims.getBody().getExpiration().before(new Date())) {
+				if(claims.getBody().getExpiration().before(new Date())) {
 					return callRefreshToken(request, response, option, requestUrl);
 				}
 				userRole = "" + claims.getBody().get("role");
 
 			}
 
-			if (requestUrl.contains("/admin/")) {
-				if ("Analytics_Admin".equals(userRole)) {
-					return true;
-				}
-
-			} else {
-				if ("Analytics_User".equals(userRole)) {
-					return true;
-
-				} else if ("Analytics_Admin".equals(userRole)) {
-					//TODL: Port 정보 외부로 빼기
-					if (requestUrl.indexOf(":12020/algorithmManage") > -1) {
-						return false;
-					} else if (requestUrl.indexOf(":12020/sandboxManage") > -1) {
-						return false;
-					} else if (requestUrl.indexOf(":12020/projectManage") > -1) {
-						return false;
-					} else if (requestUrl.indexOf(":12020/batchManage") > -1) {
-						return false;
-					} else {
-						return true;
-					}
-				}
+			if("Analytics_Admin".equals(userRole)) {
+				return true;
 			}
-
+			
 		} catch (Exception e) {
 			MakeUtil.printErrorLogger(e, "userRoleCheck Error");
 			removeCookie(request, response, requestUrl);

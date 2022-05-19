@@ -107,7 +107,7 @@ class AnalyticsBatchApplicationTests {
 
 					String predictedAt = "";
 					// 적용할 데이터에서의 값과 예측값을 가지고 인덱스값을 생성
-					JSONObject data = new JSONObject().fromObject(httpJson.get("data"));
+					JSONObject data = JSONObject.fromObject(httpJson.get("data"));
 
 					List<String> predictList = (List<String>) data.get("predict");
 					JSONObject applyDataJson = null;
@@ -152,7 +152,7 @@ class AnalyticsBatchApplicationTests {
 					JSONObject congestionIndexPrediction = null;
 
 					JSONArray tempJsonArray = new JSONArray();
-					JSONObject tempJson = new JSONObject();
+					JSONObject tempJson = null;
 
 					sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss,SSSXXX");
 
@@ -160,7 +160,7 @@ class AnalyticsBatchApplicationTests {
 					HashMap<String, JSONObject> resultMap = new HashMap<String, JSONObject>();
 
 					for (int i = 0; i < sendJsonArr.size(); i++) {
-						sendJson = new JSONObject().fromObject(sendJsonArr.get(i));
+						sendJson = JSONObject.fromObject(sendJsonArr.get(i));
 						if ("".equals(parkingId) || parkingId.equals(sendJson.get(domainIdColumnName))) {
 
 							parkingId = "" + sendJson.get(domainIdColumnName);

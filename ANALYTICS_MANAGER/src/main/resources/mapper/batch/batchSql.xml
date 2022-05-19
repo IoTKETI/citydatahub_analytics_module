@@ -250,7 +250,7 @@
            		, #{domainIdColumnName}
            		, #{storeMethod}
            		, #{updateAttribute}
-           		, 'stop'
+           		, 'waiting'
            		, #{makeDataMethod}
 				, #{sql}
 				, #{targetType}

@@ -36,10 +36,9 @@ batchServer:
   url: http://localhost:8000/modules/analyticsModule
 
 coreModuleApiServer:
-  url: http://ip:port/entities/
-  method: /attrs/congestionIndexPrediction
+  url: http://ip:port/entities?Id=
 
 coreModuleIngestServer:
-  url: http://ip:port/entityOperations/upsert?options=update
+  url: http://ip:port/entityOperations/upsert?options=
   datasetId: pocOffStreetParking
   type: http://uri.citydatahub.kr/ngsi-ld/parking/OffStreetParking

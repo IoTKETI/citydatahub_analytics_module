@@ -3,7 +3,7 @@ $(function(){
 	
 	// 전처리 리스트 클릭시
 	$(document).on("click", ".preprocessedData", function(){
-		/*샌드박스 파일브라우저 샘플 미리보기*/
+		/*파일브라우저 샘플 미리보기*/
 		$(".preprocessedData").removeClass("activeSel");
 		$(this).addClass("activeSel");
 		selectedPreprocessedDataPk = $(this).attr("id");

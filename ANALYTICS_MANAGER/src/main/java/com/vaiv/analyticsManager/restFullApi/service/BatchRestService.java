@@ -80,9 +80,6 @@ public class BatchRestService {
 	@Value("${nfs.resultPath}")
 	private String nfsResultPath;
 	
-	@Value("${analyticsBatchServer.isDevTest}")
-	private boolean analyticsBatchServerIsDevTest;
-	
 	@Value("${analyticsBatchServer.url}")
 	private String analyticsBatchServerUrl;
 	
@@ -298,10 +295,6 @@ public class BatchRestService {
 				
 				/*************** 배치분석모듈에 BATCH_INFO 전송 *********************/
 				String batchIp = sandboxRestService.getInstanceIp(batch.getBatchInstanceSequenceFk2());
-				if( analyticsBatchServerIsDevTest ) {
-					// 배치서버 IP
-					batchIp = "#Input URL/modules/analyticsModule";
-				}
 				
 				listUrl = batchIp+"/batchService";
 				JSONObject batchInfoParam = JSONObject.fromObject(httpJson.get("data"));
@@ -459,112 +452,118 @@ public class BatchRestService {
 	 * @return
 	 * @throws Exception 
 	 */
-	public JSONObject batchServersAsPost(Instance instance) throws Exception {
+	// public JSONObject batchServersAsPost(Instance instance) throws Exception {
 
 
-		JSONObject returnJson = new JSONObject();
+	// 	JSONObject returnJson = new JSONObject();
 
-		// 중복체크
-		if( sandboxRestMapper.checkInstanceName(instance.getName()) > 0 ) {
-			returnJson.put("result", "fail");
-			returnJson.put("type", "4100");
-			returnJson.put("detail", "duplicateName");
-			return returnJson;
+	// 	// 중복체크
+	// 	if( sandboxRestMapper.checkInstanceName(instance.getName()) > 0 ) {
+	// 		returnJson.put("result", "fail");
+	// 		returnJson.put("type", "4100");
+	// 		returnJson.put("detail", "duplicateName");
+	// 		return returnJson;
 
-		}else {
-			// 템플릿 데이터 가져오기
-			String url = cloudApiUrl+CLOUD_API_SERVER_POST_FIX;
+	// 	}else {
+	// 		// 템플릿 데이터 가져오기
+	// 		// Map<String, Object> templateDetail = sandboxRestMapper.template(instance.getTemplateId()); // TODO:refactoring
 
-			Headers headers=new Headers.Builder().add(CLOUD_API_CREDENTIAL_KEY, cloudApiCredential).build();
+	// 		String url = cloudApiUrl+CLOUD_API_SERVER_POST_FIX;
 
-			JSONObject paramJson = new JSONObject();
-			JSONArray jsonTempArr = new JSONArray();
-			JSONObject  httpResponseJson= new JSONObject();
-			paramJson.put("name", instance.getName());
-			paramJson.put("sourceType", "image");
-			paramJson.put("volumeCreated", "false");
+	// 		Headers headers=new Headers.Builder().add(CLOUD_API_CREDENTIAL_KEY, cloudApiCredential).build();
 
-			paramJson.put("imageId", imageRef);
-			paramJson.put("flavorName", flavorRef);
-			paramJson.put("keyPair", keyName);
-			paramJson.put("zone", availabilityZone);
+	// 		// String jsonMessage = ""; // TODO:refactoring
+	// 		// JSONObject json = new JSONObject(); // TODO:refactoring
+	// 		JSONObject paramJson = new JSONObject();
+	// 		JSONArray jsonTempArr = new JSONArray();
+	// 		// JSONObject jsonTemp = new JSONObject(); // TODO:refactoring
+	// 		JSONObject  httpResponseJson= new JSONObject();
+	// 		paramJson.put("name", instance.getName());
+	// 		paramJson.put("sourceType", "image");
+	// 		paramJson.put("volumeCreated", "false");
 
-			jsonTempArr.add(networks);
-			paramJson.put("networkId", jsonTempArr);
+	// 		paramJson.put("imageId", imageRef);
+	// 		paramJson.put("flavorName", flavorRef);
+	// 		paramJson.put("keyPair", keyName);
+	// 		paramJson.put("zone", availabilityZone);
 
-			jsonTempArr = new JSONArray();
-			jsonTempArr.add(securityGroups);
-			paramJson.put("securityGroupName", jsonTempArr);
+	// 		jsonTempArr.add(networks);
+	// 		paramJson.put("networkId", jsonTempArr);
 
-			httpResponseJson = httpService.httpServicePOST(url, headers, paramJson.toString());
+	// 		jsonTempArr = new JSONArray();
+	// 		// jsonTemp = new JSONObject(); // TODO:refactoring
+	// 		jsonTempArr.add(securityGroups);
+	// 		paramJson.put("securityGroupName", jsonTempArr);
 
-			if( "201".equals(httpResponseJson.get("type")) ) {
-				logger.info("Server creation completed... ");
+	// 		httpResponseJson = httpService.httpServicePOST(url, headers, paramJson.toString());
 
-				instance.setKeypairName(keyName); // 키페어 이름
-				instance.setAvailabilityZone(availabilityZone);// 가용구역
-				instance.setServerState("create_call"); // 서버상태
-				instance.setModuleState("checking");
-				instance.setCloudInstanceServerId(flavorRef);  // 서버아이디
-				instance.setTemplateId(999999);
-				instance.setAnalysisInstanceServerType("batch"); // 서버타입(sandbox, batch)
+	// 		if( "201".equals(httpResponseJson.get("type")) ) {
+	// 			logger.info("Server creation completed... ");
 
-				/* 인스턴스 저장 */
-				sandboxRestMapper.insertInstance(instance);
-				logger.info("Instance insert completed...");
+	// 			instance.setKeypairName(keyName); // 키페어 이름
+	// 			instance.setAvailabilityZone(availabilityZone);// 가용구역
+	// 			instance.setServerState("create_call"); // 서버상태
+	// 			instance.setModuleState("checking");
+	// 			instance.setCloudInstanceServerId(flavorRef);  // 서버아이디
+	// 			instance.setTemplateId(999999);
+	// 			instance.setAnalysisInstanceServerType("batch"); // 서버타입(sandbox, batch)
 
-				/* 인스턴스 상세 저장 */
-				instance.setSnapshotId(imageRef); // 스냅샷 아이디
+	// 			/* 인스턴스 저장 */
+	// 			sandboxRestMapper.insertInstance(instance);
+	// 			logger.info("Instance insert completed...");
 
-				sandboxRestMapper.insertInstanceDetail(instance);
-				logger.info("InstanceDetail insert completed...");
+	// 			/* 인스턴스 상세 저장 */
+	// 			instance.setSnapshotId(imageRef); // 스냅샷 아이디
 
-				Map<String, Object> detail = sandboxRestMapper.instance(instance.getInstanceSequencePk());
+	// 			sandboxRestMapper.insertInstanceDetail(instance);
+	// 			logger.info("InstanceDetail insert completed...");
 
-				returnJson.put("instance", new JSONObject().fromObject(detail));
-				returnJson.put("result", "success");
-				returnJson.put("type", "2001");
+	// 			Map<String, Object> detail = sandboxRestMapper.instance(instance.getInstanceSequencePk());
 
-			}else if( "400".equals(httpResponseJson.get("type")) ) { // Bad Request
-				JSONObject errorJson = new JSONObject().fromObject(httpResponseJson.get("data"));
-				String message = errorJson.get("title")+"";
+	// 			returnJson.put("instance", new JSONObject().fromObject(detail));
+	// 			returnJson.put("result", "success");
+	// 			returnJson.put("type", "2001");
 
-				if( message.indexOf("disk is smaller than the minimum") > -1 ) { // 디스크가 이미지보다 작다
-					returnJson.put("type", "4000");
-					returnJson.put("detail", "disk is smaller than the minimum");
-				}else {
-					returnJson.put("type", "5000");
-					returnJson.put("detail", httpResponseJson.get("data"));
-				}
+	// 		}else if( "400".equals(httpResponseJson.get("type")) ) { // Bad Request
+	// 			JSONObject errorJson = new JSONObject().fromObject(httpResponseJson.get("data"));
+	// 			String message = errorJson.get("title")+"";
 
-
-			}else if( "403".equals(httpResponseJson.get("type")) ) { // Forbidden
-				JSONObject errorJson = new JSONObject().fromObject(httpResponseJson.get("data"));
-				String message = errorJson.get("title")+"";
-
-				if( message.indexOf("Quota exceeded for ram:") > -1 ) { // 할당 메모리 초과
-					returnJson.put("type", "4005");
-					returnJson.put("detail", "Quota exceeded for ram:");
-
-				}else if( message.indexOf("Quota exceeded for cores:") > -1 ) { // 할당 코어 초과
-					returnJson.put("type", "4005");
-					returnJson.put("detail", "Quota exceeded for cores:");
-
-				}else {
-					returnJson.put("type", "5000");
-					returnJson.put("detail", httpResponseJson.get("data"));
-				}
+	// 			if( message.indexOf("disk is smaller than the minimum") > -1 ) { // 디스크가 이미지보다 작다
+	// 				returnJson.put("type", "4000");
+	// 				returnJson.put("detail", "disk is smaller than the minimum");
+	// 			}else {
+	// 				returnJson.put("type", "5000");
+	// 				returnJson.put("detail", httpResponseJson.get("data"));
+	// 			}
 
 
-			}else {
-				returnJson.put("detail", httpResponseJson.get("data"));
-				returnJson.put("type", "5000");
-				logger.error("Failed to create server creation... ",httpResponseJson.toString());
-			}
-		}
-		return returnJson;
+	// 		}else if( "403".equals(httpResponseJson.get("type")) ) { // Forbidden
+	// 			JSONObject errorJson = new JSONObject().fromObject(httpResponseJson.get("data"));
+	// 			String message = errorJson.get("title")+"";
 
-	}
+	// 			if( message.indexOf("Quota exceeded for ram:") > -1 ) { // 할당 메모리 초과
+	// 				returnJson.put("type", "4005");
+	// 				returnJson.put("detail", "Quota exceeded for ram:");
+
+	// 			}else if( message.indexOf("Quota exceeded for cores:") > -1 ) { // 할당 코어 초과
+	// 				returnJson.put("type", "4005");
+	// 				returnJson.put("detail", "Quota exceeded for cores:");
+
+	// 			}else {
+	// 				returnJson.put("type", "5000");
+	// 				returnJson.put("detail", httpResponseJson.get("data"));
+	// 			}
+
+
+	// 		}else {
+	// 			returnJson.put("detail", httpResponseJson.get("data"));
+	// 			returnJson.put("type", "5000");
+	// 			logger.error("Failed to create server creation... ",httpResponseJson.toString());
+	// 		}
+	// 	}
+	// 	return returnJson;
+
+	// }
 
 	/**
 	 * zip파일 압축 풀고 zip파일 삭제
@@ -638,7 +637,7 @@ public class BatchRestService {
 			if( "200".equals(analyticsBatchServerHttpJson.get("type")) ) {
 				resultJson.put("result", "success");
 				resultJson.put("type", "2001");
-				logger.info("AnalyticsBatchServer send "+batchServiceSequence+" updqte...");
+				logger.info("AnalyticsBatchServer send "+batchServiceSequence+" update...");
 			}else {
 				resultJson.put("result", "fail");
 				resultJson.put("type", "5000");

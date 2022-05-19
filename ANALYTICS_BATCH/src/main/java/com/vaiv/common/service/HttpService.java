@@ -57,7 +57,7 @@ public class HttpService {
 		JSONObject result = new JSONObject();
 		Request request = null;
 		
-		request = new Request.Builder().header("Accept", "application/json").url(connUrl).get().build();
+		request = new Request.Builder().header("Accept", "application/ld+json").url(connUrl).get().build();
 		
 		String resMessage = "";
 		

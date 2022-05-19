@@ -27,12 +27,12 @@
               </colgroup>
 			  <thead>
 				<tr>
-				<th scope="col"><div class="checkboxCustom"><input type="checkbox" id="check-all"><label for="check-all"></label></div></th>
+				<th scope="col" width="5%"><div class="checkboxCustom"><input type="checkbox" id="check-all"><label for="check-all"></label></div></th>
 				<th scope="col">projectSequencePk</th>
-				<th scope="col">이름</th>
-				<th scope="col">설명</th>
+				<th scope="col" width="25%">프로젝트명</th>
+				<th scope="col" width="40%">설명</th>
 				<th scope="col">생성일</th>
-				<th scope="col">인스턴스명</th>
+				<!-- <th scope="col">인스턴스명</th> -->
 				<th th:if="${session.userRole} == 'Analytics_Admin'">사용자</th>
 				<th scope="col">수정</th>
               </tr>

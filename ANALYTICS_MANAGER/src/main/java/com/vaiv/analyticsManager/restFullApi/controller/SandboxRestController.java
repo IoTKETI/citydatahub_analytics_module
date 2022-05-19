@@ -9,18 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vaiv.analyticsManager.common.utils.MakeUtil;
-import com.vaiv.analyticsManager.restFullApi.domain.Instance;
-import com.vaiv.analyticsManager.restFullApi.domain.Template;
 import com.vaiv.analyticsManager.restFullApi.service.SandboxRestService;
 
 import net.sf.json.JSONObject;
@@ -219,43 +213,15 @@ public class SandboxRestController {
 	
 	
 	/**
-	 * 템플릿 허용 목록 가져오기
+	 * 도메인명 목록 가져오기
 	 * @return
 	 */
 	@GetMapping(value="/availableList")
 	public ResponseEntity<JSONObject> availableList(HttpSession session){
 		JSONObject result = new JSONObject();
 		try {
-			String userId = ""+session.getAttribute("userId");
-			String userRole = ""+session.getAttribute("userRole");
-
-			if(userRole.equals("Analytics_Admin")){
-				result = sandboxRestService.allModelList();
-				return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-			}
-
-			result = sandboxRestService.availableList(userId);
-        	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "availableList");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	/**
-	 * 스냅샷 목록 가져오기
-	 * @return
-	 */
-	@GetMapping(value="/snapshotList")
-	public ResponseEntity<JSONObject> snapshotList(){
-		JSONObject result = new JSONObject();
-		try {
-			result = sandboxRestService.snapshotList();
-        	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-			
+			result = sandboxRestService.allModelList();
+			return new ResponseEntity<JSONObject>(result, HttpStatus.OK);
 		}catch (Exception e) {
 			result.put("type", "5000");
 			result.put("detail", e.toString());
@@ -280,236 +246,6 @@ public class SandboxRestController {
 			result.put("type", "5000");
 			result.put("detail", e.toString());
 			MakeUtil.printErrorLogger(e, "availableDataList");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	
-	/**
-	 * 샌드박스 템플릿 추가 요청
-	 * @param template
-	 * @param session
-	 * @return
-	 */
-	@PostMapping(value="/customTemplateRequests")
-	public ResponseEntity<JSONObject> customTemplateRequestsAsPost(@RequestBody Template template, HttpSession session){
-		JSONObject result = new JSONObject();
-		
-		try {
-			if( MakeUtil.isNotNullAndEmpty(template) ) {
-				template.setUserId(""+session.getAttribute("userId"));
-				sandboxRestService.customTemplateRequestsAsPost(template);
-				result.put("result", "success");
-				result.put("type", "2004");
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-        	}else {
-        		result.put("type", "4101");
-    			result.put("detail", "MANDATORY PARAMETER MISSING");
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "customTemplateRequestsAsPost");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	/**
-	 * 샌드박스 템플릿  생성요청 취소 또는 커스텀 샌드박스 관리자 승인 또는 거절 또는 완료
-	 * state => standby:대기 / reject:거절 / ongoing:생성준비중 / done:생성완료 / cancel:취소
-	 * @param templateId
-	 * @param state
-	 * @return
-	 */
-	@PatchMapping(value="/customTemplateRequests/{templateId}")
-	public ResponseEntity<JSONObject> customTemplateRequestsAsPatch(@PathVariable Integer templateId, @RequestBody Template template){
-		JSONObject result = new JSONObject();
-		try {
-			if( MakeUtil.isNotNullAndEmpty(templateId) ) {
-				template.setTemplateId(templateId);
-				sandboxRestService.customTemplateRequestsAsPatch(template);
-				result.put("result", "success");
-				result.put("type", "2004");
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-        	}else {
-        		result.put("type", "4101");
-    			result.put("detail", "MANDATORY PARAMETER MISSING");
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "customTemplateRequestsAsPatch");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	
-	/**
-	 * 템플릿 생성
-	 * @param template
-	 * @return
-	 */
-	@PostMapping(value="/templates")
-	public ResponseEntity<JSONObject> templatesAsPost(@RequestBody Template template){
-		JSONObject result = new JSONObject();
-		
-		try {
-			if( MakeUtil.isNotNullAndEmpty(template) ) {
-				result = sandboxRestService.templatesAsPost(template);
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-        	}else {
-        		result.put("type", "4101");
-    			result.put("detail", "MANDATORY PARAMETER MISSING");
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "templatesAsPost");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	/**
-	 * 템플릿 삭제
-	 * @param templateId
-	 * @return
-	 */
-	@DeleteMapping(value="/templates/{templateId}")
-	public ResponseEntity<JSONObject> templateAsDelete(@PathVariable Integer templateId){
-		JSONObject result = new JSONObject();
-		try {
-			if( MakeUtil.isNotNullAndEmpty(templateId) ) {
-				sandboxRestService.templateAsDelete(templateId);
-				result.put("result", "success");
-				result.put("type", "2001");
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);	
-        	}else {
-        		result.put("type", "4101");
-    			result.put("detail", "MANDATORY PARAMETER MISSING");
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "templateAsDelete templateId : "+templateId);
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	/**
-	 * 템플릿 수정
-	 * @param template
-	 * @return
-	 */
-	@PatchMapping(value="/templates/{templateId}")
-	public ResponseEntity<JSONObject> templatesAsPatch(@RequestBody Template template,@PathVariable Integer templateId){
-		JSONObject result = new JSONObject();
-		
-		try {
-			if( MakeUtil.isNotNullAndEmpty(template) ) {
-				template.setTemplateId(templateId);
-				result = sandboxRestService.templatesAsPatch(template);
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-        	}else {
-        		result.put("type", "4101");
-    			result.put("detail", "MANDATORY PARAMETER MISSING");
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "templatesAsPatch");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-
-	/**
-	 * 샌드박스 생성
-	 * @param instance
-	 * @param session
-	 * @return
-	 */
-	@PostMapping(value="/instances")
-	public ResponseEntity<JSONObject> instancesAsPost(@RequestBody Instance instance, HttpSession session){
-		JSONObject result = new JSONObject();
-		
-		try {
-			if( MakeUtil.isNotNullAndEmpty(instance) ) {
-				instance.setUserId(""+session.getAttribute("userId"));
-				result = sandboxRestService.instancesAsPost(instance);
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-            	
-        	}else {
-        		result.put("type", "4101");
-    			result.put("detail", "MANDATORY PARAMETER MISSING");
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "instancesAsPost");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	/**
-	 * 샌드박스 시작/정지
-	 * @param instancePk
-	 * @return
-	 */
-	@PatchMapping(value="/instances/{instancePk}")
-	public ResponseEntity<JSONObject> instanceAsPatch(@PathVariable Integer instancePk){
-		JSONObject result = new JSONObject();
-		try {
-			if( MakeUtil.isNotNullAndEmpty(instancePk) ) {
-				result = sandboxRestService.instanceAsPatch(instancePk);
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-        	}else {
-        		result.put("type", "4101");
-    			result.put("detail", "MANDATORY PARAMETER MISSING");
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "instance");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	
-	/**
-	 * 샌드박스 삭제
-	 * @param instancePk
-	 * @return
-	 */
-	@DeleteMapping(value="/instances/{instancePk}")
-	public ResponseEntity<JSONObject> instanceAsDelete(@PathVariable Integer instancePk){
-		JSONObject result = new JSONObject();
-		try {
-			if( MakeUtil.isNotNullAndEmpty(instancePk) ) {
-				result = sandboxRestService.instanceAsDelete(instancePk);
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-        	}else {
-        		result.put("type", "4101");
-    			result.put("detail", "MANDATORY PARAMETER MISSING");
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "instance");
 			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
 		}
 	}

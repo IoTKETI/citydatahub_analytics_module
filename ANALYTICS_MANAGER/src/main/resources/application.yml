@@ -67,47 +67,29 @@ cloudApi:
     securityGroups: #Input Info
 
 sso:
-  dataHubUrl_pri: #Input URL
-  dataHubUrl_pub: #Input URL
-  dataHubUrl_pri_admin: #Input URL
-  dataHubUrl_pub_admin: #Input URL
+  dataHubUrl_pub_admin: #Input Info
+  dataHubUrl_pri_admin: #Input Info #not necessarily
   responseType: code
   authEndpoint: oauth2.0/authorize
   tokenEndpoint: oauth2.0/token
+  cookieInTokenName: chaut
   publicKeyEndPoint: security/publickey
   userMethod: security/users
   logoutMethod: security/logout
   adminClientId: #Input Info
   adminClientSecret: #Input Info
-  # 관리자 계정
-  # username: cityhub04
-  # password: cityhub04!
-  redirectUri_pri: #Input URL
   redirectUri_pub: #Input URL
   redirectUri_admin: /admin/main
   grantTypeAuth: authorization_code
   grantTypeClient: client_credentials
   grantTypePassword: password
   grantTypeRefresh: refresh_token
-  isDevTest: false
-  devUserRole: Analytics_Admin  # Analytics_Admin or Analytics_User
-  userId: #Input Info
-  userClientId: #Input Info
-  userClientSecret: #Input Info
 
-## N2M Authorized API
-authorizedModel:
-  modelListUrl: #Input URL
-  urlPrefix: /dataservice/analysisApprovalRequests/users
-  urlPostfix: /dataModel
-  devTest: false
-  devID: skdisk2
+
 
 ## KETI API
 allModel:
   modelListUrl: #Input URL
-  devTest: false
-  devSampleModels: '[#Input json]'
 
 module:
   tempUrl: #Input URL
@@ -126,7 +108,7 @@ zuul:
       path: /modules/**
       sensitiveHeaders:
   isNotUseSandbox: false
-  hueServer: #Input URL
+  analyticsModuleServer: #Input URL
   contextPortMap: analyticsModule:8000
   contextSubpathMap: /modules/analyticsModule:/modules/analyticsModule
 

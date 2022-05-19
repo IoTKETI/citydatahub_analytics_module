@@ -236,17 +236,17 @@ public class SandboxGwController {
 	 * @return
 	 */
 	@PostMapping(value="/instances")
-	public ResponseEntity<Object> instancesAsPostGw(@RequestBody InstanceGw instanceGw, HttpSession session){
-		JSONObject result = new JSONObject();
+	// public ResponseEntity<Object> instancesAsPostGw(@RequestBody InstanceGw instanceGw, HttpSession session){
+	// 	JSONObject result = new JSONObject();
 		
-		try {
-			result = sandboxGwService.instancesAsPostGw(instanceGw, session);
-			return restFullReturnService.restReturn(result, "create");
+	// 	try {
+	// 		result = sandboxGwService.instancesAsPostGw(instanceGw, session);
+	// 		return restFullReturnService.restReturn(result, "create");
             	
-		}catch (Exception e) {
-			return restFullReturnService.exceptionFailed("instancesAsPostGw",e);
-		}
-	}
+	// 	}catch (Exception e) {
+	// 		return restFullReturnService.exceptionFailed("instancesAsPostGw",e);
+	// 	}
+	// }
 	
 	/**
 	 * 샌드박스 시작/정지

@@ -3,7 +3,7 @@ $(function(){
 	
 	// 모델 리스트 클릭시
 	$(document).on("click", ".modelData", function(){
-		/*샌드박스 파일브라우저 샘플 미리보기*/
+		/*파일브라우저 샘플 미리보기*/
 		$(".modelData").removeClass("activeSel");
 		$(this).addClass("activeSel");
 		selectedModelPk = $(this).attr("id");
@@ -12,7 +12,7 @@ $(function(){
 	
 	// 모델테스트 로컬파일 클릭시
 	$(document).on("click", ".modelLocalFiles", function(){
-		/*샌드박스 파일브라우저 샘플 미리보기*/
+		/*파일브라우저 샘플 미리보기*/
 		$(".modelLocalFiles").parent().removeClass("active");
 		$(this).parent().addClass("active");
 		fnGetModelLocalFileSample($(this).text());

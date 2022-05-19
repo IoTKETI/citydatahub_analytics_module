@@ -82,11 +82,11 @@ var fnChangeCustomTemplateByAjax = function(templateId, data){
 	return result;
 }
 
-/*템플릿 허용 데이터 가져오기*/
+/*도메인명 목록 가져오기*/
 var fnGetRequestTemplateAvailableByAjax = function(option){
 	var result;
 	url = uiContext+"/sandbox/availableList";
-	errorMessage = "템플릿 허용 목록 가져오기 에러";
+	errorMessage = "도메인명 목록 가져오기 에러";
 	fnAjaxGetDataSync(url, errorMessage, function(response){
 		result = response.availableList;
 	});
@@ -200,60 +200,60 @@ var fnGetInstanceListByAjax = function(){
 }
 
 /*인스턴스 서버사양 가져오기*/
-var fnGetInstanceServerByAjax = function(serverId){
-	var result;
-	url = uiContext+"/sandbox/specifications/"+serverId
-	errorMessage = "인스턴스 서버사양 조회 에러";
-	fnAjaxGetDataSync(url, errorMessage, function(response){
-		result = response;
-	});
-	return result;
-}
+// var fnGetInstanceServerByAjax = function(serverId){
+// 	var result;
+// 	url = uiContext+"/sandbox/specifications/"+serverId
+// 	errorMessage = "인스턴스 서버사양 조회 에러";
+// 	fnAjaxGetDataSync(url, errorMessage, function(response){
+// 		result = response;
+// 	});
+// 	return result;
+// }
 
 
 /*인스턴스 생성용 서버 종류 가져오기*/
-var fnGetServerListByAjax = function(){
-	var result;
-	url = uiContext+"/sandbox/specifications";
-	errorMessage = "인스턴스 서버 종류 에러";
-	fnAjaxGetDataSync(url, errorMessage, function(response){
-		result = response.data;
-	});
-	return result;
-}
+// var fnGetServerListByAjax = function(){
+// 	var result;
+// 	url = uiContext+"/sandbox/specifications";
+// 	errorMessage = "인스턴스 서버 종류 에러";
+// 	fnAjaxGetDataSync(url, errorMessage, function(response){
+// 		result = response.data;
+// 	});
+// 	return result;
+// }
 
 /*인스턴스 생성*/
-var fnCreateInstanceByAjax = function(data){
-	var result;
-	url = uiContext+"/sandbox/instances";
-	errorMessage = "인스턴스 생성 에러";
-	fnAjaxDataSync(url, "POST", JSON.stringify(data), errorMessage, function(response){
-		result = response;
-	});
-	return result;
-}
+// var fnCreateInstanceByAjax = function(data){
+// 	var result;
+// 	url = uiContext+"/sandbox/instances";
+// 	errorMessage = "인스턴스 생성 에러";
+// 	fnAjaxDataSync(url, "POST", JSON.stringify(data), errorMessage, function(response){
+// 		result = response;
+// 	});
+// 	return result;
+// }
 
 /*인스턴스 시작/정지*/
-var fnStartNStopInstanceByAjax = function(checkId){
-	var result;
-	url = uiContext+"/sandbox/instances/"+checkId;
-	errorMessage = "인스턴스 시작/정지 에러";
-	fnAjaxDataSync(url, "PATCH", "", errorMessage, function(response){
-		result = response;
-	});
-	return result;
-}
+// var fnStartNStopInstanceByAjax = function(checkId){
+// 	var result;
+// 	url = uiContext+"/sandbox/instances/"+checkId;
+// 	errorMessage = "인스턴스 시작/정지 에러";
+// 	fnAjaxDataSync(url, "PATCH", "", errorMessage, function(response){
+// 		result = response;
+// 	});
+// 	return result;
+// }
 
 /*인스턴스 삭제*/
-var fnDeleteInstanceByAjax = function(checkId){
-	var result;
-	url = uiContext+"/sandbox/instances/"+checkId;
-	errorMessage = "인스턴스 삭제 에러";
-	fnAjaxDeleteDataSync(url, errorMessage, function(response){
-		result = response;
-	});
-	return result;
-}
+// var fnDeleteInstanceByAjax = function(checkId){
+// 	var result;
+// 	url = uiContext+"/sandbox/instances/"+checkId;
+// 	errorMessage = "인스턴스 삭제 에러";
+// 	fnAjaxDeleteDataSync(url, errorMessage, function(response){
+// 		result = response;
+// 	});
+// 	return result;
+// }
 
 /************************************************** 프로젝트 **************************************************/
 
@@ -334,7 +334,7 @@ var fnDeleteOriginalDataByAjax = function(projectSequencePk, selectedOriginalDat
 	return result;
 }
 
-/*샌드박스 파일브라우저 가져오기*/
+/*파일브라우저 가져오기*/
 var fnGetSandboxFileBrowserByAjax = function(selectedInstancePk){
 	var result;
 	url = uiContext+"/sandbox/instances/"+selectedInstancePk+"/localFiles";
@@ -345,7 +345,7 @@ var fnGetSandboxFileBrowserByAjax = function(selectedInstancePk){
 	return result;
 }
 
-/*샌드박스 파일브라우저 샘플 미리보기*/
+/*파일브라우저 샘플 미리보기*/
 var fnGetLocalFileSampleByAjax = function(selectedInstancePk, localFile){
 	var result;
 	url = uiContext+"/sandbox/instances/"+selectedInstancePk+"/localFiles/"+localFile;

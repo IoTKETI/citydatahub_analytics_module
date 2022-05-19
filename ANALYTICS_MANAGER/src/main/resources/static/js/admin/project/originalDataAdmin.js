@@ -7,7 +7,7 @@ $(function(){
 	
 	// 샌드박스 로컬파일 클릭시
 	$(document).on("click", ".localFiles", function(){
-		/*샌드박스 파일브라우저 샘플 미리보기*/
+		/*파일브라우저 샘플 미리보기*/
 		$(".localFiles").removeClass("activeSel");
 		$(this).addClass("activeSel");
 		fnGetLocalFileSample($(this).text());
@@ -16,7 +16,7 @@ $(function(){
 	// 원본리스트 클릭시
 	$(document).on("click", ".originalData", function(){
 		$("#loading").show();
-		/*샌드박스 파일브라우저 샘플 미리보기*/
+		/*파일브라우저 샘플 미리보기*/
 		$(".originalData").removeClass("activeSel");
 		$(this).addClass("activeSel");
 		selectedOriginalDataPk = $(this).attr("id");
@@ -52,6 +52,10 @@ $(function(){
 	
 });
 
+var createTable = function(){
+	// 공통 호출 에러 방지 Dummy
+}
+
 var fnInit = function(){
 	$(".breadcrumb__list--current").text("프로젝트 상세");
 	userRole = $("#userRole").val();
@@ -72,7 +76,7 @@ var fnGetProjectInfo = function(projectSequencePk){
 	$(".name").text(project.NAME);
 	$("#description").text(project.DESCRIPTION);
 	$("#createDataTime").text("생성일: "+project.createDataTime);
-	$("#instanceName").text("인스턴스 정보: "+project.instanceName);
+	// $("#instanceName").text("인스턴스 정보: "+project.instanceName);
 	selectedInstancePk = project.SELECTED_INSTANCE;
 }
 
@@ -148,7 +152,7 @@ var fnDeleteOriginalData = function(){
 	}
 }
 
-/*원본 데이터 생성버튼 클릭시 샌드박스 파일브라우저 가져오기*/
+/*원본 데이터 생성버튼 클릭시 파일브라우저 가져오기*/
 var fnGetSandboxFileBrowser = function(){
 	var response = fnGetSandboxFileBrowserByAjax(selectedInstancePk);
 	
@@ -173,7 +177,7 @@ var fnGetSandboxFileBrowser = function(){
 	}
 }
 
-/*샌드박스 파일브라우저 샘플 미리보기*/
+/*파일브라우저 샘플 미리보기*/
 var fnGetLocalFileSample = function(localFile){
 	var localFile = fnGetLocalFileSampleByAjax(selectedInstancePk, localFile);
 	$("#localFileSample").html("<pre>"+JSON.stringify(localFile,null,2)+"</pre>");

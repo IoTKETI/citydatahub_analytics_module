@@ -917,7 +917,7 @@ public class ProjectRestService {
 	}
 
 	/**
-	 * 사용자별 모델 목록 가져오기
+	 * 모델 목록 가져오기
 	 * @param userId
 	 * @return
 	 */

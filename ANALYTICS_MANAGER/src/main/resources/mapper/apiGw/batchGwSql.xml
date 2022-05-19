@@ -277,7 +277,7 @@
            		, #{postprocessingType}
            		, #{denominatorFieldName}
            		, #{targetAttributeName}
-           		, 'stop'
+           		, 'waiting'
            		, #{makeDataMethod}
 				, #{sql}
 				, #{targetType}

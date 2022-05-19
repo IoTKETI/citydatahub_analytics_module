@@ -320,27 +320,27 @@ public class BatchRestController {
 	 * @return
 	 */
 	@PostMapping(value="/batchServers")
-	public ResponseEntity<JSONObject> batchServersAsPost(@RequestBody Instance instance, HttpSession session){
-		JSONObject result = new JSONObject();
+	// public ResponseEntity<JSONObject> batchServersAsPost(@RequestBody Instance instance, HttpSession session){
+	// 	JSONObject result = new JSONObject();
 		
-		try {
-			if( MakeUtil.isNotNullAndEmpty(instance) ) {
-				instance.setUserId(""+session.getAttribute("userId"));
-				result = batchRestService.batchServersAsPost(instance);
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-        	}else {
-        		result.put("type", "4101");
-    			result.put("detail", "MANDATORY PARAMETER MISSING");
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
+	// 	try {
+	// 		if( MakeUtil.isNotNullAndEmpty(instance) ) {
+	// 			instance.setUserId(""+session.getAttribute("userId"));
+	// 			result = batchRestService.batchServersAsPost(instance);
+    //         	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
+    //     	}else {
+    //     		result.put("type", "4101");
+    // 			result.put("detail", "MANDATORY PARAMETER MISSING");
+    //     		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
+    //     	}
 			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "batchServersAsPost");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
+	// 	}catch (Exception e) {
+	// 		result.put("type", "5000");
+	// 		result.put("detail", e.toString());
+	// 		MakeUtil.printErrorLogger(e, "batchServersAsPost");
+	// 		return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
+	// 	}
+	// }
 
 	/**
 	 * 배치 Admin Nifi 주소 가져오기
