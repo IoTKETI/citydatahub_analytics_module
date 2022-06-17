@@ -402,7 +402,6 @@ var fnCreateModel = function(){
 	});
 	if( fnNotNullAndEmpty(algorithmsSequencePk) ){
 		data["algorithms_sequence_pk"] = algorithmsSequencePk;
-		// train_data {preprocessed_data_sequence_pk : }
 		trainData["preprocessed_data_sequence_pk"] = selectedPreprocessedDataPk;
 		data["train_data"] = trainData;
 		

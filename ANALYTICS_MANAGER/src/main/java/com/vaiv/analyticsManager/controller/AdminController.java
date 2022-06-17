@@ -7,15 +7,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.vaiv.analyticsManager.common.service.AuthService;
-import com.vaiv.analyticsManager.common.utils.MakeUtil;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
-import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +35,7 @@ public class AdminController {
 	 * @param response
 	 * @param request
 	 */
-	@RequestMapping("/admin/main")
+	@RequestMapping("/")
 	public void main(@RequestParam(value = "code", required = false) String code,
 			@RequestParam(value = "state", required = false) String state, HttpServletResponse response,
 			HttpServletRequest request) {
@@ -65,17 +60,11 @@ public class AdminController {
 		String requestUrl = "" + request.getRequestURL();
 		String message = authService.logout("" + session.getAttribute("userId"), request, requestUrl);
 		logger.info("logout message: " + message.toString());
-		if (MakeUtil.isNotNullAndEmpty(message)) {
-			JsonObject json = new JsonParser().parse(message).getAsJsonObject();
-			if ("success".equals(json.get("result").getAsString())
-					|| "session does not exist".equals(json.get("description").getAsString())) {
 
-				authService.removeCookie(request, response, requestUrl);
-				authService.removeSession(request);
-			}
-		}
+		authService.removeCookie(request, response, requestUrl);
+		authService.removeSession(request);
 
-		return new RedirectView("/admin/algorithmManage");
+		return new RedirectView("/");
 	}
 
 	/**

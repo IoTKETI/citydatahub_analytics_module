@@ -43,7 +43,6 @@ public class AsyncService {
 	 * @param preprocessedDataSequencePk
 	 * @return
 	 */
-	@SuppressWarnings("static-access")
 	public Future<String> preprocessedData(String url, Integer preprocessedDataSequencePk){
 		logger.info("AsyncService-preprocessedData : Start!!! ");
 		JSONObject httpJson = null;
@@ -54,7 +53,7 @@ public class AsyncService {
 			for (int i = 0; i < asyncPeriod; i++) {
 				try {
 					httpJson = httpService.httpServiceGET(url, "");
-					preprocessedDataJson = new JSONObject().fromObject(httpJson.get("data"));	
+					preprocessedDataJson = JSONObject.fromObject(httpJson.get("data"));	
 				} catch (ConnectException e) {
 					connectionFailCnt++;
 					logger.info("AsyncService-preprocessedData connectionFailCnt: "+connectionFailCnt+", Error: "+e);
@@ -113,7 +112,6 @@ public class AsyncService {
 	 * @param url
 	 * @param modelSequencePk
 	 */
-	@SuppressWarnings("static-access")
 	public Future<String> models(String url, Integer modelSequencePk) {
 		logger.info("AsyncService-models : Start!!! ");
 		JSONObject httpJson = null;
@@ -124,7 +122,7 @@ public class AsyncService {
 			for (int i = 0; i < asyncPeriod; i++) {
 				try {
 					httpJson = httpService.httpServiceGET(url, "");
-					modelsJson = new JSONObject().fromObject(httpJson.get("data"));
+					modelsJson = JSONObject.fromObject(httpJson.get("data"));
 					
 				} catch (ConnectException e) {
 					logger.info("AsyncService-models : "+e);

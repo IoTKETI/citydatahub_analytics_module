@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vaiv.analyticsManager.common.utils.MakeUtil;
 import com.vaiv.analyticsManager.restFullApi.domain.Batch;
-import com.vaiv.analyticsManager.restFullApi.domain.Instance;
 import com.vaiv.analyticsManager.restFullApi.domain.SearchData;
 import com.vaiv.analyticsManager.restFullApi.service.BatchRestService;
 
@@ -34,154 +33,6 @@ public class BatchRestController {
 
 	@Value("${admin.nifiUrl}")
 	private String adminNifiUrl;
-
-	/**
-	 * 배치신청 목록 조회
-	 * @param session
-	 * @return
-	 */
-	@GetMapping(value="/batchServiceRequests")
-	public ResponseEntity<JSONObject> batchServiceRequests(HttpSession session){
-		JSONObject result = new JSONObject();
-		try {
-			result = batchRestService.batchServiceRequests(session);
-			return new ResponseEntity<JSONObject>(result, HttpStatus.OK);
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "batchServiceRequests");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	/**
-	 * 배치신청 조회
-	 * @param batchServiceSequencePk
-	 * @return
-	 */
-	@GetMapping(value="/batchServiceRequests/{batchServiceRequestSequencePk}")
-	public ResponseEntity<JSONObject> batchServiceRequest(@PathVariable Integer batchServiceRequestSequencePk){
-		JSONObject result = new JSONObject();
-		try {
-			if( MakeUtil.isNotNullAndEmpty(batchServiceRequestSequencePk) ) {
-				result = batchRestService.batchServiceRequest(batchServiceRequestSequencePk);
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-        	}else {
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "batchServiceRequest");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	
-	/**
-	 * 배치신청 등록
-	 * @param batch
-	 * @param session
-	 * @return
-	 */
-	@PostMapping(value="/batchServiceRequests")
-	public ResponseEntity<JSONObject> batchServiceRequestsAsPost(@RequestBody Batch batch, HttpSession session){
-		JSONObject result = new JSONObject();
-		
-		try {
-			if( MakeUtil.isNotNullAndEmpty(batch) ) {
-				batch.setUserId(""+session.getAttribute("userId"));
-				result = batchRestService.batchServiceRequestsAsPost(batch);
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-        	}else {
-        		result.put("type", "4101");
-    			result.put("detail", "MANDATORY PARAMETER MISSING");
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "batchServiceRequestsAsPost");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	/**
-	 * 배치신청 수정
-	 * @param batchServiceSequencePk
-	 * @param batch
-	 * @param session
-	 * @return
-	 */
-	@PatchMapping(value="/batchServiceRequests/{batchServiceRequestSequencePk}")
-	public ResponseEntity<JSONObject> batchServiceRequestsAsPatch(@PathVariable Integer batchServiceRequestSequencePk, @RequestBody Batch batch, HttpSession session){
-		JSONObject result = new JSONObject();
-		
-		try {
-			if( MakeUtil.isNotNullAndEmpty(batchServiceRequestSequencePk) ) {
-				batch.setUserId(""+session.getAttribute("userId"));
-				result = batchRestService.batchServiceRequestsAsPatch(batch);
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-        	}else {
-        		result.put("type", "4101");
-    			result.put("detail", "MANDATORY PARAMETER MISSING");
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "batchServiceRequestsAsPatch");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	/**
-	 * 배치 신청 삭제
-	 * @param batchServiceSequencePk
-	 * @return
-	 */
-	@DeleteMapping(value="/batchServiceRequests/{batchServiceRequestSequencePk}")
-	public ResponseEntity<JSONObject> batchServiceRequestsDelete(@PathVariable Integer batchServiceRequestSequencePk){
-		JSONObject result = new JSONObject();
-		try {
-			if( MakeUtil.isNotNullAndEmpty(batchServiceRequestSequencePk) ) {
-				result = batchRestService.batchServiceRequestsDelete(batchServiceRequestSequencePk);
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-        	}else {
-        		result.put("type", "4101");
-    			result.put("detail", "MANDATORY PARAMETER MISSING");
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "batchServiceRequestSequencePk");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	/**
-	 * 배치 목록 조회
-	 * @param session
-	 * @return
-	 */
-	@GetMapping(value="/batchServices")
-	public ResponseEntity<JSONObject> batchServices(HttpSession session){
-		JSONObject result = new JSONObject();
-		try {
-			result = batchRestService.batchServices(session);
-			return new ResponseEntity<JSONObject>(result, HttpStatus.OK);
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "batchServices");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
 	
 	/**
 	 * 배치 조회
@@ -206,7 +57,6 @@ public class BatchRestController {
 			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
 		}
 	}
-	
 	
 	
 	/**
@@ -309,39 +159,10 @@ public class BatchRestController {
 			result.put("type", "5000");
 			result.put("detail", e.toString());
 			MakeUtil.printErrorLogger(e, "batchServers");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
+			return new ResponseEntity<JSONObject>(result, HttpStatus.EXPECTATION_FAILED);
 		}
 	}
 	
-	/**
-	 * 배치서버 생성
-	 * @param batch
-	 * @param session
-	 * @return
-	 */
-	@PostMapping(value="/batchServers")
-	// public ResponseEntity<JSONObject> batchServersAsPost(@RequestBody Instance instance, HttpSession session){
-	// 	JSONObject result = new JSONObject();
-		
-	// 	try {
-	// 		if( MakeUtil.isNotNullAndEmpty(instance) ) {
-	// 			instance.setUserId(""+session.getAttribute("userId"));
-	// 			result = batchRestService.batchServersAsPost(instance);
-    //         	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-    //     	}else {
-    //     		result.put("type", "4101");
-    // 			result.put("detail", "MANDATORY PARAMETER MISSING");
-    //     		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-    //     	}
-			
-	// 	}catch (Exception e) {
-	// 		result.put("type", "5000");
-	// 		result.put("detail", e.toString());
-	// 		MakeUtil.printErrorLogger(e, "batchServersAsPost");
-	// 		return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-	// 	}
-	// }
-
 	/**
 	 * 배치 Admin Nifi 주소 가져오기
 	 * @param session

@@ -11,10 +11,9 @@
 	<script th:src="@{/js/admin/batch/batchManageAdmin.js}"></script>
 		<ul class="contentsTab tab clearfix" id="contents_tab">
 			<li class="on"><a href="javascript:void(0)" class="iconArea" onclick="setTabMenu('#contents_tab','0');">배치 관리</a></li>
-			<li class=""><a href="javascript:void(0)" class="iconArea" onclick="setTabMenu('#contents_tab','1');">배치 실행 이력 관리</a></li>
+			<li class=""><a href="javascript:void(0)" class="iconArea" onclick="setTabMenu('#contents_tab','1');">배치 실행 이력</a></li>
 		</ul>
 
-        <!-- <h3 class="content__title">배치 신청 목록</h3> -->
 		<div class="contentsTab_con tab_con" id="contents_tab_con">
 			<div class="tabView tabViewOn">
 				<section class="section">
@@ -31,7 +30,6 @@
 							<th>배치명</th>
 							<th>프로젝트</th>
 							<th>모델명</th>
-							<th>데이터 생성방식</th>
 							<th>도메인명</th>
 							<th>결과반영방식</th>
 							<th>실행주기</th>
@@ -218,8 +216,8 @@
 									<label class="control-label  text-left">&nbsp;후처리 방식</label>
 								</div>
 								<div class="col-md-10 col-sm-10 col-xs-12">
-									<select class="form-control" id="storeMethod">
-										<option class="select" value="rawData">없음</option>
+									<select class="select select--full" id="storeMethod">
+										<option value="rawData">없음</option>
 										<option value="percentage">백분율</option>
 									</select>
 								</div>
@@ -264,7 +262,7 @@
 									<label class="control-label  text-left">&nbsp;업데이트 도메인명</label>
 								</div>
 								<div class="col-md-10 col-sm-10 col-xs-12">
-									<select class="form-control" id="resultUpdateDomain">
+									<select class="select select--full" id="resultUpdateDomain">
 
 									</select>
 								</div>
@@ -327,7 +325,7 @@
 								</div>
 								<div class="col-md-2 col-sm-8 col-xs-12">
 									<!-- 보안을 위한 onkeydown return : 에러 아님 -->
-									<input type="text" class="form-control" id="executionCycle_4" placeholder="* 요일(0~7)" onkeydown="return fnOnlyNumberCommaDot();">
+									<input type="text" class="form-control" id="executionCycle_4" placeholder="* 요일(1~7)" onkeydown="return fnOnlyNumberCommaDot();">
 								</div>
 							</div>
 
@@ -347,7 +345,6 @@
 	        </div>
 	        <div class="modal__footer">
 	          <button class="button__primary modalName" type="button" onclick="fnSaveBatch();" id="saveBatchRequestBtn"></button>
-	          <!-- <button class="button__primary rejectBtn" type="button" onclick="fnRejectBatch();">거절</buttvvon> -->
 			  <button class="button__secondary button__modal--close" type="button" onclick="fnCloseModal('batchModal')">닫기</button>
 	        </div>
 	      </div>

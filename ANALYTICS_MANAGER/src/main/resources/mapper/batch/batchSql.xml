@@ -160,9 +160,6 @@
 		    ) AS "modelName"
 		FROM "BATCH_SERVICE" AS bs
         WHERE "DELETE_FLAG" = FALSE
-        	<if test="userId != null and userId != 'null' and userId != ''">
-        		AND "ENROLLEMENT_ID" = #{userId}
-        	</if>
 		ORDER BY "CREATE_DATETIME" DESC
 	</select>
 	
@@ -300,15 +297,6 @@
 		</trim>
 		WHERE "BATCH_SERVICE_SEQUENCE_PK" = #{batchServiceSequencePk}
 	</update>
-	
-	<select id="batchServers" resultType="java.util.HashMap">
-		SELECT
-			ist.*
-		FROM "INSTANCE" AS ist
-        WHERE ist."DELETE_FLAG" = false
-        	AND ist."ANALYSIS_INSTANCE_SERVER_TYPE" = 'batch'
-		ORDER BY "CREATE_DATETIME" DESC
-	</select>
 	
 	<select id="batchServiceByinstancePk" resultType="java.util.HashMap">
 		SELECT *

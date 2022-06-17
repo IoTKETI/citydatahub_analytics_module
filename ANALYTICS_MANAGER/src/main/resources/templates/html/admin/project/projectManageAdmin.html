@@ -22,8 +22,6 @@
             <table class="table--column" id="logTable">
               <caption>테이블 제목</caption>
               <colgroup>
-                <!-- <col style="width:150px"> -->
-                <!-- <col style="width:auto"> -->
               </colgroup>
 			  <thead>
 				<tr>
@@ -32,7 +30,6 @@
 				<th scope="col" width="25%">프로젝트명</th>
 				<th scope="col" width="40%">설명</th>
 				<th scope="col">생성일</th>
-				<!-- <th scope="col">인스턴스명</th> -->
 				<th th:if="${session.userRole} == 'Analytics_Admin'">사용자</th>
 				<th scope="col">수정</th>
               </tr>
@@ -76,13 +73,6 @@
 								<textarea rows="7" class="form-control" id="description"  placeholder="프로젝트 설명"></textarea>
 							</td>
 						</tr>
-						<!-- <tr class="registDiv">
-							<th scope="col" class="text--center">인스턴스 명</th>
-							<td>
-								<select class="select select--full" id="selectedInstance">
-								</select>
-							</td>
-						</tr> -->
 						
 		            </tbody>
 					</table>

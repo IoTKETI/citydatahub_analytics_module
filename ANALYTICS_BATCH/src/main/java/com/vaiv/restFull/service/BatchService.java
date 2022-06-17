@@ -302,6 +302,16 @@ public class BatchService {
 			logger.info("B.1.1. applyDataFullPathManager를 위한 경로 : " + applyDataFullPath);
 			logger.info("B.1.1. applyDataFullPathForModule을 위한 경로 : " + applyDataFullPathForModule);
 
+			
+			// 데이터 만드는 방식이 sql일 경우 배치관리도구에서 데이터를 만듬
+			// if (batchService.get("MAKE_DATA_METHOD").toString().equals("sql")) {
+			// 	// 1. sql 로 데이터를 가져옴
+			// 	String sql = batchService.get("SQL").toString();
+				
+			// 	// 2. json 형태로 데이터를 만듬
+			// 	warehouseService.makeApplyFile(applyDataFullPath, sql);
+			// }
+			
 			File applyDataFile = new File(applyDataFullPath);
 			if (applyDataFile.exists()) {
 
@@ -357,7 +367,6 @@ public class BatchService {
 					}
 					
 					String domainIdColumnName = "" + batchService.get("DOMAIN_ID_COLUMN_NAME");
-					// String timeColumnName = "" + batchService.get("TIME_COLUMN_NAME");
 					JSONArray sendJsonArr;
 					/// PostProceesing
 					logger.info("B.3.1 후처리를 실행 ");
@@ -406,10 +415,11 @@ public class BatchService {
 						batchMapper.updateBatchServiceState(
 								new BatchServiceState(batchServiceSequencePk, CODE_BATCH_SERVICE_SUCCESS));
 
-					}catch (Exception e){
+					} catch (Exception e) {
 						batchMapper.updateBatchServiceState(new BatchServiceState(batchServiceSequencePk, CODE_BATCH_SERVICE_FAIL));
 						logger.error(e.toString());
-						batchLogService.writeLogAboutBatchTransferResult(batchStartDatetime, false, httpJson.toString(), entityFormat.toString().replaceAll("'\\{","{"), saveUrl);
+						batchLogService.writeLogAboutBatchTransferResult(batchStartDatetime, false, httpJson.toString(),
+								entityFormat.toString().replaceAll("'\\{", "{"), saveUrl);
 					}
 
 				} else {
@@ -427,14 +437,13 @@ public class BatchService {
 			}
 		} catch (Exception e) {
 			batchMapper.updateBatchServiceState(new BatchServiceState(batchServiceSequencePk, CODE_BATCH_SERVICE_FAIL));
-			logger.error("=========== "+batchServiceSequencePk+" batch process ===========",e);
+			logger.error("=========== " + batchServiceSequencePk + " batch process ===========", e);
 			logger.error(e.toString());
 		}
 		batchLogService.writeLogAboutBatchEnd(batchStartDatetime);
 		return;
 
 	}
-
 
 	private HashMap<String, JSONObject> makeCoreStoreMap(JSONArray sendJsonArr, String domainIdColumnName, String updateAttribute) {
 		HashMap<String, JSONObject> resultMap = new HashMap<String, JSONObject>();
@@ -502,6 +511,7 @@ public class BatchService {
 		return resultMap;
 	}
 
+	@SuppressWarnings("unchecked")
 	private JSONArray makePostProcessingArray(String storeMethod, JSONArray applyDataJsonList,
 			JSONObject predictResultJson, String totalColumnName, String domainIdColumnName)
 			throws Exception {
@@ -532,14 +542,14 @@ public class BatchService {
 					throw new Exception("Total ColumnName이 존재하지 않습니다. ");
 				}
 				
-				double totalspotnumber = Double.parseDouble(applyDataJson.get(totalColumnName).toString());
+				float totalspotnumber = Float.parseFloat(applyDataJson.get(totalColumnName).toString());
 				float predictFloat = Float.parseFloat(predictList.get(i));
 
 				if (totalspotnumber != 0.0) {
-					long percentage = Math.round((predictFloat * 1.0f) / totalspotnumber * 100); // (totalspotnumber - 예측값) / totalspotnumber *100
+					String percentage = String.format("%.2f", (totalspotnumber - predictFloat) / totalspotnumber * 100); // (totalspotnumber - 예측값) / totalspotnumber *100
 					sendJson.put(storeMethod, percentage);
 				} else {
-					logger.info(applyDataJson.get(domainIdColumnName) + "의 totalsponumber가 0입니다.");
+					logger.info(applyDataJson.get(domainIdColumnName) + "의 totalspotnumber가 0입니다.");
 					sendJson.put(storeMethod, -1);
 				}
 			}

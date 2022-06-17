@@ -14,7 +14,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 @Service
-@SuppressWarnings("static-access")
 public class AlgorithmGwService {
 	
 	@Autowired
@@ -32,7 +31,7 @@ public class AlgorithmGwService {
 		
 		List<Map<String, Object>> list = algorithmGwMapper.algorithmsGw();
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(new JSONObject().fromObject(map));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(JSONObject.fromObject(map));
 		}
 		
 		return jsonArr;
@@ -57,7 +56,7 @@ public class AlgorithmGwService {
 		if( detail == null ) {
 			return restFullReturnService.resourceNotFound("Not found Algorithm");
 		}
-		result = MakeUtil.nvlJson(new JSONObject().fromObject(detail));
+		result = MakeUtil.nvlJson(JSONObject.fromObject(detail));
 		return result;
 	}
 	

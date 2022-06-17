@@ -2,49 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.vaiv.analyticsManager.restFullApi.mapper.SandboxRestMapper">
 
-   <select id="templates" resultType="java.util.HashMap">
-		SELECT *
-			,(SELECT 
-				string_agg("USER_ID",',') 
-			FROM "ANALYSIS_TEMPLATE_USER" 
-			WHERE "ANALYSIS_TEMPLATE_SEQUENCE_FK1"="ANALYSIS_TEMPLATE_SEQUENCE_PK"
-			) AS "userId"
-		FROM "ANALYSIS_TEMPLATE"
-        WHERE "DELETE_FLAG" = FALSE
-      		<if test="userId != null and userId != 'null' and userId != ''">
-      			AND "PUBLIC_FLAG" = TRUE
-      			OR "ANALYSIS_TEMPLATE_SEQUENCE_PK" in (
-           			SELECT "ANALYSIS_TEMPLATE_SEQUENCE_FK1" FROM "ANALYSIS_TEMPLATE_USER"
-           			WHERE "USER_ID" = #{userId}
-           		)
-      	</if>
-		ORDER BY "CREATE_DATETIME" DESC
-   </select>
-   
-   <select id="template" resultType="java.util.HashMap">
-		SELECT *
-			,(SELECT 
-				string_agg("USER_ID",',') 
-			FROM "ANALYSIS_TEMPLATE_USER" 
-			WHERE "ANALYSIS_TEMPLATE_SEQUENCE_FK1"="ANALYSIS_TEMPLATE_SEQUENCE_PK"
-			) AS "userId"
-		FROM "ANALYSIS_TEMPLATE"
-   		WHERE "ANALYSIS_TEMPLATE_SEQUENCE_PK"=#{templateId}
-   </select>
-   
-   
-   <select id="customTemplateRequests" resultType="java.util.HashMap">
-   		SELECT 
-   			*
-   			, to_char("CREATE_DATETIME", 'YYYY-MM-DD') as "createDataTime"
-   		FROM "CUSTOM_ANALYSIS_TEMPLATE_REQUEST"
-   		WHERE "PROGRESS_STATE" in ('ongoing', 'standby','reject')
-      		<if test="userId != null and userId != 'null' and userId != ''">
-   				AND "USER_ID" = #{userId}
-   			</if>
-   		ORDER BY "CREATE_DATETIME" DESC
-   </select>
-   
    <select id="customTemplateRequest" resultType="java.util.HashMap">
    		SELECT 
    			*
@@ -53,61 +10,6 @@
 		WHERE "CUSTOM_ANALYSIS_TEMPLATE_REQUEST_SEQUENCE_PK" = #{templateId}
    </select>
    
-   <update id="customTemplateRequestsAsPatch" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Template">
-   		UPDATE "CUSTOM_ANALYSIS_TEMPLATE_REQUEST" 
-   		SET "PROGRESS_STATE" = #{progressState},
-   		<choose>
-   			<when test='progressState == "cancel"'>"USER_CANCEL_DATETIME" = NOW()</when>
-   			<otherwise>
-   				"ADMIN_COMMENT" = #{adminComment},
-   				"PROGRESS_CHANGE_DATETIME" = NOW()
-   			</otherwise>
-   		</choose>    		
-		WHERE "CUSTOM_ANALYSIS_TEMPLATE_REQUEST_SEQUENCE_PK" = #{templateId}
-   </update>
-   
-   <insert id="customTemplateRequestsAsPost" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Template">
-      		INSERT INTO 
-   			"CUSTOM_ANALYSIS_TEMPLATE_REQUEST"(
-                 "NAME",
-                 "DATA_SUMMARY",
-                 "DATA_STARTDATE",
-                 "DATA_ENDDATE",
-                 "PROGRESS_STATE",
-                 "CREATE_DATETIME",
-                 "USER_ID"
-			) VALUES(
-            	#{name},
-                #{dataSummaryToString},
-                #{dataStartDate},
-                #{dataEndDate},
-                'ongoing',
-                NOW(),
-                #{userId}
-        	)
-   </insert>
-   
-   <insert id="templatesAsPost" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Template" useGeneratedKeys="true" keyProperty="ANALYSIS_TEMPLATE_SEQUENCE_PK">
-   		INSERT INTO 
-   			"ANALYSIS_TEMPLATE"(
-                 "NAME",
-                 "SNAPSHOT_ID",
-                 "DATA_SUMMARY",
-                 "DATA_STARTDATE",
-                 "DATA_ENDDATE",
-                 "PUBLIC_FLAG",
-                 "CREATE_DATETIME"
-			) VALUES(
-            	#{name},
-            	#{snapshotId},
-                #{dataSummaryToString},
-                #{dataStartDate},
-                #{dataEndDate},
-                #{publicFlag},
-                NOW()
-        	)
-   </insert>
-  
 	<select id="checkTemplateName" resultType="int">
 		SELECT COUNT(*) FROM "ANALYSIS_TEMPLATE"
 		WHERE "DELETE_FLAG" = FALSE AND "NAME" = #{name}
@@ -133,18 +35,6 @@
 		DELETE FROM "ANALYSIS_TEMPLATE_USER" 
 		WHERE "ANALYSIS_TEMPLATE_SEQUENCE_FK1"=#{templateId} 
 	</delete>
-	
-	<update id="templatesAsPatch" parameterType="com.vaiv.analyticsManager.restFullApi.domain.Template">
-		UPDATE "ANALYSIS_TEMPLATE" 
-		SET 
-			"NAME" = #{name},
-            "SNAPSHOT_ID" = #{snapshotId},
-            "DATA_SUMMARY" = #{dataSummaryToString},
-            "DATA_STARTDATE" = #{dataStartDate},
-            "DATA_ENDDATE" = #{dataEndDate},
-            "PUBLIC_FLAG" = #{publicFlag}
-		WHERE "ANALYSIS_TEMPLATE_SEQUENCE_PK" = #{templateId}
-	</update>
 	
    <select id="templateUsers" resultType="java.util.HashMap">
    		SELECT * FROM "ANALYSIS_TEMPLATE_USER"

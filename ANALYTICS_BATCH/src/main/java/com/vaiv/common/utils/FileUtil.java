@@ -296,9 +296,9 @@ public class FileUtil {
 	public static void resize(String inputImagePath, String outputImagePath, int maxSize, int dpi) throws Exception{
 		logger.info(" resize start : inputImagePath: "+inputImagePath+", outputImagePath: "+outputImagePath+", maxSize: "+maxSize+", dpi: "+dpi);
 		
-		File inputFile = new File(inputImagePath);
-		File outputFile = new File(outputImagePath);
-		String fileExt = inputImagePath.substring(inputImagePath.lastIndexOf(".")+1);
+		// File inputFile = new File(inputImagePath);
+		// File outputFile = new File(outputImagePath);
+		// String fileExt = inputImagePath.substring(inputImagePath.lastIndexOf(".")+1);
 	}
 	
 	public static BufferedImage toBufferedImage(Image image, int type) {

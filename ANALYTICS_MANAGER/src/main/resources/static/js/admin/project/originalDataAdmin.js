@@ -5,7 +5,7 @@ $("#loading").show();
 $(function(){
 	fnInit();
 	
-	// 샌드박스 로컬파일 클릭시
+	// 인스턴스 로컬파일 클릭시
 	$(document).on("click", ".localFiles", function(){
 		/*파일브라우저 샘플 미리보기*/
 		$(".localFiles").removeClass("activeSel");
@@ -76,7 +76,6 @@ var fnGetProjectInfo = function(projectSequencePk){
 	$(".name").text(project.NAME);
 	$("#description").text(project.DESCRIPTION);
 	$("#createDataTime").text("생성일: "+project.createDataTime);
-	// $("#instanceName").text("인스턴스 정보: "+project.instanceName);
 	selectedInstancePk = project.SELECTED_INSTANCE;
 }
 
@@ -169,11 +168,8 @@ var fnGetSandboxFileBrowser = function(){
 		}
 		$("#localFiles").html(html);
 		fnOpenModal("originModal");
-	}else if( response.title == "Resource Not Found" ){
-		fnComNotify("warning","샌드박스가 존재하지 않습니다.");
-		
-	}else if( response.title == "Operation Not Supported" ){
-		fnComNotify("warning","샌드박스가 꺼져있습니다.");
+	}else {
+		fnComNotify("warning","원본 데이터 생성을 실패하였습니다.");
 	}
 }
 
@@ -215,7 +211,7 @@ var fnCreateOriginalData = function(){
 		}
 		
 	}else{
-		fnComNotify("warning", "샌드박스 로컬 파일을 선택해주세요.");
+		fnComNotify("warning", "파일을 선택해주세요.");
 	}
 }
 

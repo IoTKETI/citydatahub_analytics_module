@@ -23,10 +23,6 @@ public class PostFilter extends ZuulFilter{
     public Object run() throws ZuulException {
         RequestContext ctx = RequestContext.getCurrentContext();
         log.info("POST Filter's ctx string before modify: " + ctx.toString());
-        // ctx.set("x-forwarded-prefix","");
-        // ctx.set("requestURI","");
-
-        // log.info("POST Filter's ctx string After modify: " + ctx.toString());
         return null;
     }
 

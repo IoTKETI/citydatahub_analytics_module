@@ -21,7 +21,7 @@ import net.sf.json.JSONObject;
 public class HttpService {
 
 	private Logger logger = LoggerFactory.getLogger(HttpService.class);
-
+	
 	private OkHttpClient client;
 	
 	public HttpService() {
@@ -231,8 +231,8 @@ public class HttpService {
 	 * @return
 	 * @throws Exception
 	 */
-	public JSONObject httpServiceDELETE(String connUrl, String option) throws Exception{
-		logger.info("--- httpServiceDELETE "+option+" connUrl: "+connUrl+" ---");
+	public JSONObject httpServiceDELETE(String connUrl) throws Exception{
+		logger.info("--- httpServiceDELETE connUrl: "+connUrl+" ---");
 		JSONObject result = new JSONObject();
 		Request request = null;
 

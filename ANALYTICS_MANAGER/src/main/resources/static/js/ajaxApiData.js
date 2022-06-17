@@ -24,64 +24,7 @@ var fnAlgorithmByAjax = function(algorithmPk){
 	return result;
 }
 
-/************************************************** 샌드박스 템플릿 **************************************************/
-
-/*템플릿 목록 가져오기*/
-var fnGetTemplateListByAjax = function(){
-	var result;
-	url = uiContext+"/sandbox/templates";
-	errorMessage = "템플릿 목록 가져오기 에러";
-	fnAjaxGetDataSync(url, errorMessage, function(response){
-		result = response;
-	});
-	return result;
-}
-
-/*템플릿 가져오기*/
-var fnGetTemplateByAjax = function(templateId){
-	var result;
-	url = uiContext+"/sandbox/templates/"+templateId;
-	errorMessage = "템플릿 정보 가져오기 에러";
-	fnAjaxGetDataSync(url, errorMessage, function(response){
-		result = response.template;
-	});
-	return result;
-}
-
-/*템플릿 신청목록 가져오기  */
-var fnGetRequestTemplateListByAjax = function(){
-	var result;
-	url = uiContext+"/sandbox/customTemplateRequests";
-	errorMessage = "템플릿 신청목록 가져오기 에러";
-	fnAjaxGetDataSync(url, errorMessage, function(response){
-		result = response.customTemplateRequests;
-	});
-	return result;
-}
-
-/* 커스텀 템플릿 정보 가져오기*/
-var fnGetCustomTemplateByAjax = function(templateId){
-	var result;
-	url = uiContext+"/sandbox/customTemplateRequests/"+templateId;
-	var errorMessage = "커스텀 템플릿 정보 가져오기 에러";
-	fnAjaxGetDataSync(url, errorMessage, function(response){
-		result = response.customTemplateRequest;
-	});
-	return result;
-}
-
-
-/*커스텀 템플릿 상태 변경*/
-var fnChangeCustomTemplateByAjax = function(templateId, data){
-	var result;
-	url = uiContext+"/sandbox/customTemplateRequests/"+templateId;
-	errorMessage = "커스텀 템플릿 상태 변경 에러";
-	fnAjaxDataSync(url, "PATCH", JSON.stringify(data), errorMessage, function(response){
-		result = response;
-	});
-	return result;
-}
-
+/************************************************** 인스턴스 **************************************************/
 /*도메인명 목록 가져오기*/
 var fnGetRequestTemplateAvailableByAjax = function(option){
 	var result;
@@ -92,101 +35,6 @@ var fnGetRequestTemplateAvailableByAjax = function(option){
 	});
 	return result;
 }
-
-/*선택된 허용가능 데이터 가져오기*/
-var fnGetRequestTemplateAvailableDataByAjax = function(id){
-	var result;
-	url = uiContext+"/sandbox/availableDataList/"+id;
-	errorMessage = "템플릿 허용 데이터 가져오기 에러";
-	fnAjaxGetDataSync(url, errorMessage, function(response){
-		result = response.availableDataList.data;
-	});
-	return result;
-}
-
-/*샌드박스 템플릿 추가 요청*/
-var fnRequestCustomTemplateByAjax = function(data){
-	var result;
-	url = uiContext+"/sandbox/customTemplateRequests";
-	errorMessage = "샌드박스 템플릿 추가 요청 에러";
-	fnAjaxDataSync(url, "POST", JSON.stringify(data), errorMessage, function(response){
-		result = "success";
-	});
-	return result;
-}
-
-
-/*스냅샷 목록 가져오기*/
-var fnSetTemplateSnapshotByAjax = function(){
-	var result;
-	url = uiContext+"/sandbox/snapshotList";
-	var errorMessage = "스냅샷 가져오기 에러";
-	fnAjaxGetDataSync(url, errorMessage, function(response){
-		console.log("############ fnSetTemplateSnapshotAjac ##############")
-		console.log(response);
-		result = response.snapshotList;
-		//result = response.snapshotlist;
-	});
-	return result;
-}
-
-/*템플릿 생성*/
-var fnCreateTemplateByAjax = function(data){
-	var result;
-	url = uiContext+"/sandbox/templates";
-	errorMessage = "템플릿 생성 에러";
-	fnAjaxDataSync(url, "POST", JSON.stringify(data), errorMessage, function(response){
-		result = response;
-	});
-	return result;
-}
-
-/*템플릿 삭제*/
-var fnDeleteTemplateByAjax = function(templateId){
-	var result;
-	url = uiContext+"/sandbox/templates/"+templateId;
-	errorMessage = "템플릿 삭제 에러";
-	fnAjaxDeleteDataSync(url, errorMessage, function(response){
-		result = response;
-	});
-	return result;
-}
-
-/*템플릿 수정*/
-var fnUpdateTemplateByAjax = function(templateId, data){
-	var result;
-	url = uiContext+"/sandbox/templates/"+templateId;
-	errorMessage = "템플릿 수정 에러";
-	fnAjaxDataSync(url, "PATCH", JSON.stringify(data), errorMessage, function(response){
-		result = response;
-	});
-	return result;
-}
-
-/*session 에 instancePk등록*/
-var fnSandboxSetInstancePkInSessionByAjax = function(instanceSequencePk){
-	var result;
-	url = uiContext+"/sandbox/sandboxSetInstancePkInSession/"+instanceSequencePk;
-	errorMessage = "session 에 instancePk등록 에러";
-	fnAjaxGetDataSync(url, errorMessage, function(response){
-		result = response;
-	});
-	return result;
-}
-
-/*Nifi/Hue Url get*/
-var fngetUrlInSessionByAjax = function(type){
-	var result;
-	url = uiContext+"/sandbox/getUrlInSession/"+type;
-	errorMessage = "Nifi/Hue Url get";
-	fnAjaxGetDataSync(url, errorMessage, function(response){
-		result = response;
-	});
-	return result;
-}
-
-
-/************************************************** 샌드박스 인스턴스 **************************************************/
 
 /*인스턴스 목록 가져오기*/
 var fnGetInstanceListByAjax = function(){
@@ -199,63 +47,17 @@ var fnGetInstanceListByAjax = function(){
 	return result;
 }
 
-/*인스턴스 서버사양 가져오기*/
-// var fnGetInstanceServerByAjax = function(serverId){
-// 	var result;
-// 	url = uiContext+"/sandbox/specifications/"+serverId
-// 	errorMessage = "인스턴스 서버사양 조회 에러";
-// 	fnAjaxGetDataSync(url, errorMessage, function(response){
-// 		result = response;
-// 	});
-// 	return result;
-// }
-
-
-/*인스턴스 생성용 서버 종류 가져오기*/
-// var fnGetServerListByAjax = function(){
-// 	var result;
-// 	url = uiContext+"/sandbox/specifications";
-// 	errorMessage = "인스턴스 서버 종류 에러";
-// 	fnAjaxGetDataSync(url, errorMessage, function(response){
-// 		result = response.data;
-// 	});
-// 	return result;
-// }
-
-/*인스턴스 생성*/
-// var fnCreateInstanceByAjax = function(data){
-// 	var result;
-// 	url = uiContext+"/sandbox/instances";
-// 	errorMessage = "인스턴스 생성 에러";
-// 	fnAjaxDataSync(url, "POST", JSON.stringify(data), errorMessage, function(response){
-// 		result = response;
-// 	});
-// 	return result;
-// }
-
-/*인스턴스 시작/정지*/
-// var fnStartNStopInstanceByAjax = function(checkId){
-// 	var result;
-// 	url = uiContext+"/sandbox/instances/"+checkId;
-// 	errorMessage = "인스턴스 시작/정지 에러";
-// 	fnAjaxDataSync(url, "PATCH", "", errorMessage, function(response){
-// 		result = response;
-// 	});
-// 	return result;
-// }
-
-/*인스턴스 삭제*/
-// var fnDeleteInstanceByAjax = function(checkId){
-// 	var result;
-// 	url = uiContext+"/sandbox/instances/"+checkId;
-// 	errorMessage = "인스턴스 삭제 에러";
-// 	fnAjaxDeleteDataSync(url, errorMessage, function(response){
-// 		result = response;
-// 	});
-// 	return result;
-// }
-
 /************************************************** 프로젝트 **************************************************/
+/*Nifi/Hue Url get*/
+var fngetUrlInSessionByAjax = function(type){
+	var result;
+	url = uiContext+"/sandbox/getUrlInSession/"+type;
+	errorMessage = "Nifi/Hue Url get";
+	fnAjaxGetDataSync(url, errorMessage, function(response){
+		result = response;
+	});
+	return result;
+}
 
 /*프로젝트 목록 조회*/
 var fnGetProjectListByAjax = function(){
@@ -338,7 +140,7 @@ var fnDeleteOriginalDataByAjax = function(projectSequencePk, selectedOriginalDat
 var fnGetSandboxFileBrowserByAjax = function(selectedInstancePk){
 	var result;
 	url = uiContext+"/sandbox/instances/"+selectedInstancePk+"/localFiles";
-	errorMessage = "샌드박스 로컬파일 조회 에러";
+	errorMessage = "인스턴스 로컬파일 조회 에러";
 	fnAjaxGetDataSync(url, errorMessage, function(response){
 		result = response;
 	});
@@ -349,7 +151,7 @@ var fnGetSandboxFileBrowserByAjax = function(selectedInstancePk){
 var fnGetLocalFileSampleByAjax = function(selectedInstancePk, localFile){
 	var result;
 	url = uiContext+"/sandbox/instances/"+selectedInstancePk+"/localFiles/"+localFile;
-	errorMessage = "샌드박스 로컬파일 샘플조회 에러";
+	errorMessage = "인스턴스 로컬파일 샘플조회 에러";
 	fnAjaxGetDataSync(url, errorMessage, function(response){
 		result = response.localFile;
 	});
@@ -538,51 +340,6 @@ var fnGetModelsOfInstancePkByAjax = function(instanceSequencePk){
 
 
 /************************************************** 배치 **************************************************/
-
-/*배치신청 목록 조회*/
-var fnGetbatchServiceRequestsByAjax = function(){
-	var result;
-	url = uiContext+"/batchServiceRequests/";
-	errorMessage = "배치신청 목록 조회 에러";
-	fnAjaxGetDataSync(url, errorMessage, function(response){
-		result = response.batchServiceRequests;
-	});
-	return result;
-}
-
-/*배치신청 조회 */
-var fnGetbatchServiceRequestByAjax = function(batchServiceSequencePk){
-	var result;
-	url = uiContext+"/batchServiceRequests/"+batchServiceSequencePk;
-	errorMessage = "배치신청 조회 에러";
-	fnAjaxGetDataSync(url, errorMessage, function(response){
-		result = response.batchServiceRequest;
-	});
-	return result;
-}
-
-
-/*배치신청 등록/수정*/
-var fnbatchServiceRequestsByAjax = function(url, method, data){
-	errorMessage = "배치신청 등록/수정 에러";
-	url = uiContext + url;
-	fnAjaxDataSync(url, method, JSON.stringify(data), errorMessage, function(response){
-		result = response;
-	});
-	return result;
-}
-
-/*배치신청 삭제*/
-var fnDeleteBatchRequestByAjax = function(batchServiceRequestSequencePk){
-	var result;
-	url = uiContext+"/batchServiceRequests/"+batchServiceRequestSequencePk;
-	errorMessage = "배치신청 삭제 에러";
-	fnAjaxDeleteDataSync(url, errorMessage, function(response){
-		result = response;
-	});
-	return result;
-}
-
 /*배치 목록 조회*/
 var fnGetBatchServicesByAjax = function(){
 	var result;
@@ -626,29 +383,6 @@ var fnDeleteBatchByAjax = function(batchServiceSequencePk){
 	return result;
 }
 
-
-/*배치서버 목록 가져오기*/
-var fnGetBatchServerListByAjax = function(){
-	var result;
-	var url = uiContext+"/batchServers";
-	var errorMessage = "배치서버 목록 조회 에러";
-	fnAjaxGetDataSync(url, errorMessage, function(response){
-		result = response.batchServers;
-	});
-	return result;
-}
-
-/*배치서버 생성*/
-var fnCreateBatchServerByAjax = function(data){
-	var result;
-	url = uiContext+"/batchServers";
-	errorMessage = "배치서버 생성 에러";
-	fnAjaxDataSync(url, "POST", JSON.stringify(data), errorMessage, function(response){
-		result = response;
-	});
-	return result;
-}
-
 /*Admin Nifi URL*/
 var fnGetAdminNifiUrl = function(){
 	var result;
@@ -659,7 +393,6 @@ var fnGetAdminNifiUrl = function(){
 	});
 	return result;
 }
-
 
 /*배치 시작&정지*/
 var fnStartAStopBatchByAjax = function(data){
@@ -672,11 +405,11 @@ var fnStartAStopBatchByAjax = function(data){
 	return result;
 }
 
-/*배치로그 가져오기*/
+/*배치로그 List 가져오기*/
 var fnGetBatchLogListByAjax = function(startDate, endDate){
 	var result;
 	var url = uiContext+"/batchLogs?startDate="+startDate+"&endDate="+endDate;
-	var errorMessage = "배치로그 조회 에러";
+	var errorMessage = "배치로그 List 조회 에러";
 	fnAjaxGetDataSync(url, errorMessage, function(response){
 		result = response;
 	});
@@ -693,7 +426,3 @@ var fnGetBatchLogByAjax = function(logBatchSequencePk){
 	});
 	return result;
 }
-
-
-
-

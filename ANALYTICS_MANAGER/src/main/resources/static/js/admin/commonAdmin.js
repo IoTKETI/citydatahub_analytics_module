@@ -11,7 +11,6 @@ $(function(){
 	});
 	var urlName = window.location.pathname;	
 	if( urlName == "/algorithmManage" )		$(".algorithmAdminActive").addClass("customActive");
-	else if( urlName == "/sandboxManage" )	$(".sandboxManageAdminActive").addClass("customActive");
 	else if( urlName == "/projectManage" || urlName == "/projectDetail")	$(".projectManageAdminActive").addClass("customActive");
 	else if( urlName == "/batchManage" )		$(".batchManageAdminActive").addClass("customActive");
 	

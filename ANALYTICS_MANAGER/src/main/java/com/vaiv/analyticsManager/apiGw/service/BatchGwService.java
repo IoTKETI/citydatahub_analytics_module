@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
-import okhttp3.Headers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.vaiv.analyticsManager.apiGw.domain.BatchGw;
-import com.vaiv.analyticsManager.apiGw.domain.InstanceGw;
 import com.vaiv.analyticsManager.apiGw.mapper.BatchGwMapper;
 import com.vaiv.analyticsManager.apiGw.mapper.ProjectGwMapper;
 import com.vaiv.analyticsManager.apiGw.mapper.SandboxGwMapper;
@@ -28,7 +26,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 @Service
-@SuppressWarnings("static-access")
 public class BatchGwService {
 
 	private static Logger logger = LoggerFactory.getLogger(SandboxGwService.class);
@@ -56,31 +53,6 @@ public class BatchGwService {
 	@Value("${cloudApi.url}")
 	private String cloudApiUrl;
 
-	@Value("${cloudApi.credential}")
-	private String cloudApiCredential;
-
-	@Value("${cloudApi.batch.imageRef}")
-	private String imageRef;
-
-	@Value("${cloudApi.batch.flavorRef}")
-	private String flavorRef;
-
-	@Value("${cloudApi.batch.keyName}")
-	private String keyName;
-
-	@Value("${cloudApi.batch.availabilityZone}")
-	private String availabilityZone;
-
-	@Value("${cloudApi.batch.networks}")
-	private String networks;
-
-	@Value("${cloudApi.batch.securityGroups}")
-	private String securityGroups;
-
-	private final String CLOUD_API_SERVER_POST_FIX="/cloudServices/openstack/servers";
-	private final String CLOUD_API_CREDENTIAL_KEY="credential";
-
-	
 	@Value("${nfs.path}")
 	private String nfsPath;
 	
@@ -105,7 +77,7 @@ public class BatchGwService {
 		
 		List<Map<String, Object>> list = batchGwMapper.batchServiceRequestsGw(userId);
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(JSONObject.fromObject(map)));
 		}
 		
 		return jsonArr;
@@ -134,7 +106,7 @@ public class BatchGwService {
 		if( detail == null ) {
 			return restFullReturnService.resourceNotFound("Not found batchServiceRequest");
 		}
-		result = MakeUtil.nvlJson(new JSONObject().fromObject(detail));
+		result = MakeUtil.nvlJson(JSONObject.fromObject(detail));
 		return result;
 	}
 
@@ -151,16 +123,13 @@ public class BatchGwService {
 		if( batchGwMapper.checkBatchNameGw(batchGw) > 0 ) {
 			return restFullReturnService.alreadyExists("duplicate name");
 		}
+
 		/* 프로젝트 체크 */
 		Map<String, Object> project = projectGwMapper.projectGw(batchGw.getProjectId());
 		if( project == null ) {
 			return restFullReturnService.resourceNotFound("Not found project");
 		}
-		/*인스턴스 체크*/
-		// Map<String, Object> instance = sandboxGwMapper.instanceGw(batchGw.getInstanceId());
-		// if( instance == null ) {
-		// 	return restFullReturnService.resourceNotFound("Not found instance");
-		// }
+
 		/*모델 체크*/
 		Map<String, Object> model = projectGwMapper.modelGw(batchGw.getProjectId(), batchGw.getModelId());
 		if( model == null ) {
@@ -173,92 +142,6 @@ public class BatchGwService {
 		return result;
 	}
 
-	/**
-	 * 배치신청 수정
-	 * @param batch
-	 * @return
-	 * @throws Exception 
-	 */
-	// public JSONObject batchServiceRequestsAsPatchGw(HttpSession session, String batchServiceRequestSequencePk, BatchGw batchGw) throws Exception {
-	// 	JSONObject result = new JSONObject();
-	// 	int batchServiceRequestId;
-	// 	try {
-	// 		batchServiceRequestId = Integer.parseInt(batchServiceRequestSequencePk);
-	// 	} catch (Exception e) {
-	// 		return restFullReturnService.badRequestData("parameter type Error");
-	// 	}
-		
-	// 	// 템플릿 명 중복 체크 batchServiceRequestId
-	// 	// batchGw.setBatchServiceRequestId(batchServiceRequestId);
-	// 	// if( batchGwMapper.checkBatchNameGw(batchGw) > 0 ) {
-	// 	// 	return restFullReturnService.alreadyExists("duplicate name");
-	// 	// }
-
-	// 	String userRole = ""+session.getAttribute("userRole");
-	// 	String userId = ""+session.getAttribute("userId");
-	// 	if( "Analytics_Admin".equals(userRole) ) userId = "";
-
-
-	// 	/*배치신청 체크*/
-	// 	Map<String, Object> batchRequest = batchGwMapper.batchServiceRequestGw(batchServiceRequestId, userId);
-	// 	if( batchRequest == null ) {
-	// 		return restFullReturnService.resourceNotFound("Not found batchServiceRequest");
-	// 	}
-		
-	// 	/* 사용자 권한체크 */
-	// 	if( !"Analytics_Admin".equals(userRole) ) {
-	// 		return restFullReturnService.unauthorized("Unauthorized");
-	// 	}
-	// 	batchGw.setDeleteFlag(false);
-	// 	// 배치신청 수정
-	// 	batchGwMapper.updateBatchServiceRequestGw(batchGw);
-	// 	return result;			
-	
-	// }
-	
-	/**
-	 * 배치 신청 삭제
-	 * @param batchServiceRequestSequencePk
-	 * @return
-	 * @throws Exception 
-	 */
-	public JSONObject batchServiceRequestsDeleteGw(HttpSession session, String batchServiceRequestSequencePk) throws Exception {
-		JSONObject resultJson = new JSONObject();
-		
-		int batchServiceRequestId;
-		try {
-			batchServiceRequestId = Integer.parseInt(batchServiceRequestSequencePk);
-		} catch (Exception e) {
-			return restFullReturnService.badRequestData("parameter type Error");
-		}
-		String userRole = ""+session.getAttribute("userRole");
-		String userId = ""+session.getAttribute("userId");
-		if( "Analytics_Admin".equals(userRole) ) userId = "";
-
-		Map<String, Object> batchRequest = batchGwMapper.batchServiceRequestGw(batchServiceRequestId, userId);
-		/* 사용자 권한체크 */
-		userId = ""+session.getAttribute("userId");
-
-		if( !(userId.equals(batchRequest.get("creatorId")) || "Analytics_Admin".equals(userRole) ) ) {
-			return restFullReturnService.unauthorized("Unauthorized");
-		}
-		
-		// 배치 신청 수정
-		BatchGw batchGw = new BatchGw();
-		batchGw.setBatchServiceRequestId(batchServiceRequestId);
-		batchGw.setDeleteFlag(true);
-		batchGwMapper.updateBatchServiceRequestGw(batchGw);
-		
-		resultJson.put("result", "success");
-		resultJson.put("type", "2001");
-		return resultJson;			
-	}
-	
-	
-	
-	
-	
-	
 	
 	/**
 	 * 배치 목록 조회 API
@@ -274,7 +157,7 @@ public class BatchGwService {
 		
 		List<Map<String, Object>> list = batchGwMapper.batchServicesGw(userId);
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(JSONObject.fromObject(map)));
 		}
 		
 		return jsonArr;
@@ -302,7 +185,7 @@ public class BatchGwService {
 		if( detail == null ) {
 			return restFullReturnService.resourceNotFound("Not found batchService");
 		}
-		result = MakeUtil.nvlJson(new JSONObject().fromObject(detail));
+		result = MakeUtil.nvlJson(JSONObject.fromObject(detail));
 		return result;
 	}
 
@@ -328,21 +211,19 @@ public class BatchGwService {
 		if( project == null ) {
 			return restFullReturnService.resourceNotFound("Not found project");
 		}
-		/*인스턴스 체크*/
-		// Map<String, Object> instance = sandboxGwMapper.instanceGw(batchGw.getSandboxInstanceId());
-		// if( instance == null ) {
-		// 	return restFullReturnService.resourceNotFound("Not found sandbox instance");
-		// }
+
 		/*배치 인스턴스 체크*/
 		Map<String, Object> batchInstance = sandboxGwMapper.instanceGw(batchGw.getSandboxInstanceId());
 		if( batchInstance == null ) {
 			return restFullReturnService.resourceNotFound("Not found batch instance");
 		}
+
 		/*모델 체크*/
 		Map<String, Object> model = projectGwMapper.modelGw(batchGw.getProjectId(), batchGw.getModelId());
 		if( model == null ) {
 			return restFullReturnService.resourceNotFound("Not found model");
 		}
+
 		/* 사용자 권한체크 */
 		String userId = ""+session.getAttribute("userId");
 		String userRole = ""+session.getAttribute("userRole");
@@ -367,14 +248,6 @@ public class BatchGwService {
 		
 		if( "200".equals(httpJson.get("type")) ) {
 			
-			// 배치신청 업데이트
-			// if( MakeUtil.isNotNullAndEmpty(batchGw.getBatchServiceRequestId()) ) {
-			// 	BatchGw batchRequest = new BatchGw();
-			// 	batchRequest.setBatchServiceRequestId(batchGw.getBatchServiceRequestId());
-			// 	batchRequest.setProgressState("done");
-			// 	batchGwMapper.updateBatchServiceRequestGw(batchRequest);
-			// }
-			
 			// 배치 등록
 			batchGw.setUserId(userId);
 			if( batchGw.getManagerId() == null ) batchGw.setManagerId(batchGw.getUserId());
@@ -390,7 +263,6 @@ public class BatchGwService {
 			JSONObject batchHttpJson = httpService.httpServicePOST(listUrl, batchInfoParam.toString(), null);
 			if( "201".equals(batchHttpJson.get("type")) ) {
 				logger.info("send BatchModuleServer BATCH_INFO complete...");
-//					JSONObject batchModuleJson = new JSONObject().fromObject(batchHttpJson.get("data"));
 			}else {
 				logger.error("Error send BatchModuleServer BATCH_INFO..."+batchHttpJson.toString());
 				throw new RuntimeException("Error send BatchModuleServer BATCH_INFO");
@@ -415,10 +287,8 @@ public class BatchGwService {
 			unzipAndDeleteGw(filePath, fileName);
 			logger.info("preprocessedData, model Files save complete...");
 			
-			
-			/*************** 배치서버에 전송 *********************/
 			Map<String, Object> detail = batchGwMapper.batchServiceGw(batchGw.getBatchServiceId(), null);
-			if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchService", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
+			if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchService", MakeUtil.nvlJson(JSONObject.fromObject(detail)));
 			
 			resultJson.put("result", "success");
 			resultJson.put("type", "2001");
@@ -439,7 +309,6 @@ public class BatchGwService {
 	public JSONObject batchServicesAsPatchGw(HttpSession session, BatchGw batchGw, String batchServicePk) throws Exception {
 		JSONObject resultJson = new JSONObject();
 		
-		
 		int batchServiceId;
 		try {
 			batchServiceId = Integer.parseInt(batchServicePk);
@@ -458,16 +327,13 @@ public class BatchGwService {
 		if( project == null ) {
 			return restFullReturnService.resourceNotFound("Not found project");
 		}
-		/*인스턴스 체크*/
-		// Map<String, Object> instance = sandboxGwMapper.instanceGw(batchGw.getSandboxInstanceId());
-		// if( instance == null ) {
-		// 	return restFullReturnService.resourceNotFound("Not found sandbox instance");
-		// }
+		
 		/*배치 인스턴스 체크*/
 		Map<String, Object> batchInstance = sandboxGwMapper.instanceGw(batchGw.getSandboxInstanceId());
 		if( batchInstance == null ) {
 			return restFullReturnService.resourceNotFound("Not found batch instance");
 		}
+
 		/*모델 체크*/
 		Map<String, Object> model = projectGwMapper.modelGw(batchGw.getProjectId(), batchGw.getModelId());
 		if( model == null ) {
@@ -490,7 +356,7 @@ public class BatchGwService {
 		batchGwMapper.updateBatchServiceGw(batchGw);
 		Map<String, Object> detail = batchGwMapper.batchServiceGw(batchGw.getBatchServiceId(), null);
 		if( MakeUtil.isNotNullAndEmpty(detail) ) {
-			resultJson.put("batchService", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
+			resultJson.put("batchService", MakeUtil.nvlJson(JSONObject.fromObject(detail)));
 		}else {
 			return restFullReturnService.resourceNotFound("Not found batchService");
 		}
@@ -584,13 +450,6 @@ public class BatchGwService {
 	}
 	
 	
-	
-	
-	
-	
-	
-	
-	
 	/**
 	 * 배치서버 목록 조회
 	 * @return
@@ -601,7 +460,7 @@ public class BatchGwService {
 		
 		List<Map<String, Object>> list = batchGwMapper.batchServersGw();
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(JSONObject.fromObject(map)));
 		}
 		
 		return jsonArr;
@@ -624,119 +483,9 @@ public class BatchGwService {
 		if( batchServerDetail == null ) {
 			return restFullReturnService.resourceNotFound("Not found batch Server");
 		}
-		return MakeUtil.nvlJson(new JSONObject().fromObject(batchServerDetail));
+		return MakeUtil.nvlJson(JSONObject.fromObject(batchServerDetail));
 	}
 
-	/**
-	 * 배치서버 생성
-	 * @param batch
-	 * @return
-	 * @throws Exception 
-	 */
-	// public JSONObject batchServersAsPostGw(HttpSession session, InstanceGw instanceGw) throws Exception {
-	// 	JSONObject returnJson = new JSONObject();
-		
-	// 	// 중복체크
-	// 	if( sandboxGwMapper.checkInstanceNameGw(instanceGw.getName()) > 0 ) {
-	// 		return restFullReturnService.alreadyExists("duplicate name");
-			
-	// 	}else {
-			
-	// 		// 인스턴스 생성
-	// 		String url = cloudApiUrl+CLOUD_API_SERVER_POST_FIX;
-
-	// 		Headers headers=new Headers.Builder().add(CLOUD_API_CREDENTIAL_KEY, cloudApiCredential).build();
-	// 		JSONObject paramJson = new JSONObject();
-	// 		JSONArray jsonTempArr = new JSONArray();
-	// 		JSONObject  httpResponseJson= new JSONObject();
-	// 		paramJson.put("name", instanceGw.getName());
-	// 		paramJson.put("sourceType", "image");
-	// 		paramJson.put("volumeCreated", "false");
-
-	// 		paramJson.put("imageId", imageRef);
-	// 		paramJson.put("flavorName", flavorRef);
-	// 		paramJson.put("keyPair", keyName);
-	// 		paramJson.put("zone", availabilityZone);
-
-	// 		jsonTempArr.add(networks);
-	// 		paramJson.put("networkId", jsonTempArr);
-
-	// 		jsonTempArr = new JSONArray();
-	// 		jsonTempArr.add(securityGroups);
-	// 		paramJson.put("securityGroupName", jsonTempArr);
-
-	// 		httpResponseJson = httpService.httpServicePOST(url, headers, paramJson.toString());
-
-	// 		if( "201".equals(httpResponseJson.get("type")) ) {
-	// 			logger.info("Server creation completed... ");
-
-	// 			instanceGw.setUserId(""+session.getAttribute("userId"));
-	// 			instanceGw.setKeypairName(keyName); // 키페어 이름
-	// 			instanceGw.setServerState("create_call"); // 서버상태
-	// 			instanceGw.setModuleState("checking");
-	// 			instanceGw.setAvailabilityZone(availabilityZone);// 가용구역
-	// 			instanceGw.setCloudInstanceServerId(flavorRef);  // 서버아이디
-	// 			instanceGw.setTemplateId(999999);
-	// 			instanceGw.setAnalysisInstanceServerType("batch"); // 서버타입(sandbox, batch)
-
-
-	// 			/* 인스턴스 저장 */
-	// 			sandboxGwMapper.insertInstanceGw(instanceGw);
-	// 			logger.info("InstanceGw insert completed...");
-
-	// 			/* 인스턴스 상세 저장 */
-	// 			instanceGw.setSnapshotId(imageRef); // 스냅샷 아이디
-				
-	// 			sandboxGwMapper.insertInstanceDetailGw(instanceGw);
-	// 			logger.info("InstanceDetail insert completed...");
-				
-	// 		}else if( "400".equals(httpResponseJson.get("type")) ) { // Bad Request
-	// 			JSONObject errorJson = new JSONObject().fromObject(httpResponseJson.get("data"));
-	// 			errorJson = new JSONObject().fromObject(errorJson.get("badRequest"));
-	// 			String message = errorJson.get("message")+"";
-				
-	// 			if( message.indexOf("disk is smaller than the minimum") > -1 ) { // 디스크가 이미지보다 작다
-	// 				returnJson.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
-	// 				returnJson.put("type", "Operation Not Supported");
-	// 				returnJson.put("detail", "disk is smaller than the minimum");
-	// 			}else {
-	// 				returnJson.put("type", "http://citydatahub.kr/errors/InternalError");
-	// 				returnJson.put("title", "Internal Error");
-	// 				returnJson.put("detail", httpResponseJson.get("data"));
-	// 			}
-					
-			
-	// 		}else if( "403".equals(httpResponseJson.get("type")) ) { // Forbidden
-	// 			JSONObject errorJson = new JSONObject().fromObject(httpResponseJson.get("data"));
-	// 			errorJson = new JSONObject().fromObject(errorJson.get("forbidden"));
-	// 			String message = errorJson.get("message")+"";
-				
-	// 			if( message.indexOf("Quota exceeded for ram:") > -1 ) { // 할당 메모리 초과
-	// 				returnJson.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
-	// 				returnJson.put("type", "Operation Not Supported");
-	// 				returnJson.put("detail", "Quota exceeded for ram:");
-					
-	// 			}else if( message.indexOf("Quota exceeded for cores:") > -1 ) { // 할당 코어 초과
-	// 				returnJson.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
-	// 				returnJson.put("type", "Operation Not Supported");
-	// 				returnJson.put("detail", "Quota exceeded for cores:");
-					
-	// 			}else {
-	// 				returnJson.put("type", "http://citydatahub.kr/errors/OperationNotSupported");
-	// 				returnJson.put("type", "Operation Not Supported");
-	// 				returnJson.put("detail", httpResponseJson.get("data"));
-	// 			}
-				
-	// 		}else {
-	// 			returnJson.put("type", "http://citydatahub.kr/errors/InternalError");
-	// 			returnJson.put("title", "Internal Error");
-	// 			returnJson.put("detail", httpResponseJson.get("data"));
-	// 		}
-	// 	}
-	// 	return returnJson;
-	// }
-	
-	
 	/**
 	 * 배치 시작/정지
 	 * @param batch
@@ -762,7 +511,7 @@ public class BatchGwService {
 		// 배치 시작/정지 수정
 		batchGwMapper.updateBatchServiceUseFlagGw(batchGw);
 		Map<String, Object> detail = batchGwMapper.batchServiceGw(batchInstanceId, null);
-		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchService", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
+		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchService", MakeUtil.nvlJson(JSONObject.fromObject(detail)));
 
 		/*************** 배치서버에 전송 *********************/
 		String listUrl = null;
@@ -801,7 +550,7 @@ public class BatchGwService {
 		
 		List<Map<String, Object>> list = batchGwMapper.batchLogsGw(userId, startDate, endDate);
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(JSONObject.fromObject(map)));
 		}
 		
 		return jsonArr;
@@ -829,6 +578,6 @@ public class BatchGwService {
         if( batchLogDetail == null ) {
             return restFullReturnService.resourceNotFound("Not found batchLog");
         }
-		return MakeUtil.nvlJson(new JSONObject().fromObject(batchLogDetail));
+		return MakeUtil.nvlJson(JSONObject.fromObject(batchLogDetail));
 	}
 }

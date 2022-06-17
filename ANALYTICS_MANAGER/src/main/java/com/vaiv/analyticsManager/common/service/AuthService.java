@@ -51,13 +51,9 @@ public class AuthService {
 
 	@Value("${sso.authEndpoint}")
 	private String authEndpoint;
-	@Value("${sso.responseType}")
-	private String responseType;
 
 	@Value("${sso.redirectUri_pub}")
 	private String redirectUriPub;
-	@Value("${sso.redirectUri_admin}")
-	private String redirectUriAdmin;
 
 	@Value("${sso.adminClientId}")
 	private String adminClientId;
@@ -82,13 +78,13 @@ public class AuthService {
 	@Value("${sso.logoutMethod}")
 	private String logoutMethod;
 	
-	@Value("${sso.cookieInTokenName}")
-	private String COOKIE_IN_TOKEN_NAME;
-
-	@Value("${cityHub.url}")
-	private String cityHubUrl;
-
 	private OkHttpClient client = new OkHttpClient();
+	
+	private final String COOKIE_IN_TOKEN_NAME = "chaut";
+	private final String ACCESS_TOKEN = "access_token";
+	private final String ACCESS_TOKEN_FOR_SESSION = "accessToken";
+	private final String RESPONSE_TYPE = "code";
+	private final String REFRESH_TOKEN = "refresh_token";
 
 	private static String user_token;
 	private static String user_refreshToken = "";
@@ -114,8 +110,8 @@ public class AuthService {
 				}
 			}
 		}
-		if (accessToken == null && MakeUtil.isNotNullAndEmpty(session.getAttribute("accessToken"))) {
-			accessToken = "" + session.getAttribute("accessToken");
+		if (accessToken == null && MakeUtil.isNotNullAndEmpty(session.getAttribute(ACCESS_TOKEN_FOR_SESSION))) {
+			accessToken = "" + session.getAttribute(ACCESS_TOKEN_FOR_SESSION);
 		}
 
 		return accessToken;
@@ -131,7 +127,7 @@ public class AuthService {
 		String state = EncryptionUtil.sha256Encoder(request);
 		String redirectUri = redirectUriPub;
 
-		String urlParam = "?response_type=" + responseType + "&redirect_uri=" + redirectUri + "&client_id=" + adminClientId + "&state=" + state + "";
+		String urlParam = "?response_type=" + RESPONSE_TYPE + "&redirect_uri=" + redirectUri + "&client_id=" + adminClientId + "&state=" + state + "";
 
 		return dataHubUrlPubAdmin + authEndpoint + urlParam;
 	}
@@ -156,7 +152,7 @@ public class AuthService {
 		jsonObject.addProperty("client_id", adminClientId);
 		jsonObject.addProperty("client_secret", adminClientSecret);
 		jsonObject.addProperty("redirect_uri", redirectUri);
-		jsonObject.addProperty("code", code);
+		jsonObject.addProperty(RESPONSE_TYPE, code);
 
 		RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonObject.toString());
 		Request okRequest = new Request.Builder().url(tokenUrl).post(requestBody).build();
@@ -196,11 +192,11 @@ public class AuthService {
 
 		if (tokenResponse != null) {
 			JsonObject token = parser.parse(tokenResponse).getAsJsonObject();
-			String accessToken = "access_token";
-			cookie = new Cookie(COOKIE_IN_TOKEN_NAME, token.get(accessToken).getAsString());
+			cookie = new Cookie(COOKIE_IN_TOKEN_NAME, token.get(ACCESS_TOKEN).getAsString());
 
 			cookie.setHttpOnly(true);
 			cookie.setSecure(false);
+			// cookie.setPath("/");
 			cookie.setMaxAge(60 * 60 * 24);
 			response.addCookie(cookie);
 		}
@@ -230,7 +226,7 @@ public class AuthService {
 	public void createAccessTokenSession(String accessToken, HttpServletRequest request) {
 		if (accessToken != null) {
 			HttpSession session = request.getSession();
-			session.setAttribute("accessToken", accessToken);
+			session.setAttribute(ACCESS_TOKEN_FOR_SESSION, accessToken);
 		}
 	}
 
@@ -246,14 +242,13 @@ public class AuthService {
 	 * @throws InvalidKeySpecException
 	 * @throws UnsupportedEncodingException
 	 */
-	@SuppressWarnings({ "static-access" })
 	public boolean ValidateToken(String publicKeyResponse, String accessToken, HttpServletRequest request,
 			HttpServletResponse response, String option, String requestUrl)
 			throws NoSuchAlgorithmException, InvalidKeySpecException, UnsupportedEncodingException {
 
 		try {
 			if (MakeUtil.isNotNullAndEmpty(publicKeyResponse)) {
-				JSONObject publicKeyResponseJson = new JSONObject().fromObject(publicKeyResponse);
+				JSONObject publicKeyResponseJson = JSONObject.fromObject(publicKeyResponse);
 				publicKeyResponse = "" + publicKeyResponseJson.get("publickey");
 				KeyFactory kf = KeyFactory.getInstance("RSA");
 
@@ -325,6 +320,19 @@ public class AuthService {
 	public void removeCookie(HttpServletRequest request, HttpServletResponse response, String requestUrl) {
 		Cookie cookie = new Cookie(COOKIE_IN_TOKEN_NAME, null);
 		cookie.setMaxAge(0);
+		cookie.setPath("/");
+		response.addCookie(cookie);
+
+		cookie.setMaxAge(0);
+		cookie.setPath("/admin/algorithmManage");
+		response.addCookie(cookie);
+
+		cookie.setMaxAge(0);
+		cookie.setPath("/admin/projectManage");
+		response.addCookie(cookie);
+
+		cookie.setMaxAge(0);
+		cookie.setPath("/admin/batchManage");
 		response.addCookie(cookie);
 	}
 
@@ -334,8 +342,7 @@ public class AuthService {
 	 * @param request
 	 */
 	public void removeSession(HttpServletRequest request) {
-		HttpSession session = request.getSession();
-		session.invalidate();
+		request.getSession().invalidate();
 	}
 
 	/**
@@ -362,9 +369,9 @@ public class AuthService {
 
 		jsonObject.addProperty("grant_type", grantRefreshToken);
 		if ("owner".equals(option))
-			jsonObject.addProperty("refresh_token", user_refreshToken);
+			jsonObject.addProperty(REFRESH_TOKEN, user_refreshToken);
 		else
-			jsonObject.addProperty("refresh_token", refreshToken);
+			jsonObject.addProperty(REFRESH_TOKEN, refreshToken);
 
 		RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), jsonObject.toString());
 		Request okRequest = new Request.Builder().url(tokenUrl).addHeader("Authorization", refreshHeader).post(requestBody)
@@ -390,11 +397,11 @@ public class AuthService {
 			if ("owner".equals(option)) {
 				if (MakeUtil.isNotNullAndEmpty(resMessage)) {
 					JsonObject token = new JsonParser().parse(resMessage).getAsJsonObject();
-					if (token.get("access_token") != null)
-						user_token = token.get("access_token").getAsString();
+					if (token.get(ACCESS_TOKEN) != null)
+						user_token = token.get(ACCESS_TOKEN).getAsString();
 
-					if (token.get("refresh_token") != null)
-						user_refreshToken = token.get("refresh_token").getAsString();
+					if (token.get(REFRESH_TOKEN) != null)
+						user_refreshToken = token.get(REFRESH_TOKEN).getAsString();
 				}
 			} else {
 				cookieAddTokenByJson(request, response, resMessage, requestUrl); // 쿠키
@@ -440,9 +447,8 @@ public class AuthService {
 
 		if (token != null) {
 			JsonObject getRefreshToken = parser.parse(token).getAsJsonObject();
-			String target = "expires_in";
-			if (getRefreshToken.get(target) != null) {
-				expires = getRefreshToken.get(target).getAsString();
+			if (getRefreshToken.get(REFRESH_TOKEN) != null) {
+				expires = getRefreshToken.get(REFRESH_TOKEN).getAsString();
 			}
 		}
 
@@ -463,11 +469,11 @@ public class AuthService {
 			String cityhubToken = getCityhubToken(requestUrl);
 			if (MakeUtil.isNotNullAndEmpty(cityhubToken)) {
 				JsonObject token = new JsonParser().parse(cityhubToken).getAsJsonObject();
-				if (token.get("access_token") != null)
-					user_token = token.get("access_token").getAsString();
+				if (token.get(ACCESS_TOKEN) != null)
+					user_token = token.get(ACCESS_TOKEN).getAsString();
 
-				if (token.get("refresh_token") != null)
-					user_refreshToken = token.get("refresh_token").getAsString();
+				if (token.get(REFRESH_TOKEN) != null)
+					user_refreshToken = token.get(REFRESH_TOKEN).getAsString();
 			}
 		}
 
@@ -514,8 +520,6 @@ public class AuthService {
 
 		try {
 			jsonObject.addProperty("grant_type", grantPasswordCredentials);
-			// jsonObject.addProperty("username", username);
-			// jsonObject.addProperty("password", password);
 
 			RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"),
 					jsonObject.toString());
@@ -548,13 +552,12 @@ public class AuthService {
 	 * @throws InvalidKeySpecException
 	 * @throws NoSuchAlgorithmException
 	 */
-	@SuppressWarnings("static-access")
 	public void createUserSession(String token, HttpServletRequest request, HttpServletResponse response,
 			String requestUrl) throws InvalidKeySpecException, NoSuchAlgorithmException {
 		HttpSession session = request.getSession();
 
 		try {
-			JSONObject publicKeyResponseJson = new JSONObject().fromObject(getPublicKey(requestUrl));
+			JSONObject publicKeyResponseJson = JSONObject.fromObject(getPublicKey(requestUrl));
 			String publicKeyResponse = "" + publicKeyResponseJson.get("publickey");
 			KeyFactory kf = KeyFactory.getInstance("RSA");
 			String publicKeyContent = publicKeyResponse.replaceAll("\r\n", "").replaceAll("-----BEGIN PUBLIC KEY-----", "")
@@ -569,22 +572,8 @@ public class AuthService {
 			session.setAttribute("userType", claims.getBody().get("type"));
 			session.setAttribute("userId", claims.getBody().get("userId"));
 			session.setAttribute("userNickname", claims.getBody().get("nickname"));
-			session.setAttribute("userEmail", claims.getBody().get("email"));
 			session.setAttribute("userRole", claims.getBody().get("role"));
 
-			// User(name, phone)정보 가져오기
-			if ("Analytics_Admin".equals(session.getAttribute("userRole")))
-				user_token = token;
-
-			String userInfo = getUserInfo("" + session.getAttribute("userId"), request, response, requestUrl);
-			if (MakeUtil.isNotNullAndEmpty(userInfo)) {
-				JSONObject userInfoJson = new JSONObject().fromObject(userInfo);
-				session.setAttribute("userPhone", userInfoJson.get("phone"));
-				session.setAttribute("userName", userInfoJson.get("name"));
-			}
-
-			// cityHub URL 저장
-			session.setAttribute("cityHubUrl", cityHubUrl);
 		} catch (Exception e) {
 			logger.error("createUserSession Error : " + e);
 			MakeUtil.printErrorLogger(e, "createUserSession Error");
@@ -641,7 +630,6 @@ public class AuthService {
 	 * @param requestUrl
 	 * @return
 	 */
-	@SuppressWarnings("static-access")
 	public boolean userRoleCheck(HttpServletRequest request, HttpServletResponse response, String option, String accessToken, String requestUrl) {
 		String userRole = null;
 		try {
@@ -651,7 +639,7 @@ public class AuthService {
 				userRole = "" + session.getAttribute("userRole");
 
 			}else {
-				JSONObject publicKeyResponseJson = new JSONObject().fromObject(getPublicKey(requestUrl));
+				JSONObject publicKeyResponseJson = JSONObject.fromObject(getPublicKey(requestUrl));
 				String publicKeyResponse = "" + publicKeyResponseJson.get("publickey");
 
 				KeyFactory kf = KeyFactory.getInstance("RSA");

@@ -13,7 +13,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 @Service
-@SuppressWarnings("static-access")
 public class AlgorithmRestService {
 	
 	@Autowired
@@ -32,7 +31,7 @@ public class AlgorithmRestService {
 		List<Map<String, Object>> list = algorithmRestMapper.algorithms();
 		
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(new JSONObject().fromObject(map));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(JSONObject.fromObject(map));
 		}
 		result.put("result", "success");
 		result.put("type", "2000");
@@ -50,7 +49,7 @@ public class AlgorithmRestService {
 		JSONObject result = new JSONObject();
 		
 		Map<String, Object> detail = algorithmRestMapper.algorithm(id);
-		if( MakeUtil.isNotNullAndEmpty(detail) )	result.put("algorithm", new JSONObject().fromObject(detail));
+		if( MakeUtil.isNotNullAndEmpty(detail) )	result.put("algorithm", JSONObject.fromObject(detail));
 		
 		result.put("result", "success");
 		result.put("type", "2000");
@@ -69,7 +68,7 @@ public class AlgorithmRestService {
 		List<Map<String, Object>> list = algorithmRestMapper.searchAlgorithms(searchValue);
 		
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(JSONObject.fromObject(map)));
 		}
 		result.put("result", "success");
 		result.put("type", "2000");

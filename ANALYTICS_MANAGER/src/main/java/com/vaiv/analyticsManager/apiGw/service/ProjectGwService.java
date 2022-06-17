@@ -29,7 +29,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 @Service
-@SuppressWarnings("static-access")
 public class ProjectGwService {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -75,7 +74,7 @@ public class ProjectGwService {
 		
 		List<Map<String, Object>> list = projectGwMapper.projectsGw(userId);
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(JSONObject.fromObject(map)));
 		}
 		
 		return jsonArr;
@@ -99,7 +98,7 @@ public class ProjectGwService {
 		if( detail == null ) {
 			return restFullReturnService.resourceNotFound("Not found project");
 		}
-		result = MakeUtil.nvlJson(new JSONObject().fromObject(detail));
+		result = MakeUtil.nvlJson(JSONObject.fromObject(detail));
 		return result;
 	}
 	
@@ -202,7 +201,7 @@ public class ProjectGwService {
 		}
 		
 
-		// 원본데이터 삭제(천처리 삭제,모델 삭제) => 전처리 삭제(update) => 모델 삭제(update)
+		// 원본데이터 삭제(전처리 삭제,모델 삭제) => 전처리 삭제(update) => 모델 삭제(update)
 		List<Map<String, Object>> originalDataList = projectGwMapper.originalDataListGw(id);
 		JSONObject originalDataJson = null;
 		for( Map<String, Object> originalDataGw : originalDataList ) {
@@ -242,7 +241,7 @@ public class ProjectGwService {
 		
 		for (Map<String, Object> map : list) {
 			if( MakeUtil.isNotNullAndEmpty(map) ) {
-				JSONObject convertCamelJson = MakeUtil.convertJsonSnakeCaseKeyToCamelCaseKey(new JSONObject().fromObject(map));
+				JSONObject convertCamelJson = MakeUtil.convertJsonSnakeCaseKeyToCamelCaseKey(JSONObject.fromObject(map));
 				convertCamelJson.put("sampleData", convertSampleData(convertCamelJson.get("sampleData")));
 				jsonArr.add(convertCamelJson);
 			}
@@ -269,7 +268,7 @@ public class ProjectGwService {
 		
 		Map<String, Object> detail = projectGwMapper.originalDataGw(projectSequenceId, originalDataSequenceId);
 		if( MakeUtil.isNotNullAndEmpty(detail) ) {
-			JSONObject convertCamelJson = MakeUtil.convertJsonSnakeCaseKeyToCamelCaseKey(new JSONObject().fromObject(detail));
+			JSONObject convertCamelJson = MakeUtil.convertJsonSnakeCaseKeyToCamelCaseKey(JSONObject.fromObject(detail));
 			convertCamelJson.put("sampleData", convertSampleData(convertCamelJson.get("sampleData")));
 			return convertCamelJson;
 
@@ -325,7 +324,7 @@ public class ProjectGwService {
 		
 		if( "201".equals(httpJson.get("type")) ) {
 			// 생성 성공
-			originalDataJson = new JSONObject().fromObject(httpJson.get("data"));
+			originalDataJson = JSONObject.fromObject(httpJson.get("data"));
 			originalDataGw.setOriginalDataId(Integer.parseInt(""+originalDataJson.get("ORIGINAL_DATA_SEQUENCE_PK")));
 			originalDataGw.setName(""+originalDataJson.get("NAME"));
 			originalDataGw.setFilename(""+originalDataJson.get("FILENAME"));
@@ -472,7 +471,7 @@ public class ProjectGwService {
 		// 모델정보 가져오기
 		Map<String, Object> projectDetail = projectGwMapper.projectGw(projectSequenceId);
 		
-		// 천처리 삭제(모델 삭제) => 모델 삭제(update)
+		// 전처리 삭제(모델 삭제) => 모델 삭제(update)
 		List<Map<String, Object>> preprocessedList = projectGwMapper.preprocessedDataListGw(Integer.parseInt(""+projectDetail.get("SELECTED_INSTANCE")), originalDataSequenceId);
 		
 		JSONObject preprocessedJson = null;
@@ -492,7 +491,7 @@ public class ProjectGwService {
 		
 		// 원본데이터 삭제 API
 		if( !"NoAPI".equals(option)) {
-			httpJson = httpService.httpServiceDELETE(listUrl, "");
+			httpJson = httpService.httpServiceDELETE(listUrl);
 		}else {
 			httpJson.put("type", "200");
 		}
@@ -508,7 +507,7 @@ public class ProjectGwService {
 			return restFullReturnService.badRequestData("Mandatory Parameter Missing");
 			
 		}else if( "404".equals(httpJson.get("type")) ) {
-			JSONObject json = new JSONObject().fromObject(httpJson.get("data"));
+			JSONObject json = JSONObject.fromObject(httpJson.get("data"));
 			// 이미 삭제처리되었을 경우
 			if( "4004".equals(json.get("type")) && "File Not Found".equals(json.get("title")) ){
 				// 삭제 성공
@@ -537,7 +536,7 @@ public class ProjectGwService {
 		
 		List<Map<String, Object>> list = projectGwMapper.preprocessFunctionListGw();
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(JSONObject.fromObject(map)));
 		}
 		
 		return jsonArr;
@@ -561,7 +560,7 @@ public class ProjectGwService {
 		if( detail == null ) {
 			return restFullReturnService.resourceNotFound("Not found preprocessFunction");
 		}
-		result = MakeUtil.nvlJson(new JSONObject().fromObject(detail));
+		result = MakeUtil.nvlJson(JSONObject.fromObject(detail));
 		return result;
 	}
 
@@ -585,7 +584,7 @@ public class ProjectGwService {
 		for (Map<String, Object> map : list) {
 			if( MakeUtil.isNotNullAndEmpty(map) ) {
 				map.put("summary", MakeUtil.replaceNone(""+map.get("summary")));
-				JSONObject convertCamelJson = MakeUtil.convertJsonSnakeCaseKeyToCamelCaseKey(new JSONObject().fromObject(map));
+				JSONObject convertCamelJson = MakeUtil.convertJsonSnakeCaseKeyToCamelCaseKey(JSONObject.fromObject(map));
 				jsonArr.add(convertCamelJson);
 			}
 		}
@@ -615,7 +614,7 @@ public class ProjectGwService {
 		Map<String, Object> detail = projectGwMapper.preprocessedDataGw(instanceId, preprocessedDataId);
 		if( MakeUtil.isNotNullAndEmpty(detail) ) {
 			detail.put("summary", MakeUtil.replaceNone(""+detail.get("summary")));
-			JSONObject convertCamelJson = MakeUtil.convertJsonSnakeCaseKeyToCamelCaseKey(new JSONObject().fromObject(detail));
+			JSONObject convertCamelJson = MakeUtil.convertJsonSnakeCaseKeyToCamelCaseKey(JSONObject.fromObject(detail));
 			return convertCamelJson;
 		}else {
 			return restFullReturnService.resourceNotFound("Not found preprocessed Data");
@@ -664,12 +663,12 @@ public class ProjectGwService {
 		newParams.put("original_data_sequence_pk", newParams.get("originalDataId"));
 		newParams.put("request_data", newParams.get("requestData"));
 		
-		param = new JSONObject().fromObject(newParams);
+		param = JSONObject.fromObject(newParams);
 		httpJson = httpService.httpServicePOST(listUrl, param.toString(), null);
 		if( "202".equals(httpJson.get("type")) ) {
 			// 생성 성공
 			
-			preprocessedDataJson = new JSONObject().fromObject(httpJson.get("data"));
+			preprocessedDataJson = JSONObject.fromObject(httpJson.get("data"));
 			PreprocessedDataGw pData = new PreprocessedDataGw();
 			pData.setPreprocessedDataId(Integer.parseInt(""+preprocessedDataJson.get("PREPROCESSED_DATA_SEQUENCE_PK")));
 			pData.setCommand(""+preprocessedDataJson.get("COMMAND"));
@@ -768,8 +767,8 @@ public class ProjectGwService {
 			String ip = sandboxGwService.getInstanceIp(Integer.parseInt(""+project.get("SELECTED_INSTANCE")));
 			String listUrl = ip + "/preprocessedData/"+preprocessedDataId;
 			
-			// 천처리 삭제 API
-			httpJson = httpService.httpServiceDELETE(listUrl, "");
+			// 전처리 삭제 API
+			httpJson = httpService.httpServiceDELETE(listUrl);
 			
 		}else {
 			httpJson.put("type", "200");
@@ -787,7 +786,7 @@ public class ProjectGwService {
 			return restFullReturnService.badRequestData("Mandatory Parameter Missing");
 			
 		}else if( "404".equals(httpJson.get("type")) ) {
-			JSONObject json = new JSONObject().fromObject(httpJson.get("data"));
+			JSONObject json = JSONObject.fromObject(httpJson.get("data"));
 			// 이미 삭제처리되었을 경우
 			if( "4004".equals(json.get("type")) && "File Not Found".equals(json.get("title")) ){
 				PreprocessedDataGw pData = new PreprocessedDataGw();
@@ -835,7 +834,7 @@ public class ProjectGwService {
 		for (Map<String, Object> map : list) {
 			if( MakeUtil.isNotNullAndEmpty(map) ) {
 				map.put("trainSummary", MakeUtil.replaceNone(""+map.get("trainSummary")));
-				JSONObject convertCamelJson = MakeUtil.convertJsonSnakeCaseKeyToCamelCaseKey(new JSONObject().fromObject(map));
+				JSONObject convertCamelJson = MakeUtil.convertJsonSnakeCaseKeyToCamelCaseKey(JSONObject.fromObject(map));
 				jsonArr.add(convertCamelJson);
 			}
 		}
@@ -862,7 +861,7 @@ public class ProjectGwService {
 		Map<String, Object> detail = projectGwMapper.modelGw(projectId, modelId);
 		if( MakeUtil.isNotNullAndEmpty(detail) ) {
 			detail.put("trainSummary", MakeUtil.replaceNone(""+detail.get("trainSummary")));
-			JSONObject convertCamelJson = MakeUtil.convertJsonSnakeCaseKeyToCamelCaseKey(new JSONObject().fromObject(detail));
+			JSONObject convertCamelJson = MakeUtil.convertJsonSnakeCaseKeyToCamelCaseKey(JSONObject.fromObject(detail));
 			return convertCamelJson;
 		}else {
 			return restFullReturnService.resourceNotFound("Not found model");
@@ -913,11 +912,11 @@ public class ProjectGwService {
 		newParams.put("model_parameters", newParams.get("modelParameters"));
 		newParams.put("train_parameters", newParams.get("trainParameters"));
 		
-		param = new JSONObject().fromObject(newParams);
+		param = JSONObject.fromObject(newParams);
 		httpJson = httpService.httpServicePOST(listUrl, param.toString(), null);
 		if( "202".equals(httpJson.get("type")) ) {
 			// 생성 성공
-			modelJson = new JSONObject().fromObject(httpJson.get("data"));
+			modelJson = JSONObject.fromObject(httpJson.get("data"));
 			ModelGw modelGw = new ModelGw();
 			modelGw.setModelId(Integer.parseInt(""+modelJson.get("MODEL_SEQUENCE_PK")));
 			modelGw.setCommand(""+modelJson.get("COMMAND"));
@@ -1003,7 +1002,7 @@ public class ProjectGwService {
 			// 인스턴스 내부IP 가져오기
 			String ip = sandboxGwService.getInstanceIp(Integer.parseInt(""+project.get("SELECTED_INSTANCE")));
 			listUrl = ip + "/models/"+modelId;
-			param = new JSONObject().fromObject(params);
+			param = JSONObject.fromObject(params);
 			httpJson = httpService.httpServicePATCH(listUrl, param.toString(), null);
 			
 		}else {
@@ -1086,13 +1085,13 @@ public class ProjectGwService {
 		newParams.put("mode", newParams.get("mode"));
 		newParams.put("test_data_path", newParams.get("testDataPath"));
 		
-		param = new JSONObject().fromObject(params);
+		param = JSONObject.fromObject(params);
 		
 		httpJson = httpService.httpServicePATCH(listUrl, param.toString(), null);
 		
 		if( "200".equals(httpJson.get("type")) || "202".equals(httpJson.get("type")) ) {
 			
-			return new JSONObject().fromObject(httpJson.get("data"));
+			return JSONObject.fromObject(httpJson.get("data"));
 			
 		}else if( "400".equals(httpJson.get("type")) ) {
 			return restFullReturnService.badRequestData("Mandatory Parameter Missing");
@@ -1158,7 +1157,7 @@ public class ProjectGwService {
 			String listUrl = ip + "/models/"+modelId;
 			
 			// 모델 삭제 API
-			httpJson = httpService.httpServiceDELETE(listUrl, "");
+			httpJson = httpService.httpServiceDELETE(listUrl);
 			
 		}else {
 			httpJson.put("type", "200");
@@ -1175,7 +1174,7 @@ public class ProjectGwService {
 			return restFullReturnService.badRequestData("Mandatory Parameter Missing");
 			
 		}else if( "404".equals(httpJson.get("type")) ) {
-			JSONObject json = new JSONObject().fromObject(httpJson.get("data"));
+			JSONObject json = JSONObject.fromObject(httpJson.get("data"));
 			// 이미 삭제처리되었을 경우
 			if( "4004".equals(json.get("type")) && "File Not Found".equals(json.get("title")) ){
 				ModelGw modelGw = new ModelGw();
@@ -1205,7 +1204,7 @@ public class ProjectGwService {
 	 */
 	public JSONObject convertSampleData(Object sampleData) {
 		JSONObject resultJson = new JSONObject();
-		JSONObject sampleDataJson = new JSONObject().fromObject(sampleData);
+		JSONObject sampleDataJson = JSONObject.fromObject(sampleData);
 		ArrayList<String> stringArr = null;
 		JSONArray valueArray = null;
 		JSONObject json = null;
@@ -1217,11 +1216,11 @@ public class ProjectGwService {
 		while( it.hasNext() ) {
 			key = (String) it.next();
 			value = sampleDataJson.get(key);
-			valueArray = new JSONArray().fromObject(value);
+			valueArray = JSONArray.fromObject(value);
 			stringArr = new ArrayList<String>();
 			
 			for (int i = 0; i < valueArray.size(); i++) {
-				json = new JSONObject().fromObject(valueArray.get(i));
+				json = JSONObject.fromObject(valueArray.get(i));
 				
 				Iterator<?> sampleIt = json.keys();
 				while( sampleIt.hasNext() ) {

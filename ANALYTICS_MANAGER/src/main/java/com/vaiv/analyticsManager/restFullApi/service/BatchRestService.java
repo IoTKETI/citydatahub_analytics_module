@@ -4,9 +4,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpSession;
-
-import okhttp3.Headers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +15,13 @@ import com.vaiv.analyticsManager.common.utils.FileUtil;
 import com.vaiv.analyticsManager.common.utils.MakeUtil;
 import com.vaiv.analyticsManager.common.utils.ZipUtils;
 import com.vaiv.analyticsManager.restFullApi.domain.Batch;
-import com.vaiv.analyticsManager.restFullApi.domain.Instance;
 import com.vaiv.analyticsManager.restFullApi.domain.SearchData;
 import com.vaiv.analyticsManager.restFullApi.mapper.BatchRestMapper;
-import com.vaiv.analyticsManager.restFullApi.mapper.SandboxRestMapper;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 @Service
-@SuppressWarnings("static-access")
 public class BatchRestService {
 
 	private static Logger logger = LoggerFactory.getLogger(SandboxRestService.class);
@@ -39,40 +33,12 @@ public class BatchRestService {
 	private SandboxRestService sandboxRestService;
 	
 	@Autowired
-	private SandboxRestMapper sandboxRestMapper;
-	
-	
-	@Autowired
 	private HttpService httpService;
 
 
 	// Cloud API
 	@Value("${cloudApi.url}")
 	private String cloudApiUrl;
-
-	@Value("${cloudApi.credential}")
-	private String cloudApiCredential;
-
-	@Value("${cloudApi.batch.imageRef}")
-	private String imageRef;
-
-	@Value("${cloudApi.batch.flavorRef}")
-	private String flavorRef;
-
-	@Value("${cloudApi.batch.keyName}")
-	private String keyName;
-
-	@Value("${cloudApi.batch.availabilityZone}")
-	private String availabilityZone;
-
-	@Value("${cloudApi.batch.networks}")
-	private String networks;
-
-	@Value("${cloudApi.batch.securityGroups}")
-	private String securityGroups;
-
-	private final String CLOUD_API_SERVER_POST_FIX="/openstack/infra/cloudServices/openstack/servers";
-	private final String CLOUD_API_CREDENTIAL_KEY="credential";
 
 	@Value("${nfs.path}")
 	private String nfsPath;
@@ -85,139 +51,18 @@ public class BatchRestService {
 	
 	
 	/**
-	 * 배치신청 목록 조회
-	 * @param userId
-	 * @return
-	 * @throws Exception 
-	 */
-	public JSONObject batchServiceRequests(HttpSession session) throws Exception {
-		JSONObject resultJson = new JSONObject();
-		JSONArray jsonArr = new JSONArray();
-		
-		String userRole = ""+session.getAttribute("userRole");
-		String userId = ""+session.getAttribute("userId");
-		if( "Analytics_Admin".equals(userRole) ) userId = "";
-		
-		List<Map<String, Object>> list = batchRestMapper.batchServiceRequests(userId);
-		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
-		}
-		
-		
-		resultJson.put("result", "success");
-		resultJson.put("type", "2000");
-		resultJson.put("batchServiceRequests", jsonArr);
-		return resultJson;
-	}
-
-	/**
-	 * 배치신청 조회
-	 * @param batchServiceSequencePk
-	 * @return
-	 * @throws Exception 
-	 */
-	public JSONObject batchServiceRequest(Integer batchServiceRequestSequencePk) throws Exception {
-		JSONObject resultJson = new JSONObject();
-		
-		Map<String, Object> detail = batchRestMapper.batchServiceRequest(batchServiceRequestSequencePk);
-		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchServiceRequest", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
-		
-		resultJson.put("result", "success");
-		resultJson.put("type", "2000");
-		return resultJson;
-	}
-
-	/**
-	 * 배치신청 등록
-	 * @param batch
-	 * @return
-	 * @throws Exception 
-	 */
-	public JSONObject batchServiceRequestsAsPost(Batch batch) throws Exception {
-		JSONObject resultJson = new JSONObject();
-		// 배치 명 중복 체크
-		if( batchRestMapper.checkBatchName(batch) > 0 ) {
-			resultJson.put("result", "fail");
-			resultJson.put("type", "4100");
-			resultJson.put("detail", "duplicateName");
-			return resultJson;
-			
-		}else {
-			// 배치신청 등록
-			batchRestMapper.insertBatchServiceRequest(batch);
-			
-			Map<String, Object> detail = batchRestMapper.batchServiceRequest(batch.getBatchServiceRequestSequencePk());
-			if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchServiceRequest", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
-			
-			resultJson.put("result", "success");
-			resultJson.put("type", "2001");
-			return resultJson;
-		}
-	}
-
-	/**
-	 * 배치신청 수정
-	 * @param batch
-	 * @return
-	 * @throws Exception 
-	 */
-	public JSONObject batchServiceRequestsAsPatch(Batch batch) throws Exception {
-		JSONObject resultJson = new JSONObject();
-		// 템플릿 명 중복 체크
-		if( batchRestMapper.checkBatchName(batch) > 0 ) {
-			resultJson.put("result", "fail");
-			resultJson.put("type", "4100");
-			resultJson.put("detail", "duplicateName");
-			return resultJson;
-			
-		}else {
-			// 배치신청 수정
-			batchRestMapper.updateBatchServiceRequest(batch);
-			
-			Map<String, Object> detail = batchRestMapper.batchServiceRequest(batch.getBatchServiceRequestSequencePk());
-			if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchServiceRequest", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
-			
-			resultJson.put("result", "success");
-			resultJson.put("type", "2001");
-			return resultJson;			
-		}
-	}
-	
-	/**
-	 * 배치 신청 삭제
-	 * @param batchServiceRequestSequencePk
-	 * @return
-	 * @throws Exception 
-	 */
-	public JSONObject batchServiceRequestsDelete(Integer batchServiceRequestSequencePk) throws Exception {
-		JSONObject resultJson = new JSONObject();
-		// 배치 신청 수정
-		Batch batch = new Batch();
-		batch.setBatchServiceRequestSequencePk(batchServiceRequestSequencePk);
-		batch.setDeleteFlag(true);
-		batchRestMapper.updateBatchServiceRequest(batch);
-		
-		resultJson.put("result", "success");
-		resultJson.put("type", "2001");
-		return resultJson;			
-	}
-	
-	/**
 	 * 배치 목록 조회
 	 * @param userId
 	 * @return
 	 * @throws Exception 
 	 */
-	public JSONObject batchServices(HttpSession session) throws Exception {
+	public JSONObject batchServices() throws Exception {
 		JSONObject resultJson = new JSONObject();
 		JSONArray jsonArr = new JSONArray();
-		String userRole = ""+session.getAttribute("userRole");
-		String userId = ""+session.getAttribute("userId");
-		if( "Analytics_Admin".equals(userRole) ) userId = "";
 		
-		List<Map<String, Object>> list = batchRestMapper.batchServices(userId);
+		List<Map<String, Object>> list = batchRestMapper.batchServices();
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(JSONObject.fromObject(map)));
 		}
 
 		resultJson.put("result", "success");
@@ -236,7 +81,7 @@ public class BatchRestService {
 		JSONObject resultJson = new JSONObject();
 		
 		Map<String, Object> detail = batchRestMapper.batchService(batchServiceSequencePk);
-		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchService", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
+		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchService", MakeUtil.nvlJson(JSONObject.fromObject(detail)));
 		
 		resultJson.put("result", "success");
 		resultJson.put("type", "2000");
@@ -285,7 +130,7 @@ public class BatchRestService {
 					Batch batchRequest = new Batch();
 					batchRequest.setBatchServiceRequestSequencePk(batch.getBatchServiceRequestSequencePk());
 					batchRequest.setProgressState("done");
-					batchRestMapper.updateBatchServiceRequest(batchRequest);
+					// batchRestMapper.updateBatchServiceRequest(batchRequest);
 				}
 				
 				// 배치 등록
@@ -327,7 +172,7 @@ public class BatchRestService {
 				logger.info("preprocessedData, model Files save complete...");
 
 				Map<String, Object> detail = batchRestMapper.batchService(batch.getBatchServiceSequencePk());
-				if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchService", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
+				if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchService", MakeUtil.nvlJson(JSONObject.fromObject(detail)));
 				
 				resultJson.put("result", "success");
 				resultJson.put("type", "2001");
@@ -348,7 +193,7 @@ public class BatchRestService {
 	 */
 	public JSONObject batchServicesAsPatch(Batch batch) throws Exception {
 		JSONObject resultJson = new JSONObject();
-		// 템플릿 명 중복 체크
+		// 배치 명 중복 체크
 		if( batchRestMapper.checkBatchName(batch) > 0 ) {
 			resultJson.put("result", "fail");
 			resultJson.put("type", "4100");
@@ -359,7 +204,7 @@ public class BatchRestService {
 			// 배치 수정
 			batchRestMapper.updateBatchService(batch);
 			Map<String, Object> detail = batchRestMapper.batchService(batch.getBatchServiceSequencePk());
-			if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchService", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
+			if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchService", MakeUtil.nvlJson(JSONObject.fromObject(detail)));
 			
 			/*************** 배치서버에 전송 *********************/
 			if( "start".equals(detail.get("BATCH_STATE")) ) {
@@ -427,145 +272,6 @@ public class BatchRestService {
 	}
 
 	/**
-	 * 배치서버 목록 조회
-	 * @return
-	 * @throws Exception 
-	 */
-	public JSONObject batchServers() throws Exception {
-		JSONObject resultJson = new JSONObject();
-		JSONArray jsonArr = new JSONArray();
-		
-		List<Map<String, Object>> list = batchRestMapper.batchServers();
-		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
-		}
-
-		resultJson.put("result", "success");
-		resultJson.put("type", "2000");
-		resultJson.put("batchServers", jsonArr);
-		return resultJson;
-	}
-
-	/**
-	 * 배치서버 생성
-	 * @param batch
-	 * @return
-	 * @throws Exception 
-	 */
-	// public JSONObject batchServersAsPost(Instance instance) throws Exception {
-
-
-	// 	JSONObject returnJson = new JSONObject();
-
-	// 	// 중복체크
-	// 	if( sandboxRestMapper.checkInstanceName(instance.getName()) > 0 ) {
-	// 		returnJson.put("result", "fail");
-	// 		returnJson.put("type", "4100");
-	// 		returnJson.put("detail", "duplicateName");
-	// 		return returnJson;
-
-	// 	}else {
-	// 		// 템플릿 데이터 가져오기
-	// 		// Map<String, Object> templateDetail = sandboxRestMapper.template(instance.getTemplateId()); // TODO:refactoring
-
-	// 		String url = cloudApiUrl+CLOUD_API_SERVER_POST_FIX;
-
-	// 		Headers headers=new Headers.Builder().add(CLOUD_API_CREDENTIAL_KEY, cloudApiCredential).build();
-
-	// 		// String jsonMessage = ""; // TODO:refactoring
-	// 		// JSONObject json = new JSONObject(); // TODO:refactoring
-	// 		JSONObject paramJson = new JSONObject();
-	// 		JSONArray jsonTempArr = new JSONArray();
-	// 		// JSONObject jsonTemp = new JSONObject(); // TODO:refactoring
-	// 		JSONObject  httpResponseJson= new JSONObject();
-	// 		paramJson.put("name", instance.getName());
-	// 		paramJson.put("sourceType", "image");
-	// 		paramJson.put("volumeCreated", "false");
-
-	// 		paramJson.put("imageId", imageRef);
-	// 		paramJson.put("flavorName", flavorRef);
-	// 		paramJson.put("keyPair", keyName);
-	// 		paramJson.put("zone", availabilityZone);
-
-	// 		jsonTempArr.add(networks);
-	// 		paramJson.put("networkId", jsonTempArr);
-
-	// 		jsonTempArr = new JSONArray();
-	// 		// jsonTemp = new JSONObject(); // TODO:refactoring
-	// 		jsonTempArr.add(securityGroups);
-	// 		paramJson.put("securityGroupName", jsonTempArr);
-
-	// 		httpResponseJson = httpService.httpServicePOST(url, headers, paramJson.toString());
-
-	// 		if( "201".equals(httpResponseJson.get("type")) ) {
-	// 			logger.info("Server creation completed... ");
-
-	// 			instance.setKeypairName(keyName); // 키페어 이름
-	// 			instance.setAvailabilityZone(availabilityZone);// 가용구역
-	// 			instance.setServerState("create_call"); // 서버상태
-	// 			instance.setModuleState("checking");
-	// 			instance.setCloudInstanceServerId(flavorRef);  // 서버아이디
-	// 			instance.setTemplateId(999999);
-	// 			instance.setAnalysisInstanceServerType("batch"); // 서버타입(sandbox, batch)
-
-	// 			/* 인스턴스 저장 */
-	// 			sandboxRestMapper.insertInstance(instance);
-	// 			logger.info("Instance insert completed...");
-
-	// 			/* 인스턴스 상세 저장 */
-	// 			instance.setSnapshotId(imageRef); // 스냅샷 아이디
-
-	// 			sandboxRestMapper.insertInstanceDetail(instance);
-	// 			logger.info("InstanceDetail insert completed...");
-
-	// 			Map<String, Object> detail = sandboxRestMapper.instance(instance.getInstanceSequencePk());
-
-	// 			returnJson.put("instance", new JSONObject().fromObject(detail));
-	// 			returnJson.put("result", "success");
-	// 			returnJson.put("type", "2001");
-
-	// 		}else if( "400".equals(httpResponseJson.get("type")) ) { // Bad Request
-	// 			JSONObject errorJson = new JSONObject().fromObject(httpResponseJson.get("data"));
-	// 			String message = errorJson.get("title")+"";
-
-	// 			if( message.indexOf("disk is smaller than the minimum") > -1 ) { // 디스크가 이미지보다 작다
-	// 				returnJson.put("type", "4000");
-	// 				returnJson.put("detail", "disk is smaller than the minimum");
-	// 			}else {
-	// 				returnJson.put("type", "5000");
-	// 				returnJson.put("detail", httpResponseJson.get("data"));
-	// 			}
-
-
-	// 		}else if( "403".equals(httpResponseJson.get("type")) ) { // Forbidden
-	// 			JSONObject errorJson = new JSONObject().fromObject(httpResponseJson.get("data"));
-	// 			String message = errorJson.get("title")+"";
-
-	// 			if( message.indexOf("Quota exceeded for ram:") > -1 ) { // 할당 메모리 초과
-	// 				returnJson.put("type", "4005");
-	// 				returnJson.put("detail", "Quota exceeded for ram:");
-
-	// 			}else if( message.indexOf("Quota exceeded for cores:") > -1 ) { // 할당 코어 초과
-	// 				returnJson.put("type", "4005");
-	// 				returnJson.put("detail", "Quota exceeded for cores:");
-
-	// 			}else {
-	// 				returnJson.put("type", "5000");
-	// 				returnJson.put("detail", httpResponseJson.get("data"));
-	// 			}
-
-
-	// 		}else {
-	// 			returnJson.put("detail", httpResponseJson.get("data"));
-	// 			returnJson.put("type", "5000");
-	// 			logger.error("Failed to create server creation... ",httpResponseJson.toString());
-	// 		}
-	// 	}
-	// 	return returnJson;
-
-	// }
-
-	/**
 	 * zip파일 압축 풀고 zip파일 삭제
 	 * @param filePath
 	 * @param fileName
@@ -592,7 +298,7 @@ public class BatchRestService {
 		// 배치 시작/정지 수정
 		batchRestMapper.updateBatchServiceUseFlag(batch);
 		Map<String, Object> detail = batchRestMapper.batchService(batch.getBatchServiceSequencePk());
-		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchService", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
+		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchService", MakeUtil.nvlJson(JSONObject.fromObject(detail)));
 
 		/*************** 배치서버에 전송 *********************/
 		String listUrl = null;
@@ -693,7 +399,7 @@ public class BatchRestService {
 		JSONObject resultJson = new JSONObject();
 		
 		Map<String, Object> detail = batchRestMapper.batchLog(logBatchSequencePk);
-		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchLog", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
+		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("batchLog", MakeUtil.nvlJson(JSONObject.fromObject(detail)));
 		
 		resultJson.put("result", "success");
 		resultJson.put("type", "2000");

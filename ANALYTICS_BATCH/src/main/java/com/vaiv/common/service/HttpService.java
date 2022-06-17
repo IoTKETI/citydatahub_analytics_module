@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -140,52 +139,6 @@ public class HttpService {
 		return MakeUtil.nvlJson(result);
 		
 	}
-	
-	//@Test
-	public void httpServicePATCH2() {
-		OkHttpClient client4;
-		client4 = new OkHttpClient();
-		OkHttpClient.Builder builder = new OkHttpClient.Builder();
-		builder.connectTimeout(30, TimeUnit.SECONDS); 
-        builder.readTimeout(30, TimeUnit.SECONDS); 
-        builder.writeTimeout(30, TimeUnit.SECONDS); 
-        client4 = builder.build();
-		String connUrl="http://ip:port/entities/urn:datahub:OffStreetParking:yt_lot_3/attrs/congestionIndexPrediction";
-		String jsonMessage="{\"congestionIndexPrediction\":{\"type\":\"Property\",\"value\":[{\"index\":73,\"predictedAt\":\"2019-12-10T14:00:00,000+09:00\"},{\"index\":74,\"predictedAt\":\"2019-12-10T15:00:00,000+09:00\"},{\"index\":74,\"predictedAt\":\"2019-12-10T16:00:00,000+09:00\"}],\"observedAt\":\"2019-12-12T10:56:30,291+09:00\"}}";
-		logger.info("--- httpServicePATCH connUrl: "+connUrl+", jsonMessage: "+jsonMessage+" ---");
-		JSONObject result = new JSONObject();
-		Request okRequest = null;
-		Response response = null;
-		String resMessage = "";
-		
-		RequestBody requestBody = RequestBody.create(MediaType.parse("raw"),jsonMessage.toString());
-		okRequest = new Request.Builder()
-				.addHeader("Accept", "application/json")
-				.addHeader("Accept-Charset", "UTF-8")
-				.addHeader("Content-Type", "application/json")
-				.url(connUrl).patch(requestBody).build();
-
-		logger.info("--- httpServicePATCH okRequest.headers : "+okRequest.headers().toString());
-		logger.info("--- data : " + okRequest.body().contentType());
-		logger.info("--- jsonMessage : " + jsonMessage.toString());
-		logger.info("--- data : " + okRequest.body());
-		
-		try {
-			response = client4.newCall(okRequest).execute();
-			resMessage = response.body().string();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		result.put("type", ""+response.code());
-		result.put("title", response.message());
-		result.put("data", resMessage);
-		
-		response.body().close();
-		logger.info("--- httpServicePATCH result : "+result.toString());
-			
-	}
-	
 	
 	/**
 	 * httpService DELETE

@@ -40,5 +40,3 @@ coreModuleApiServer:
 
 coreModuleIngestServer:
   url: http://ip:port/entityOperations/upsert?options=
-  datasetId: pocOffStreetParking
-  type: http://uri.citydatahub.kr/ngsi-ld/parking/OffStreetParking

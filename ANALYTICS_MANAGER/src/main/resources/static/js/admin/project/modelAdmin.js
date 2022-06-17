@@ -26,8 +26,6 @@ $(function(){
 		$("#userRequestTerm").val("");
 		$(".modalName").text("등록");
 		$("#selectedModel").val($(".modelName").first().text());
-		// 도메인명 가져오기(템플릿 허용 데이터 가져오기)
-		fnGetRequestTemplateAvailable();
 	});
 });
 
@@ -247,11 +245,8 @@ var fnModelTestModal = function(){
 		$("#modelLocalFiles").html(html);
 		fnOpenModal("modelTestModal");
 
-	}else if( response.title == "Resource Not Found" ){
-		fnComNotify("warning","샌드박스가 존재하지 않습니다.");
-
-	}else if( response.title == "Operation Not Supported" ){
-		fnComNotify("warning","샌드박스가 꺼져있습니다.");
+	}else {
+		fnComNotify("warning","모델 테스트를 실패하였습니다.");
 	}
 }
 
@@ -278,95 +273,6 @@ var fnModelTest = function(){
 	var result = fnModelTestByAjax(projectSequencePk, selectedModelPk, data);
 	$("#modelTestResult").html(JSON.stringify(result,null,2));
 	$("#loading").hide();
-}
-
-/*도메인명 가져오기(템플릿 허용 데이터 가져오기)*/
-var fnGetRequestTemplateAvailable = function(){
-	var html = "";
-	var availableList = fnGetRequestTemplateAvailableByAjax();
-	for( var i in availableList ){
-		html += "<option value="+availableList[i].id+">"+(availableList[i].name==""?availableList[i].id:availableList[i].name)+"</option>";
-	}
-	$("#resultUpdateDomain").html(html);
-}
-
-
-/*배치신청 등록*/
-var fnSaveBatchRequest = function(){
-	// validation
-	if( $.trim($("#batchName").val()) == "" ){
-		fnComNotify("warning", "배치명을 입력해주세요.");
-		$("#batchName").focus();
-		return false;
-		
-	}else if( $.trim($("#nifiTemplateName").val()) == "" ){
-		fnComNotify("warning", "NIFI 템플릿명을 입력해주세요.");
-		$("#nifiTemplateName").focus();
-		return false;
-
-	}else if( $.trim($("#totalColumnName").val()) == "" ){
-		fnComNotify("warning", "전체값 컬럼이름을 입력해주세요.");
-		$("#totalColumnName").focus();
-		return false;
-
-	}else if( $.trim($("#domainIdColumnName").val()) == "" ){
-		fnComNotify("warning", "도메인컬럼 이름을 입력해주세요.");
-		$("#domainIdColumnName").focus();
-		return false;
-	}else if( $.trim($("#updateAttribute").val()) == "" ){
-		fnComNotify("warning", "업데이트하는 속성을 입력해주세요.");
-		$("#updateAttribute").focus();
-		return false;
-		
-	}else{
-		var executionCycle = "";
-		/*실행주기 조합*/
-		for(var i=0; i<5; i++ ){
-			if($.trim($("#executionCycle_"+i).val()) == ""){
-				fnComNotify("warning", "실행주기를 입력해주세요.");
-				$("#executionCycle_"+i).focus();
-				return false;
-			}
-			if( i == 0 ) executionCycle = $("#executionCycle_"+i).val();
-			else  executionCycle += " "+$("#executionCycle_"+i).val();
-		}
-		
-		var data = {
-			"name" : $("#batchName").val()
-			,"modelSequenceFk1" : selectedModelPk
-			,"instanceSequenceFk2" : selectedInstancePk
-			,"projectSequenceFk3" : projectSequencePk
-			,"nifiTemplateName" : $("#nifiTemplateName").val()
-			,"resultUpdateDomainId" : $("#resultUpdateDomain").val()
-			,"resultUpdateDomainName" : $("#resultUpdateDomain option:selected").text()
-			,"executionCycle" : executionCycle
-			,"resultUpdateMethod" : $("#resultUpdateMethod").val()
-			,"userRequestTerm" : $("#userRequestTerm").val()
-			,"storeMethod" : $("#storeMethod").val()
-			,"isReverseIndex" : $("#isReverseIndex").val()
-			,"totalColumnName" : $("#totalColumnName").val()
-			,"domainIdColumnName" : $("#domainIdColumnName").val()
-			,"updateAttribute" : $("#updateAttribute").val()
-		};
-
-		var url = "/batchServiceRequests"; 
-		var method = "POST";
-		if( confirm("배치를 신청 하시겠습니까?") ){
-			var response = fnbatchServiceRequestsByAjax(url, method, data);
-			if( response.result == "success" ){
-				fnComNotify("success", "배치신청을  하였습니다.");
-				fnCloseModal("batchModal");
-				
-			}else if( response.result == "fail" && response.detail == "duplicateName" ){
-				$("#batchName").focus();
-				fnComNotify("warning","배치명이 중복되었습니다.");
-				
-			}else{
-				fnComErrorMessage("배치신청 에러!!", response.detail);
-			}
-			
-		}
-	}
 }
 
 

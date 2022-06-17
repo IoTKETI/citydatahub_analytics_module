@@ -1,41 +1,16 @@
 package com.vaiv.analyticsManager.common.service;
 
-import java.net.ConnectException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-
-import com.vaiv.analyticsManager.restFullApi.service.SandboxRestService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.vaiv.analyticsManager.common.utils.MakeUtil;
-import com.vaiv.analyticsManager.restFullApi.domain.Instance;
-import com.vaiv.analyticsManager.restFullApi.mapper.SandboxRestMapper;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import net.sf.json.JSONObject;
 
 @Component
 public class Scheduler {
 	
-	private static Logger logger = LoggerFactory.getLogger(Scheduler.class);
+	// private static Logger logger = LoggerFactory.getLogger(Scheduler.class);
 	
-	@Autowired
-	private SandboxRestMapper sandboxRestMapper;
-
-	@Autowired
-	private SandboxRestService sandboxRestService;
-	
-	@Autowired
-	private HttpService httpService;
-
 	@Value("${module.tempUrl}")
 	private String moduleTempUrl;
 	

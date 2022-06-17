@@ -41,10 +41,7 @@ public class PreFilter extends ZuulFilter {
     @Autowired
     private SandboxRestService sandboxRestService;
 
-    // edited start 2022.01.20
-    // private final Logger log = LoggerFactory.getLogger(this.getClass());
     Logger log = LoggerFactory.getLogger(this.getClass());
-    // edited end 2022.01.20
 
     @Override
     public String filterType() {
@@ -96,14 +93,6 @@ public class PreFilter extends ZuulFilter {
         String uri=request.getRequestURI();
 
         String module = ctx.get(FilterConstants.SERVICE_ID_KEY).toString();
-        // String module="";
-        //  if (uri.contains("hue")) {
-        //     module = "hue";
-        // } else if(uri.contains("nifi")){
-        //     module = "nifi";
-        // } else {
-        //     module = "analyticsModule";
-        // }
 
         int requestPort=request.getServerPort();
 
@@ -135,10 +124,6 @@ public class PreFilter extends ZuulFilter {
 
         log.info("forwardIp : " + forwardIp);
 
-        // if(forwardIp == null || forwardIp.equals("")){
-        //     log.info("instanceId:"+instanceIdNum+", userId : "+userId+", userRole : "+userRole+"데이터베이스에 해당 정보가 인스턴스 정보가 없습니다.");
-        //     return null;
-        // }
 
         //2.2.3. Forward 할 URL을 구성
         String forwardUrl=request.getScheme()+"://";

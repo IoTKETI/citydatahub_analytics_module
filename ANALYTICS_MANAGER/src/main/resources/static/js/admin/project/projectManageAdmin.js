@@ -43,7 +43,6 @@ var createTable = function(){
 	var beforeBtn	= '<a class="button__file button_default rightMargin cursor" type="button" onClick="fnAddProjcetModal()">등록</a>';
 	beforeBtn		+= '<a class="button__file button_default cursor" type="button" onClick="fnDeleteProjcet()">삭제</a>';
 	
-	//$().append(beforeBtn);
 	$(beforeBtn).prependTo(".dataTables_filter_custom");
 
 	$('#logTable').DataTable().columns([1]).visible(false);
@@ -74,7 +73,6 @@ var fnCreateListHtml = function(projects){
 		html += "	<td scope='row' class='pointerCorsor'>"+data.NAME+"</td>";
 		html += "	<td>"+data.DESCRIPTION+"</td>";
 		html += "	<td>"+data.createDataTime+"</td>";
-		// html += "	<td>"+data.instanceName+"</td>";
 		if( userRole == "Analytics_Admin" )	html += "	<td>"+data.USER_ID+"</td>";
 		html += "	<td><button class='button__primary' onclick='fnUpdateModal(\""+data.PROJECT_SEQUENCE_PK+"\");'>수정</button></td>";
 		html += "</tr>";
@@ -85,17 +83,6 @@ var fnCreateListHtml = function(projects){
 /*프로젝트 등록 모달*/
 var fnAddProjcetModal = function(){
 	fnGetInstanceList(); // 인스턴스 목록 가져오기
-	// if( fnNotNullAndEmpty($("#selectedInstance").val()) ){
-	// 	$("#modalTitle").text("프로젝트 등록");
-	// 	$("#saveProjectBtn").text("등록");
-	// 	$("#projectSequencePk").val("");
-	// 	$("#name").val("").focus();
-	// 	$("#description").val("");
-	// 	$(".registDiv").show();
-	// 	fnOpenModal("projectInfo_modal");	
-	// }else{
-	// 	fnComNotify("warning", "샌드박스를 생성해주세요.");
-	// }
 	$("#modalTitle").text("프로젝트 등록");
 	$("#saveProjectBtn").text("등록");
 	$("#projectSequencePk").val("");
@@ -193,11 +180,6 @@ var fnUpdateTable = function(data, option){
 				checkbox, data.PROJECT_SEQUENCE_PK, data.NAME, data.DESCRIPTION
 				, data.createDataTime, data.USER_ID, modifyBtn
 			]);
-		// }else{
-		// 	$("#logTable").dataTable().fnAddData([
-		// 		checkbox, data.PROJECT_SEQUENCE_PK, data.NAME, data.DESCRIPTION
-		// 		, data.createDataTime, data.instanceName, modifyBtn
-		// 	]);
 		}
 		$("#logTable").DataTable().order([1, "desc"]).draw();
 		
@@ -208,11 +190,6 @@ var fnUpdateTable = function(data, option){
 				, data.createDataTime, data.USER_ID, modifyBtn
 			], clickRow);
 			
-		// }else{
-		// 	$("#logTable").dataTable().fnUpdate([
-		// 		checkbox, data.PROJECT_SEQUENCE_PK, data.NAME, data.DESCRIPTION
-		// 		, data.createDataTime, data.instanceName, modifyBtn
-		// 	], clickRow);
 		}
 	}
 }

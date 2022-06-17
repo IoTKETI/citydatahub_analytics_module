@@ -36,7 +36,7 @@ public class SandboxRestController {
 	
 	
 	/**
-	 * 샌드박스 리스트 조회
+	 * 인스턴스 리스트 조회(프로잭트 등록에 사용)
 	 * @return
 	 */
 	@GetMapping(value="/instances")
@@ -52,165 +52,6 @@ public class SandboxRestController {
 			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
 		}
 	}
-	
-	/**
-	 * 샌드박스 개별 조회
-	 * @param id
-	 * @return
-	 */
-	@GetMapping(value="/instances/{instancePk}")
-	public ResponseEntity<JSONObject> instance(@PathVariable Integer instancePk){
-		JSONObject result = new JSONObject();
-		try {
-			if( MakeUtil.isNotNullAndEmpty(instancePk) ) {
-				result = sandboxRestService.instance(instancePk);
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-        	}else {
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "instance");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	
-	/**
-	 * 샌드박스 사양 조회
-	 * @return
-	 */
-	@GetMapping(value="/specifications")
-	public ResponseEntity<JSONObject> specifications(){
-		JSONObject result = new JSONObject();
-		try {
-			result = sandboxRestService.specifications();
-			return new ResponseEntity<JSONObject>(result, HttpStatus.OK);
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "specifications");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	/**
-	 * 샌드박스 사양 상세조회
-	 * @param id
-	 * @return
-	 */
-	@GetMapping(value="/specifications/{serverId}")
-	public ResponseEntity<JSONObject> specification(@PathVariable String serverId){
-		JSONObject result = new JSONObject();
-		try {
-			if( MakeUtil.isNotNullAndEmpty(serverId) ) {
-				result = sandboxRestService.specification(serverId);
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);	
-        	}else {
-        		result.put("type", "4101");
-    			result.put("detail", "MANDATORY PARAMETER MISSING");
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "specification");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	/**
-	 * 샌드박스 템플릿 조회
-	 * @return
-	 */
-	@GetMapping(value="/templates")
-	public ResponseEntity<JSONObject> templates(HttpSession session){
-		JSONObject result = new JSONObject();
-		
-		try {
-			result = sandboxRestService.templates(session);
-			return new ResponseEntity<JSONObject>(result, HttpStatus.OK);
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "templates");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	/**
-	 * 샌드박스 템플릿 상세조회
-	 * @param id
-	 * @return
-	 */
-	@GetMapping(value="/templates/{templateId}")
-	public ResponseEntity<JSONObject> template(@PathVariable Integer templateId){
-		JSONObject result = new JSONObject();
-		try {
-			if( MakeUtil.isNotNullAndEmpty(templateId) ) {
-				result = sandboxRestService.template(templateId);
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);	
-        	}else {
-        		result.put("type", "4101");
-    			result.put("detail", "MANDATORY PARAMETER MISSING");
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "template");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	/**
-	 * 샌드박스 템플릿 신청 이력 조회
-	 * @return
-	 */
-	@GetMapping(value="/customTemplateRequests")
-	public ResponseEntity<JSONObject> customTemplateRequests(HttpSession session){
-		JSONObject result = new JSONObject();
-		try {
-			result = sandboxRestService.customTemplateRequests(session);
-			return new ResponseEntity<JSONObject>(result, HttpStatus.OK);
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "customTemplateRequests");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	/**
-	 * 샌드박스 템플릿 신청이력 개별조회
-	 * @param id
-	 * @return
-	 */
-	@GetMapping(value="/customTemplateRequests/{templateId}")
-	public ResponseEntity<JSONObject> customTemplateRequest(@PathVariable Integer templateId){
-		JSONObject result = new JSONObject();
-		try {
-			if( MakeUtil.isNotNullAndEmpty(templateId) ) {
-				result = sandboxRestService.customTemplateRequest(templateId);
-            	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-        	}else {
-        		result.put("type", "4101");
-    			result.put("detail", "MANDATORY PARAMETER MISSING");
-        		return new ResponseEntity<JSONObject>(result,HttpStatus.BAD_REQUEST);
-        	}
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "customTemplateRequest");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
 	
 	/**
 	 * 도메인명 목록 가져오기
@@ -231,27 +72,7 @@ public class SandboxRestController {
 	}
 	
 	/**
-	 * 템플릿 허용 데이터 가져오기
-	 * @param id
-	 * @return
-	 */
-	@GetMapping(value="/availableDataList/{id}")
-	public ResponseEntity<JSONObject> availableDataList(@PathVariable String id){
-		JSONObject result = new JSONObject();
-		try {
-			result = sandboxRestService.availableDataList(id);
-        	return new ResponseEntity<JSONObject>(result,HttpStatus.OK);
-			
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "availableDataList");
-			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-
-	/**
-	 * 샌드박스 로컬파일 조회
+	 * 로컬파일 조회
 	 * @return
 	 */
 	@GetMapping(value="/instances/{selectedInstance}/localFiles")
@@ -276,7 +97,7 @@ public class SandboxRestController {
 	}
 
 	/**
-	 * 샌드박스 로컬파일 샘플 조회
+	 * 로컬파일 샘플 조회
 	 * @param selectedInstance
 	 * @param localFile
 	 * @return
@@ -300,27 +121,6 @@ public class SandboxRestController {
 			MakeUtil.printErrorLogger(e, "instancesLocalFileSample");
 			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
 		}
-	}
-
-    /**
-     * session 에 instancePk등록
-     * @param instancePk
-     * @param session
-     * @return
-     */
-	@GetMapping(value="/sandboxSetInstancePkInSession/{instancePk}")
-	public ResponseEntity<String> sandboxSetInstancePkInSession(HttpSession session,  HttpServletRequest request
-																,@PathVariable Integer instancePk){
-
-		logger.info("******** Controller /sandboxSetInstancePkInSession/instancePk");
-		logger.info(request.toString());
-
-		String url = "http://"+request.getServerName()+":"+request.getServerPort();
-		logger.info(url);
-		logger.info(Integer.toString(instancePk));
-
-		session.setAttribute("instancePk", String.valueOf(instancePk));
-		return new ResponseEntity<String> (url,HttpStatus.OK);
 	}
 
 	/**

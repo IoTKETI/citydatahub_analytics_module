@@ -415,7 +415,7 @@ public class MakeUtil {
 	public static JSONArray nvlJsonArray(JSONArray jsonArr){
 		JSONArray moveJsonArr = new JSONArray();
 		if( MakeUtil.isNotNullAndEmpty(jsonArr) && jsonArr instanceof JSONArray ){
-
+			
 			try {
 				for (int i = 0; i < jsonArr.size(); i++) {
 					

@@ -8,7 +8,6 @@ $(function(){
 	});
 	
 	if( urlName == "/algorithmManage" )		$(".algorithmActive").addClass("is-active");
-	else if( urlName == "/sandboxManage" )	$(".sandboxManageActive").addClass("is-active");
 	else if( urlName == "/projectManage" || urlName == "/projectDetail")	$(".projectManageActive").addClass("is-active");
 	else if( urlName == "/batchManage" )		$(".batchManageActive").addClass("is-active");
 	
@@ -121,7 +120,6 @@ function fnSetDatepicker(startId, endId){
 	    ,format: "yyyy-mm-dd"
 	});
 	
-//	$(".startDate").val("2018-08-01");
 	$("#"+startId).val(fnGetDate("lastMonth").searchStartDate);
 	$("#"+endId).val(getFormatDate(new Date()));
 }
@@ -164,7 +162,6 @@ function gfn_renderPaging(params){
 		last = first+9;
 		if(last > totalIndexCount) last = totalIndexCount;
 	}
-    //else last = (parseInt(totalIndexCount/10) == parseInt(currentIndex/10)) ? (totalIndexCount%10 != 0 ? totalIndexCount%10 : 10) : 10;
     prev = (parseInt((currentIndex-1)/10)*10) - 9 > 0 ? (parseInt((currentIndex-1)/10)*10) - 9 : 1;
     next = (parseInt((currentIndex-1)/10)+1) * 10 + 1 < totalIndexCount ? (parseInt((currentIndex-1)/10)+1) * 10 + 1 : totalIndexCount;
     
@@ -816,190 +813,6 @@ var fnArraySplitBR  = function(value){
 	}
 }
 
-/*인스턴스 목록 상태값 변경*/
-// var convertServerState = function(type){
-// 	 switch(type){
-//      case 'create_call':
-//          return '생성요청';
-//      case 'create_fail':
-//          return '생성실패';
-//      case 'create_done':
-//          return '생성완료';
-//      case 'start_call':
-//          return '시작요청';
-//      case 'start_fail':
-//          return '시작실패';
-//      case 'start_done':
-//          return '시작완료';
-//      case 'end_call':
-//          return '종료요청';
-//      case 'end_fail':
-//          return '종료실패';
-//      case 'end_done':
-//          return '종료완료';
-//      default:
-//          return '';
-//  }
-// }
-
-/*인스턴스 모듈상태값 변경*/
-// var convertModuleState = function(type){
-// 	switch(type){
-//     case 'success':
-//         return '정상';
-//     case 'fail':
-//         return '상태이상';
-//     case 'server_die':
-//         return '분석모듈 서버 죽음';
-//     case 'server_end':
-//         return '분석모듈 종료';
-//     default:
-//         return '';
-// 	}
-// }
-
-/*인스턴스 시작*/
-// var fnStartInstance = function(option){
-// 	// 체크된 항목 가져오기
-// 	var checkMap = fnTableCheckList("tbodyHtml");
-// 	var checkIdList = checkMap.checkIdList;
-// 	var text = option=='sandbox'? '샌드박스' : '배치서버';
-	
-// 	if( checkIdList.length > 0 ){
-// 		// 시작중인지 체크
-// 		var failList = fnCheckState(checkIdList, "start");
-
-// 		if( failList == "" ){
-// 			if( confirm("시작하시겠습니까?") ){
-// 				for( var i in checkIdList ){
-// 					var response = fnStartNStopInstanceByAjax(checkIdList[i]);
-// 					if( response.result == "success" ){
-// 						fnComNotify("success", text+" 시작요청을 하였습니다.");
-// 						fnUnCheckbox();
-// 						fnChangeState();
-// 					}else{
-// 						fnComErrorMessage(text+" 시작요청 에러!!", response.detail);
-// 					}
-// 				}
-// 			}
-// 		}else if( failList == "call" ){
-// 			fnComNotify("warning", "요청중입니다. 요청이 끝난후에 실행해주세요.");
-			
-// 		}else{
-// 			fnComNotify("warning", failList+"은 이미 시작중입니다.");
-// 		}
-		
-// 	}else{
-// 		fnComNotify("warning", "시작할 목록을 선택해주세요.");
-// 	}
-// }
-
-/*인스턴스 종료*/
-// var fnStopInstance = function(option){
-// 	// 체크된 항목 가져오기
-// 	var checkMap = fnTableCheckList("tbodyHtml");
-// 	var checkIdList = checkMap.checkIdList;
-// 	var text = option=='sandbox'? '샌드박스' : '배치서버';
-	
-// 	if( checkIdList.length > 0 ){
-// 		// 종료중인지 체크
-// 		var failList = fnCheckState(checkIdList, "end");
-
-// 		if( failList == "" ){
-// 			if( confirm("종료 하시겠습니까?") ){
-// 				for( var i in checkIdList ){
-// 					var response = fnStartNStopInstanceByAjax(checkIdList[i]);
-// 					if( response.result == "success" ){
-// 						fnComNotify("success", text+" 종료요청을 하였습니다.");
-// 						fnUnCheckbox();
-// 						fnChangeState();
-// 					}else{
-// 						fnComErrorMessage(text+" 종료요청 에러!!", response.detail);
-// 					}
-// 				}
-// 			}
-// 		}else if( failList == "call" ){
-// 			fnComNotify("warning", "요청중입니다. 요청이 끝난후에 실행해주세요.");
-			
-// 		}else{
-// 			fnComNotify("warning", failList+"은 종료중입니다.");
-// 		}
-		
-// 	}else{
-// 		fnComNotify("warning", "종료할 목록을 선택해주세요.");
-// 	}
-// }
-
-/*인스턴스 삭제*/
-// var fnDeleteInstance = function(option){
-// 	// 체크된 항목 가져오기
-// 	var checkMap = fnTableCheckList("tbodyHtml");
-// 	var checkIdList = checkMap.checkIdList;
-// 	var checkRowList = checkMap.checkRowList;
-// 	var successFlug = false;
-// 	var text = option=='sandbox'? '샌드박스' : '배치서버';
-	
-// 	if( checkIdList.length > 0 ){
-// 		// 종료중인지 체크
-// 		var failList = fnCheckState(checkIdList, "start");
-
-// 		if( failList == "" ){
-// 			var comment = "샌드박스를 삭제하시면 관련된 프로젝트, 배치관리 내용도 같이 삭제 됩니다. \n삭제 하시겠습니까?";
-// 			if( option == "batchServer" ) comment = "배치서버를 삭제하시면 관련된 배치도 내용도 같이 삭제 됩니다. \n삭제 하시겠습니까?";
-// 			if( confirm(comment) ){
-// 				for( var i in checkIdList ){
-// 					var response = fnDeleteInstanceByAjax(checkIdList[i]);
-// 					if( response.result == "success" ){
-// 						fnUnCheckbox();
-// 						fnComNotify("success", text+" 삭제하였습니다.");
-// 						successFlug = true;
-						
-// 					}else{
-// 						fnComErrorMessage(text+" 삭제 에러!!", response.detail);
-// 					}
-// 				}
-// 				/* 테이블 삭제 */
-// 				if( successFlug ){
-// 					fnComDeleteTable("logTable", checkRowList);
-
-// 					// edited start 2022.01.17 by PHW 전체 건수 증가 및 감소
-// 					$("#sandboxTotalCnt").text($("#logTable >tbody tr").length);
-// 					// edited end 2022.01.17 by PHW 전체 건수 증가 및 감소
-// 				}
-// 			}
-// 		}else if( failList == "call" ){
-// 			fnComNotify("warning", "요청중입니다. 요청이 끝난후에 실행해주세요.");
-			
-// 		}else{
-// 			fnComNotify("warning", failList+"은 실행중입니다. \n 종료후 삭제해주세요.");
-// 		}
-		
-// 	}else{
-// 		fnComNotify("warning", "삭제할 목록을 선택해주세요.");
-// 	}
-// }
-
-
-
-/*인스턴스 상태 체크*/
-// var fnCheckState = function(list, option){
-// 	var failList = "";
-// 	for( var i in list ){
-// 		$(".serverState").each(function(){
-// 			if( list[i] == $(this).attr("data-pk") ){
-// 				if( $(this).attr("data-serverState").indexOf("_call") > -1 ){
-// 					failList = "call";
-// 				}else if( $(this).attr("data-serverState").indexOf(option) > -1){
-// /*					if( failList == "" ) failList = $(this).parent().prev()prev().prev().text();
-// 					else	failList += ", "+$(this).parent().prev().prev()prev().text();*/
-// 					if( failList == "" ) failList = $(this).parent().prev().prev().text();
-// 					else	failList += ", "+$(this).parent().prev().prev().text();
-// 				}
-// 			}
-// 		});
-// 	}
-// 	return failList;
-// }
 
 /*체크박스 체크해지*/
 var fnUnCheckbox = function(id){
@@ -1011,57 +824,6 @@ var fnUnCheckbox = function(id){
 	});
 }
 
-/*배치 진행상태 변경*/
-// var fnConvertProgressState = function(type){
-// 	switch(type){
-//     case 'standby':
-//         return '신청중';
-//     case 'reject':
-//         return '거절';
-//     case 'ongoing':
-//         return '배치등록중';
-//     case 'done':
-//         return '배치등록완료';
-//     default:
-//         return '';
-// 	}
-// }
-
-/*인스턴스 목록 가져오기*/
-// var fnGetInstanceOfUserId = function(){
-// 	var html = "";
-// 	var userInstanceList = fnGetInstanceListByAjax();
-// 	for( var i in userInstanceList ){
-// 		var instance = userInstanceList[i];
-// 		if( html == "" ){
-// 			fnGetModelsOfInstancePk(instance.INSTANCE_SEQUENCE_PK);
-// 			html += "<li class='instanceList active pointerCorsor' data-instanceSequencePk="+instance.INSTANCE_SEQUENCE_PK+">"+instance.NAME+"</li>";
-// 		}else{
-// 			html += "<li class='instanceList pointerCorsor' data-instanceSequencePk="+instance.INSTANCE_SEQUENCE_PK+">"+instance.NAME+"</li>";
-// 		}
-// 	}
-	
-// 	$("#selectedInstance").html(html);
-// }
-
-/*사용자 인스턴스별 모델 목록 가져오기*/
-// var fnGetModelsOfInstancePk = function(instanceSequencePk){
-// 	var html = "";
-// 	var userModelList = fnGetModelsOfInstancePkByAjax(instanceSequencePk);
-// 	for( var i in userModelList ){
-// 		var model = userModelList[i];
-// 		if( i == 0 ){	html += "<li class='modelList active pointerCorsor' data-modelSequenceFk1="+model.MODEL_SEQUENCE_PK
-// 							+" data-instanceSequenceFk2="+model.INSTANCE_SEQUENCE_FK3
-// 							+" data-projectSequenceFk3="+model.PROJECT_SEQUENCE_FK4+">"+model.NAME+"</li>";
-// 		}else{	html += "<li class='modelList pointerCorsor' data-modelSequenceFk1="+model.MODEL_SEQUENCE_PK
-// 						+" data-instanceSequenceFk2="+model.INSTANCE_SEQUENCE_FK3
-// 						+" data-projectSequenceFk3="+model.PROJECT_SEQUENCE_FK4+">"+model.NAME+"</li>";
-// 		}
-// 	}
-// 	if( html == "" ) html += "<li class='modelList'>모델이 없습니다.</li>";
-	
-// 	$("#selectedModel").html(html);
-// }
 
 /*프로젝트 목록 가져오기*/
 var fnGetProject = function(){
@@ -1080,7 +842,24 @@ var fnGetProject = function(){
 	$("#selectedProject").html(html);
 }
 
-/*사용자 프로젝트별 모델 목록 가져오기*/
+/* 프로젝트 목록 가져오기(배치에 등록된 프로젝트 선택)*/
+var fnGetSavedProject = function(batchProjectSequencePk, batchModelSequencePk){
+	var html = "";
+	var userProjectList = fnGetProjectListByAjax();
+	for( var i in userProjectList ){
+		var project = userProjectList[i];
+		if (project.PROJECT_SEQUENCE_PK == batchProjectSequencePk){
+			fnGetSavedModelsOfProjectPk(batchProjectSequencePk, batchModelSequencePk);
+			html += "<li class='projectList active pointerCorsor' data-projectSequencePk="+project.PROJECT_SEQUENCE_PK+">"+project.NAME+"</li>";
+		} else {
+			html += "<li class='projectList pointerCorsor' data-projectSequencePk="+project.PROJECT_SEQUENCE_PK+">"+project.NAME+"</li>";
+		}
+	}
+	
+	$("#selectedProject").html(html);
+}
+
+/* 프로젝트별 모델 목록 가져오기*/
 var fnGetModelsOfProjectPk = function(projectSequencePk, option){
 	var html = "";
 	var modelList = fnGetModelsByAjax(projectSequencePk, "");
@@ -1116,9 +895,30 @@ var fnGetModelsOfProjectPk = function(projectSequencePk, option){
 }
 
 
+/* 프로젝트별 모델 목록 가져오기(배치에 등록된 프로젝트 모델 선택)*/
+var fnGetSavedModelsOfProjectPk = function(batchProjectSequencePk, batchModelSequencePk){
+	var html = "";
+	var modelList = fnGetModelsByAjax(batchProjectSequencePk, "");
+	for( var i in modelList ){
+		var model = modelList[i];
+		if( model.MODEL_SEQUENCE_PK == batchModelSequencePk){
+			html += "<li class='modelList active pointerCorsor' data-modelSequenceFk1="+model.MODEL_SEQUENCE_PK
+					+" data-instanceSequenceFk2="+model.INSTANCE_SEQUENCE_FK3
+					+" data-projectSequenceFk3="+model.PROJECT_SEQUENCE_FK4+">"+model.NAME+"</li>";
+		}else{	
+			html += "<li class='modelList pointerCorsor' data-modelSequenceFk1="+model.MODEL_SEQUENCE_PK
+					+" data-instanceSequenceFk2="+model.INSTANCE_SEQUENCE_FK3
+					+" data-projectSequenceFk3="+model.PROJECT_SEQUENCE_FK4+">"+model.NAME+"</li>";
+		}
+	}
+	if( html == "" ) html += "<li class='modelList'>모델이 없습니다.</li>";
+	
+	$("#selectedModel").html(html);
+}
 
 
-/*도메인명 가져오기(템플릿 허용 데이터 가져오기)*/
+
+/*도메인명 가져오기*/
 var fnGetRequestTemplateAvailable = function(){
 	var html = "";
 	var availableList = fnGetRequestTemplateAvailableByAjax();
@@ -1127,17 +927,6 @@ var fnGetRequestTemplateAvailable = function(){
 	}
 	$("#resultUpdateDomain").html(html);
 }
-
-
-/*N2M 모달 닫기*/
-// var fnN2MCloseModal = function(selector){
-//     var $modal = $(selector);
-//     var $btnClose = $modal.find('.js-modal-close');
-
-//     $('html').removeClass('is-scroll-blocking');
-//     $btnClose.off('click.layerClose');
-//     $modal.removeClass('js-modal-show').removeAttr('tabindex').off('keydown.esc');
-// }
 
 
 //-----------------------------------------------------------

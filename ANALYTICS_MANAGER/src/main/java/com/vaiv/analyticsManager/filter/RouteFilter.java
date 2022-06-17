@@ -32,24 +32,9 @@ public class RouteFilter extends ZuulFilter{
         String uri=request.getRequestURI();
         log.info("URI : " + uri);
 
-        log.info("Route Filter's ctx string before modify: " + ctx.toString());
-        // String routeUri = "";
-
-        // if(ctx.get(FilterConstants.PROXY_KEY).toString() =="hue_filebrowser"){
-        //     routeUri = uri.replaceAll("%2F", "/");
-        //     ctx.set(FilterConstants.REQUEST_URI_KEY, routeUri);
-        // }
+        // log.info("Route Filter's ctx string before modify: " + ctx.toString());
         
-        // ctx.set("x-forwarded-prefix","");
-        // ctx.set("requestURI","");
-
-        // try {
-        //     ctx.setRouteHost(new URL("https://bamdule.tistory.com/59"));
-        // } catch (MalformedURLException e) {
-        //     e.printStackTrace();
-        // }
-        
-        log.info("Route Filter's ctx string After modify: " + ctx.toString());
+        // log.info("Route Filter's ctx string After modify: " + ctx.toString());
         
         return null;
     }

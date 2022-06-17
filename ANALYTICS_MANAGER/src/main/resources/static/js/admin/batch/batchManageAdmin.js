@@ -28,8 +28,6 @@ $(function(){
 		$("#batchInstanceSequenceFk2").val("1"); 
 
 		$("#batchNifiButton").show();
-		// 등록할 배치서버 가져오기
-		fnGetBatchServerList();
 		
 		// 프로젝트, 모델 목록 가져오기
 		fnGetProject();
@@ -41,6 +39,9 @@ $(function(){
 			fnComNotify("warning", "프로젝트에서 모델을 생성해주세요.");
 			return false;
 		}
+
+		$("#storeMethod").val("rawData"); // 후처리방식
+		$("#resultUpdateMethod").val("update"); // 결과반영방식(replace, update)
 
 		$("#updateAttribute li.active").each(function (){$(this).removeClass("active");});
 
@@ -70,17 +71,15 @@ $(function(){
 			batchServiceSequencePk = data[1];
 			
 			$(".modalName").text("수정");
-			// $("#batchNifiButton").hide();
-			
-			// 프로젝트, 모델 목록 가져오기
-			fnGetProject();
 			
 			var batch = fnGetBatchServiceByAjax(batchServiceSequencePk);
 			
-			var executionCycleArr = batch.EXECUTION_CYCLE.split(" ");
-			for( var i in executionCycleArr ){
-				$("#executionCycle_"+i).val(executionCycleArr[i]); // 실행주기
-			}
+			// 프로젝트, 모델 목록 가져오기
+			fnGetSavedProject(batch.PROJECT_SEQUENCE_FK3, batch.MODEL_SEQUENCE_FK4);
+			
+			// 도메인명 가져오기
+			fnGetRequestTemplateAvailable();
+			
 			
 			$("#name").val(batch.NAME); // 배치명
 			// 예측용 데이터 생성
@@ -97,15 +96,20 @@ $(function(){
 			// 저장된 업데이트하는 속성 active
 			if(batch.UPDATE_ATTRIBUTE!=null){
 				res=batch.UPDATE_ATTRIBUTE.split(",");
-
+				
 				for(i=0;i<res.length;i++){
 					$("#updateAttribute li[data-attribute='"+res[i]+"']").each(function(){$(this).addClass("active")});
 				}
 			}
 			$("#domainIdColumnName").val(batch.DOMAIN_ID_COLUMN_NAME); // 인스턴스 컬럼이름
 			// 실행주기, 기타사항
-			$("#executionCycle").val(batch.EXECUTION_CYCLE); // 실행주기
+			var executionCycleArr = batch.EXECUTION_CYCLE.split(" ");
+			for( var i in executionCycleArr ){
+				$("#executionCycle_"+i).val(executionCycleArr[i]); // 실행주기
+			}
 			$("#enrollmentTerm").val(batch.ENROLLMENT_TERM); // 기타사항
+
+
 
 
 			$("#makeDataMethod").val(batch.MAKE_DATA_METHOD); //  데이터 생성방식
@@ -114,24 +118,12 @@ $(function(){
 			$("#datasetId").val(batch.DATASET_ID); // 코어모듈 저장 시 데이터셋 아이디
 
 			
-			// $(".rejectBtn").hide();
 			$(".registDiv").prop("disabled", true); // .show() 또는 주석처리
-			// $(".registDiv").hide(); // .show() 또는 주석처리
 
-			// 도메인명 가져오기
-		fnGetRequestTemplateAvailable();
 			showMakeDataMethod();
 			showStoreMethod();
 
 			fnOpenModal("batchModal");
-		}
-	});
-	
-	/* 배치신청 목록 클릭시 */
-	$(document).on("click", "#batchRequestTbodyHtml td", function(){
-		if( $(this).index() == 11 ){
-			var clickRows = $("#logTable_batchRequestList").dataTable().fnGetPosition(this); // 변경하고자 하는 clickRow
-			clickRow = clickRows[0];
 		}
 	});
 	
@@ -219,20 +211,6 @@ var createTable = function(){
 	  } );
 	  $('#logTable_batchList').DataTable().columns([1]).visible(false);
 	
-  
-	  /*배치 신청 목록*/
-	  $("#logTable_batchRequestList").DataTable( {
-		  	"language" : language		  
-			,"autoWidth": false
-	  } );
-	  $('#logTable_batchRequestList').DataTable().columns([1]).visible(false);
-	
-	  /*배치 서버 목록*/
-	  $("#logTable").DataTable( {
-		  	"language" : language		  
-			,"autoWidth": false
-	  } );
-	
 	  /*배치 이력 목록*/
 	  fnSearchBatchLog();
 	  
@@ -271,7 +249,7 @@ var fnCreateBatchListHtml = function(list){
 		html += "	<td><a class='js-modal-show' href='#batchModal' title="+data.NAME+">"+data.NAME+"</a></td>";
 		html += "	<td title='"+data.projectName+"'>"+data.projectName+"</td>";
 		html += "	<td title="+data.modelName+">"+data.modelName+"</td>";
-		html += "	<td title="+data.MAKE_DATA_METHOD+">"+data.MAKE_DATA_METHOD+"</td>";
+		// html += "	<td title="+data.MAKE_DATA_METHOD+">"+data.MAKE_DATA_METHOD+"</td>";
 		html += "	<td title="+data.RESULT_UPDATE_DOMAIN_NAME+">"+data.RESULT_UPDATE_DOMAIN_NAME+"</td>";
 		if( data.RESULT_UPDATE_METHOD == "replace" )	html += "	<td title=REPLACE>REPLACE</td>";
 		else 	html += "	<td title=UPDATE>UPDATE</td>";
@@ -315,87 +293,6 @@ var fnCreateBatchLogListHtml = function(list){
 		}
 	}
 	return html;
-}
-
-
-// 등록할 배치서버 가져오기
-var fnGetBatchServerList = function(){
-	var html = "";
-	var serverList = fnGetBatchServerListByAjax();
-	for( var i in serverList ){
-		html += "<option value="+serverList[i].INSTANCE_SEQUENCE_PK+">"+serverList[i].NAME+"</option>";
-	}
-	$("#batchInstanceSequenceFk2").html(html);
-}
-
-/*배치신청 승인여부 모달*/
-var fnApprovalBatchRequest = function(batchRequestPk){
-	// 등록할 배치서버 가져오기
-	fnGetBatchServerList();
-	if( $("#batchInstanceSequenceFk2").val() == null ){
-		fnComNotify("warning", "배치서버를 생성해주세요.");
-		$('a[href="#tab_batchServerManage"]').click();
-		return false;
-	}
-	
-	$("#batchForm").find("input").each(function(){
-		$(this).val("");
-	});
-	$("#userRequestTerm").val("");
-	$(".modalName").text("승인");
-		
-	// 프로젝트, 모델 목록 가져오기
-	fnGetProject();
-
-	var batchRequest = fnGetbatchServiceRequestByAjax(batchRequestPk);
-	
-	$("#name").val(batchRequest.NAME); // 배치명
-	// 프로젝트
-	$("#selectedProject li").each(function(){
-		var projectSequencePk = $(this).attr("data-projectSequencePk");
-		if( projectSequencePk == batchRequest.PROJECT_SEQUENCE_FK3 ){
-			fnGetModelsOfProjectPk(batchRequest.PROJECT_SEQUENCE_FK3, "useOfBatch");
-			$(".projectList").removeClass("active");
-			$(this).addClass("active");
-		}
-	});
-	// 모델
-	$("#selectedModel li").each(function(){
-		var modelSequenceFk1 = $(this).attr("data-modelSequenceFk1");
-		if( modelSequenceFk1 == batchRequest.MODEL_SEQUENCE_FK1 ){
-			$(".modelList").removeClass("active");
-			$(this).addClass("active");
-		}
-	});
-	
-	var executionCycleArr = batchRequest.EXECUTION_CYCLE.split(" ");
-	for( var i in executionCycleArr ){
-		$("#executionCycle_"+i).val(executionCycleArr[i]); // 실행주기
-	}
-
-	batchServiceRequestSequencePk = batchRequest.BATCH_SERVICE_REQUEST_SEQUENCE_PK; // 배치신청 번호
-	$("#nifiTemplateName").val(batchRequest.NIFI_TEMPLATE_NAME); // NIFI 템를릿명
-	$("#resultUpdateDomain").val(batchRequest.RESULT_UPDATE_DOMAIN_ID); // 도메인명
-	$("#executionCycle").val(batchRequest.EXECUTION_CYCLE); // 실행주기
-	$("#resultUpdateMethod").val(batchRequest.RESULT_UPDATE_METHOD); // 결과만영방식
-	$("#enrollmentTerm").val(batchRequest.ENROLLMENT_TERM); // 요청사항
-	$("#enrollementId").val(batchRequest.USER_ID); // 요청자
-	$("#storeMethod").val(batchRequest.STORE_METHOD); // 저장방법
-	$("#totalColumnName").val(batchRequest.TOTAL_COLUMN_NAME); // 전체값을 포함하는 컬럼이름
-	$("#domainIdColumnName").val(batchRequest.DOMAIN_ID_COLUMN_NAME); // 도메인컬럼이름
-	$("#makeDataMethod").val(batchRequest.MAKE_DATA_METHOD); // 데이터 생성방식
-	$("#sql").val(batchRequest.SQL); //데이터 생성 방식 중 SQL 선택 시 SQL 구문
-	$("#targetType").val(batchRequest.TARGET_TYPE); // 후처리 시 타깃 처리방식
-	$("#datasetId").val(batchRequest.DATASET_ID); // 코어모듈 저장 시 데이터셋 아이디
-
-
-	showMakeDataMethod();
-	showStoreMethod();
-
-	$(".rejectBtn").show();
-	$(".registDiv").show();
-	fnOpenModal("batchModal");
-	
 }
 
 /*배치 등록/수정*/
@@ -545,7 +442,7 @@ var fnSaveBatch = function(){
 	}
 }
 
-/*업데이트 배치목록 테이블*/
+/* 배치목록 테이블 업데이트*/
 var fnUpdateBatchTable = function(data, option){
 	var checkbox = "<div class='checkboxCustom'><input type='checkbox' name='table_records' id='"+data.BATCH_SERVICE_SEQUENCE_PK+"'><label for='"+data.BATCH_SERVICE_SEQUENCE_PK+"'></label></div>";
 	var name = "<a class='js-modal-show' href='#batchModal'>"+data.NAME+"</a>";
@@ -565,32 +462,21 @@ var fnUpdateBatchTable = function(data, option){
 	else	userId = data.USER_ID
 	
     
-	if( option == "등록" || option == "승인" ){
+	if( option == "등록" ){
 		var num = $("#logTable_batchList").DataTable().rows().count()+1;
 		$("#logTable_batchList").dataTable().fnAddData([
-			checkbox, data.BATCH_SERVICE_SEQUENCE_PK, name, data.projectName, data.modelName, data.MAKE_DATA_METHOD
+			checkbox, data.BATCH_SERVICE_SEQUENCE_PK, name, data.projectName, data.modelName
 			, data.RESULT_UPDATE_DOMAIN_NAME, resultUpdateMethod, data.EXECUTION_CYCLE, batchState, data.createDataTime
 		]);
 		$("#logTable_batchList").DataTable().order([1, "desc"]).draw();
 		
 	}else{
 		$("#logTable_batchList").dataTable().fnUpdate([
-			checkbox, data.BATCH_SERVICE_SEQUENCE_PK, name, data.projectName, data.modelName, data.MAKE_DATA_METHOD
+			checkbox, data.BATCH_SERVICE_SEQUENCE_PK, name, data.projectName, data.modelName
 			, data.RESULT_UPDATE_DOMAIN_NAME, resultUpdateMethod, data.EXECUTION_CYCLE, batchState, data.createDataTime
 		], clickRow);
 	}
 }
-
-/*Nifi Admin 새창*/
-var fnNewPageForAdminNifi = function(){
-	var response = fnGetAdminNifiUrl();
-	if(response!=null){
-		console.log(response);
-		window.open(response.nifiUrl);
-	}else {
-		fnComNotify("warning", "등록된 관리자를 위한 NIFI가 없습니다.");
-	}
-};
 
 /*Nifi, Hue 새창*/
 var fnNewPage = function(type){
@@ -677,126 +563,6 @@ var fnDeleteBatch = function(){
 		fnComNotify("warning", "삭제할 목록을 선택해주세요.");
 	}
 }
-/*배치 신청 삭제*/
-var fnDeleteBatchRequest = function(){
-	// 체크된 항목 가져오기
-	var checkMap = fnTableCheckList("batchRequestTbodyHtml");
-	var checkIdList = checkMap.checkIdList;
-	var checkRowList = checkMap.checkRowList;
-	var successFlug = false;
-	if( checkIdList.length > 0 ){
-		if( confirm("배치신청을 삭제 하시겠습니까?") ){
-			for( var i in checkIdList ){
-				var response = fnDeleteBatchRequestByAjax(checkIdList[i]);
-				if( response.result == "success" ){
-					fnComNotify("success", "배치신청을 삭제하였습니다.");
-					successFlug = true;
-				}else{
-					fnComErrorMessage("배치신청 삭제 에러!!", response.detail);
-				}
-			}
-			/* 테이블 삭제 */
-			if( successFlug ){
-				fnComDeleteTable("logTable_batchRequestList", checkRowList);
-			}
-		}
-		
-	}else{
-		fnComNotify("warning", "삭제할 목록을 선택해주세요.");
-	}
-}
-
-/*배치신청 거절*/
-var fnRejectBatch = function(){
-	var data = {
-		"batchServiceRequestSequencePk" : batchServiceRequestSequencePk
-		,"progressState" : "reject"
-	};
-	
-	var url = "/batchServiceRequests/"+batchServiceRequestSequencePk;
-	var method = "PATCH";
-
-	if( confirm("신청을 거절 하시겠습니까?") ){
-		var response = fnbatchServiceRequestsByAjax(url, method, data);
-		if( response.result == "success" ){
-			/*배치신청 테이블 Row 삭제*/
-			fnUpdateBatchRequestTable(response.batchServiceRequest);
-			fnComNotify("success", "배치신청을  거절하였습니다.");
-			fnCloseModal("batchModal");
-			
-		}else{
-			fnComErrorMessage("배치 "+type+" 에러!!", response.detail);
-		}
-	}
-}
-
-/*업데이트 배치신청목록 테이블*/
-var fnUpdateBatchRequestTable = function(data){
-	var checkbox = "<div class='checkboxCustom'><input type='checkbox' name='table_records' id='"+data.BATCH_SERVICE_REQUEST_SEQUENCE_PK+"'><label for='"+data.BATCH_SERVICE_REQUEST_SEQUENCE_PK+"'></label></div>";
-	var addBatchHtml = "<button class='button__primary' onclick=fnApprovalBatchRequest('"+data.BATCH_SERVICE_REQUEST_SEQUENCE_PK+"')>승인</button>";
-	if( data.PROGRESS_STATE == "reject" ) addBatchHtml = "거절";
-	
-    var resultUpdateMethod = "UPDATE";
-    if( data.RESULT_UPDATE_METHOD == "replace" ) resultUpdateMethod = "REPLACE";
-    
-	$("#logTable_batchRequestList").dataTable().fnUpdate([
-		checkbox, data.BATCH_SERVICE_REQUEST_SEQUENCE_PK, data.NAME,  data.MAKE_DATA_METHOD
-		, data.modelName, data.RESULT_UPDATE_DOMAIN_NAME, resultUpdateMethod, data.EXECUTION_CYCLE, data.createDataTime
-		, fnConvertProgressState(data.PROGRESS_STATE), data.USER_ID, addBatchHtml
-	], clickRow);
-}
-
-/*배치 서버사양 가져오기*/
-var fnSetInfoModal = function(serverId,option){
-	$(".infoModalTd").text("");
-	var response = fnGetInstanceServerByAjax(serverId);
-	var id = "";
-	if( option == "createInstance" ) id="c_";
-	
-	$("#"+id+"infoVcpus").text(response.vcpus);
-	$("#"+id+"infoRam").text(numberWithCommas(response.ram)+" MB");
-	$("#"+id+"infoRootDisk").text(response.disk+" GB");
-	$("#"+id+"infoEDisk").text(response.eDisk+" GB");
-	$("#"+id+"infoAllDisk").text(Number(response.disk)+Number(response.eDisk)+" GB");
-	
-	if( option == undefined )	fnOpenModal("templateInfo_modal");
-}
-
-/*업데이트 배치서버 목록 테이블*/
-var fnUpdateBatchServerTable = function(data){
-	var checkbox = "<div class='checkboxCustom'><input type='checkbox' name='table_records' id='"+data.INSTANCE_SEQUENCE_PK+"'><label for='"+data.INSTANCE_SEQUENCE_PK+"'></label></div>";
-	var name = "<div data-toggle='modal' data-target='.infoModal' role='button' onClick='fnSetInfoModal(\""+data.CLOUD_INSTNACE_SERVER_ID+"\")'>"+data.NAME+"</div>";
-	var serverState = data.SERVER_STATE;
-	var moduleState = data.MODULE_STATE;
-	if( serverState.indexOf('call') > -1 ){
-		serverState = "<div class='serverState' data-serverState="+data.SERVER_STATE+" data-pk='"+data.INSTANCE_SEQUENCE_PK+"'>" +
-		  "		<div class='progress' style='margin-bottom:0px;'>" +
-		  "			<div class='progress-bar progress-bar-striped active serverState' role='progressbar' style='width:100%'>"+convertServerState(data.SERVER_STATE)+"중</div></div>";
-	}else{
-		serverState = "<div class='serverState' data-serverState="+data.SERVER_STATE+" data-pk='"+data.INSTANCE_SEQUENCE_PK+"'>"+convertServerState(data.SERVER_STATE)+"</div>";
-	}
-	
-	if( moduleState == "checking" ){
-		moduleState = "<div class='moduleState' data-serverState="+data.MODULE_STATE+" data-pk='"+data.INSTANCE_SEQUENCE_PK+"'>" +
-		  "		<div class='progress' style='margin-bottom:0px;'>" +
-		  "			<div class='progress-bar progress-bar-striped active serverState' role='progressbar' style='width:100%'>체크중</div></div>";
-	}else{
-		moduleState = "<div class='moduleState' data-moduleState='"+data.MODULE_STATE+"' data-pk='"+data.INSTANCE_SEQUENCE_PK+"'>"+convertModuleState(data.MODULE_STATE)+"</div>"
-	}
-	
-	var privateIp = "";
-	if( fnNotNullAndEmpty(data.PRIVATE_IP) )
-		privateIp = "	<div class='privateIp' data-pk='"+data.INSTANCE_SEQUENCE_PK+"'>"+data.PRIVATE_IP+"</div>";
-	else 	privateIp = "	<div class='privateIp' data-pk='"+data.INSTANCE_SEQUENCE_PK+"'></div>";
-	
-	var num = $("#logTable").DataTable().rows().count()+1;
-	
-	$("#logTable").dataTable().fnAddData([
-		checkbox, name, data.AVAILABILITY_ZONE, serverState, moduleState
-	]);
-	
-	$("#logTable").DataTable().order([1, "desc"]).draw();
-}
 
 /*배치서버 상태값 갱신*/
 var fnChangeBatchServerState = function(){
@@ -819,23 +585,6 @@ var fnChangeBatchServerState = function(){
 				$(this).parent().html(serverStateHtml);
 			}
 			
-		});
-
-		// 모듈 상태값 변경 
-		$(".moduleState").each(function(){
-			if( $(this).attr("data-moduleState") != data.MODULE_STATE 
-				&& $(this).attr("data-pk") == data.INSTANCE_SEQUENCE_PK ){
-					var moduleStateHtml = "";
-					if( data.MODULE_STATE == "checking" ){
-						moduleStateHtml = "<div class='moduleState' data-serverState="+data.MODULE_STATE+" data-pk='"+data.INSTANCE_SEQUENCE_PK+"'>" +
-		  				  "		<div class='progress' style='margin-bottom:0px;'>" +
-		  				  "			<div class='progress-bar progress-bar-striped active serverState' role='progressbar' style='width:100%'>체크중</div></div>";
-					}else{
-						var moduleStateHtml = "<div class='moduleState' data-moduleState='"+data.MODULE_STATE+"' data-pk='"+data.INSTANCE_SEQUENCE_PK+"'>"+convertModuleState(data.MODULE_STATE)+"</div>"	
-					}
-					
-					$(this).html(moduleStateHtml);
-			}
 		});
 	}
 }
@@ -867,46 +616,6 @@ var fnCreateBatchModal = function(){
 	fnOpenModal("createBatchModal");
 }
 
-/*배치서버생성*/
-var fnCreateBatch = function(){
-	if( $.trim($("#batchServerName").val()) == "" ){
-		fnComNotify("warning", "배치서버명을 입력해주세요.");
-		$("#batchServerName").focus();
-		return false;
-		
-	}else{
-		var data = {
-				"name" : $("#batchServerName").val()
-		}
-		if( confirm("배치서버를 생성하시겠습니까?") ){
-			var response = fnCreateBatchServerByAjax(data);
-			if( response.result == "success" ){
-				$("#batchServerName").val("");
-				fnCloseModal("createBatchModal");
-				fnUpdateBatchServerTable(response.batchServer);
-				fnUnCheckbox("check-all_batchList");
-				fnComNotify("success", "배치서버 생성 하였습니다.");
-				
-			}else if( response.detail == "duplicateName"){
-				$("#instanceName").focus();
-				fnComNotify("warning","배치서버명이 중복되었습니다.");
-			
-			}else if( response.detail == "disk is smaller than the minimum"){
-				fnComNotify("warning","디스크가 스냅샷이미지보다 작습니다.");
-				
-			}else if( response.detail == "Quota exceeded for ram:"){
-				fnComNotify("warning","배치서버 허용 메모리를 초과하였습니다.");
-			
-			}else if( response.detail == "Quota exceeded for cores:"){
-				fnComNotify("warning","배치서버 허용 CPU를 초과하였습니다.");
-				
-			}else{
-				fnComErrorMessage("배치서버 생성 에러!!", response.detail);
-			}			
-		}
-	}	
-}
-
 /*배치 이력 목록 조회*/
 var fnSearchBatchLog = function(){
      $("#logBatchTable").dataTable().fnDestroy();
@@ -924,11 +633,6 @@ var fnSearchBatchLog = function(){
 			,bServerSide: true
 			,searching: true
 			,sAjaxSource: "/UI/batchLogs?startDate="+$("#startDate").val()+"&endDate="+$("#endDate").val()+"&columns="+columns
-			// ,sAjaxSource: "/UI/batchLogs"
-			// ,sAjaxSource: "/UI/batchLogs" ,data:{"startDate":$("#startDate").val(), "endDate":$("#endDate").val(), "columns":columns}
-			// ,fnServerData: function(aodata){
-			// 	addata.push({"startDate":$("#startDate").val(), "endDate":$("#endDate").val(), "columns":columns});
-			// }
 			,sServerMethod: "POST"
 			,columns: [
 				{data: "LOG_BATCH_SEQUENCE_PK"}

@@ -49,43 +49,22 @@ server:
 
 cloudApi:
   url: #Input URL
-  privateIpRange: #Input IP
-  publicIpRange: #Input IPs
-  credential: #Input Info
-  authorization: #Input Info
-  sandbox:
-    keyName: #Input Info
-    availabilityZone: #Input Info
-    networks: #Input Info
-    securityGroups: #Input Info
-  batch:
-    imageRef: #Input Info
-    flavorRef: 3 #m1.medium
-    keyName: #Input Info
-    availabilityZone: #Input Info
-    networks: #Input Info
-    securityGroups: #Input Info
 
 sso:
   dataHubUrl_pub_admin: #Input Info
   dataHubUrl_pri_admin: #Input Info #not necessarily
-  responseType: code
   authEndpoint: oauth2.0/authorize
   tokenEndpoint: oauth2.0/token
-  cookieInTokenName: chaut
   publicKeyEndPoint: security/publickey
   userMethod: security/users
   logoutMethod: security/logout
   adminClientId: #Input Info
   adminClientSecret: #Input Info
   redirectUri_pub: #Input URL
-  redirectUri_admin: /admin/main
   grantTypeAuth: authorization_code
   grantTypeClient: client_credentials
   grantTypePassword: password
   grantTypeRefresh: refresh_token
-
-
 
 ## KETI API
 allModel:
@@ -112,15 +91,6 @@ zuul:
   contextPortMap: analyticsModule:8000
   contextSubpathMap: /modules/analyticsModule:/modules/analyticsModule
 
-
-ribbon:
-  eureka:
-    enabled: false
-
-modules:
-  ribbon:
-    listOfServers: 
-
 nfs:
   path: /ANALYTICS_MANAGER_NFS/batchServer/batchService_
   resultPath: /ANALYTICS_MANAGER_NFS/NIFI_RESULT
@@ -128,18 +98,6 @@ nfs:
 analyticsBatchServer:
   isDevTest: false
   url: #Input URL
-
-cityHub:
-  url: #Input URL
-
-eureka:
-  instance:
-    prefer-ip-address: true
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-     defaultZone: #Input URL/eureka
 
 admin:
   nifiUrl: #Input URL/nifi

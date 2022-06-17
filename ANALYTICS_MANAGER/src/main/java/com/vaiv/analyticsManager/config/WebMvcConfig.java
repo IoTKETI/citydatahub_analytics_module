@@ -25,7 +25,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter{
         		.addPathPatterns("/originalData/**")
 				.addPathPatterns("/batch/instances/**")
 				.addPathPatterns("/batchLogs/**")
-				.addPathPatterns("/batchServiceRequests/**")
 				.addPathPatterns("/batchServices/**")
 				.addPathPatterns("/batchLogs/**")
                 .addPathPatterns("/*");

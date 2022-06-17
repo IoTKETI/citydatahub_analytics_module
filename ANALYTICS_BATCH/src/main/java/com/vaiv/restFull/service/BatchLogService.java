@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 
 import com.vaiv.config.ApplicationContextProvider;
-import com.vaiv.restFull.domain.BatchServiceState;
 import com.vaiv.restFull.domain.LogBatch;
 import com.vaiv.restFull.mapper.BatchMapper;
 
@@ -30,8 +29,6 @@ public class BatchLogService {
     private String storeMethod;
     private String updateAttribute;
     private String resultUpdateMethod;
-    private Boolean isBatchSuccess=false;
-    private Boolean isTransmitSuccess=false;
     private String batchTargetFilePath=null;
     private Long batchTargetFileSize=null;
 
@@ -44,7 +41,7 @@ public class BatchLogService {
         this.batchMapper= ApplicationContextProvider.getBean(BatchMapper.class);
     }
 
-    //INSERT INTO "CODE" ("CODE",  "CODE_NAME", "DESCRIPTION") VALUES ('A005001', '배치관리서버(스케줄링) 배치명령시작', '배치관리서버가 배치를 시작한다.');
+    //INSERT INTO "CODE" ("CODE",  "CODE_NAME", "DESCRIPTION") VALUES ('A005001', '배치 시작', '배치를 시작한다.');
     public void writeLogAboutBatchStart(LocalDateTime batchStartDatetime, String storeMethod, String updateAttribute, String resultUpdateMethod, String executionCycle){
 
         this.logBatch.setBatchStartDatetime(batchStartDatetime);
@@ -81,14 +78,13 @@ public class BatchLogService {
         this.logBatch.setBatchInstanceSequenceFk1(null);
     }
 
-    //INSERT INTO "CODE" ("CODE",  "CODE_NAME", "DESCRIPTION") VALUES ('A005006', '배치관리서버(스케줄링) 배치명령종료', '배치관리서버가 배치를 완료한다.');
+    //INSERT INTO "CODE" ("CODE",  "CODE_NAME", "DESCRIPTION") VALUES ('A005006', '배치 종료', '배치를 완료한다.');
     public void writeLogAboutBatchEnd(LocalDateTime batchStartDatetime){
 
         this.logBatch.setBatchStartDatetime(batchStartDatetime);
         this.logBatch.setBatchEndDatetime(LocalDateTime.now());
         this.logBatch.setCode(this.CODE_BATCH_END);
-        this.logBatch.setBatchIsSuccess(isBatchSuccess&&isTransmitSuccess);
-
+        this.logBatch.setBatchIsSuccess(true);
 
         try {
             this.batchMapper.insertLogBatch(this.logBatch);
@@ -98,9 +94,9 @@ public class BatchLogService {
         }
     }
 
-    //INSERT INTO "CODE" ("CODE",  "CODE_NAME", "DESCRIPTION") VALUES ('A005002', '배치관리서버(스케줄링) 원본데이터 파일 확인', '배치관리서버가 원본데이터 파일을 확인한다.');
+    //INSERT INTO "CODE" ("CODE",  "CODE_NAME", "DESCRIPTION") VALUES ('A005002', '예측용 데이터 파일 확인', '예측용 데이터 파일을 확인한다.');
     public void writeLogAboutFileCheck(LocalDateTime batchStartDatetime,  String batchTargetFilePath, Long batchTargetFileSize, Boolean isSuccess, String batchFailReason){
-
+       
         this.logBatch.setBatchStartDatetime(batchStartDatetime);
         this.logBatch.setBatchEndDatetime(LocalDateTime.now());
 
@@ -128,7 +124,7 @@ public class BatchLogService {
         this.logBatch.setBatchTargetFileSize(null);
     }
 
-    //INSERT INTO "CODE" ("CODE",  "CODE_NAME", "DESCRIPTION") VALUES ('A005003', '배치관리서버(스케줄링) 배치모듈 명령 실행', '배치관리서버가 배치모듈 명령을 실행한다.');
+    //INSERT INTO "CODE" ("CODE",  "CODE_NAME", "DESCRIPTION") VALUES ('A005003', '배치 모듈 실행', '배치 모듈을 실행한다.');
     public void writeLogAboutBatchExecute(LocalDateTime batchStartDatetime,  Boolean isSuccess, String batchFailReason){
 
         this.logBatch.setBatchStartDatetime(batchStartDatetime);
@@ -139,11 +135,10 @@ public class BatchLogService {
         this.logBatch.setBatchTargetFilePath(this.batchTargetFilePath);
         this.logBatch.setBatchTargetFileSize(this.batchTargetFileSize);
 
-        this.logBatch.setBatchIsSuccess(true);
+        this.logBatch.setBatchIsSuccess(isSuccess);
 
         if(!isSuccess){
             this.logBatch.setBatchFailReason(batchFailReason);
-            this.logBatch.setBatchIsSuccess(false);
         }
 
         try {
@@ -157,26 +152,21 @@ public class BatchLogService {
         this.logBatch.setBatchTargetFileSize(null);
     }
 
-    //INSERT INTO "CODE" ("CODE",  "CODE_NAME", "DESCRIPTION") VALUES ('A005004', '배치관리서버(스케줄링) 배치모듈 명령 결과', '배치관리서버가 배치모듈 실행 결과를 확인한다.');
+    //INSERT INTO "CODE" ("CODE",  "CODE_NAME", "DESCRIPTION") VALUES ('A005004', '배치 모듈 결과', '배치 모듈 실행 결과를 확인한다.');
     public void writeLogAboutBatchExecuteResult(LocalDateTime batchStartDatetime,  Boolean isSuccess, String batchFailReason, String batchResult ){
 
         this.logBatch.setBatchStartDatetime(batchStartDatetime);
         this.logBatch.setBatchEndDatetime(LocalDateTime.now());
 
         this.logBatch.setCode(this.CODE_RESULT_BATCH);
-        this.logBatch.setBatchIsSuccess(true);
+        this.logBatch.setBatchIsSuccess(isSuccess);
         this.logBatch.setBatchResult(batchResult);
         this.logBatch.setBatchInstanceSequenceFk1(this.batchInstanceSequence);
         this.logBatch.setBatchTargetFilePath(this.batchTargetFilePath);
         this.logBatch.setBatchTargetFileSize(this.batchTargetFileSize);
 
         if(!isSuccess){
-            this.logBatch.setBatchIsSuccess(false);
             this.logBatch.setBatchFailReason(batchFailReason);
-        }else{
-
-            isBatchSuccess=true;
-
         }
 
         try {
@@ -192,7 +182,7 @@ public class BatchLogService {
         this.logBatch.setBatchTargetFileSize(null);
     }
 
-    //INSERT INTO "CODE" ("CODE",  "CODE_NAME", "DESCRIPTION") VALUES ('A005005', '배치관리서버(스케줄링) 배치코어모듈 결과 저장', '배치관리서버가 배치코어모듈로 저장 결과를 확인한다. ');
+    //INSERT INTO "CODE" ("CODE",  "CODE_NAME", "DESCRIPTION") VALUES ('A005005', '결과 저장(코어모듈)', '배치 실행 결과를 코어모듈에 저장/확인한다.');
     public void writeLogAboutBatchTransferResult(LocalDateTime batchStartDatetime, Boolean isSuccess, String transferFailReason, String transferData, String transferUrl){
 
 
@@ -200,23 +190,13 @@ public class BatchLogService {
         this.logBatch.setBatchEndDatetime(LocalDateTime.now());
 
         this.logBatch.setCode(this.CODE_RESULT_TRANSMIT);
-        this.logBatch.setBatchIsSuccess(true);
+        this.logBatch.setBatchIsSuccess(isSuccess);
 
         this.logBatch.setTransferData(transferData);
         this.logBatch.setTransferUrl(transferUrl);
         this.logBatch.setStoreMethod(this.storeMethod);
         this.logBatch.setUpdateAttribute(this.updateAttribute);
         this.logBatch.setResultUpdateMethod(this.resultUpdateMethod);
-
-
-        if(!isSuccess){
-            this.logBatch.setBatchIsSuccess(false);
-            isTransmitSuccess=false;
-        }else {
-            if(isTransmitSuccess==null){
-                isTransmitSuccess=true;
-            }
-        }
 
         try {
             this.batchMapper.insertLogBatch(this.logBatch);

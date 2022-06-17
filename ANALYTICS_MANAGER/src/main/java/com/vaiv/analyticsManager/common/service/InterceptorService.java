@@ -25,9 +25,6 @@ public class InterceptorService extends HandlerInterceptorAdapter {
 	@Autowired
 	private AuthService authService;
 
-	@Value("${cityHub.url}")
-	private String cityHubUrl;
-	
 	@Value("${sso.redirectUri_pub}")
 	private String redirectUriPub;
 
@@ -79,7 +76,7 @@ public class InterceptorService extends HandlerInterceptorAdapter {
 						response.setContentType("text/html; charset=UTF-8");
 						PrintWriter printwriter = response.getWriter();
 						printwriter.print("<script>alert('사용 권한이 없습니다. 권한을 신청하세요.');</script>");
-						printwriter.print("<script>location.href='" + cityHubUrl + "'</script>");
+						printwriter.print("<script>location.href='" + redirectUriPub + "'</script>");
 						printwriter.flush();
 						printwriter.close();
 						return false;
@@ -103,8 +100,7 @@ public class InterceptorService extends HandlerInterceptorAdapter {
 						authService.createAccessTokenSession(accessToken, request);
 
 					if (request.getSession().getAttribute("userId") == null
-							|| request.getSession().getAttribute("userRole") == null
-							|| request.getSession().getAttribute("cityHubUrl") == null)
+							|| request.getSession().getAttribute("userRole") == null)
 						authService.createUserSession(accessToken, request, response, requestUrl); // 유저 정보 세션에 저장
 
 					logger.info(" %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ");

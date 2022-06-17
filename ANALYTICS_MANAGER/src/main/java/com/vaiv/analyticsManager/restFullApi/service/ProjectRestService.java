@@ -22,7 +22,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 @Service
-@SuppressWarnings("static-access")
 public class ProjectRestService {
 
 	@Autowired
@@ -62,7 +61,7 @@ public class ProjectRestService {
 		
 		List<Map<String, Object>> list = projectRestMapper.projects(userId);
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(JSONObject.fromObject(map)));
 		}
 
 		resultJson.put("result", "success");
@@ -81,7 +80,7 @@ public class ProjectRestService {
 		JSONObject resultJson = new JSONObject();
 		
 		Map<String, Object> detail = projectRestMapper.project(projectSequencePk);
-		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("project", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
+		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("project", MakeUtil.nvlJson(JSONObject.fromObject(detail)));
 		
 		resultJson.put("result", "success");
 		resultJson.put("type", "2000");
@@ -109,7 +108,7 @@ public class ProjectRestService {
 			else projectRestMapper.insertProject(project);
 			
 			Map<String, Object> detail = projectRestMapper.project(project.getProjectSequencePk());
-			if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("project", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
+			if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("project", MakeUtil.nvlJson(JSONObject.fromObject(detail)));
 			
 			resultJson.put("result", "success");
 			resultJson.put("type", "2001");
@@ -124,7 +123,7 @@ public class ProjectRestService {
 	 */
 	public JSONObject projectsAsPatch(Integer projectSequencePk, Project project)throws Exception {
 		JSONObject resultJson = new JSONObject();
-		// 템플릿 명 중복 체크
+		// 프로젝트 명 중복 체크
 		project.setProjectSequencePk(projectSequencePk);
 		if( projectRestMapper.checkProjectName(project) > 0 ) {
 			resultJson.put("result", "fail");
@@ -137,7 +136,7 @@ public class ProjectRestService {
 			projectRestMapper.updateProject(project);
 			
 			Map<String, Object> detail = projectRestMapper.project(project.getProjectSequencePk());
-			if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("project", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
+			if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("project", MakeUtil.nvlJson(JSONObject.fromObject(detail)));
 			
 			resultJson.put("result", "success");
 			resultJson.put("type", "2001");
@@ -153,7 +152,7 @@ public class ProjectRestService {
 	public JSONObject projectAsDelete(Integer projectSequencePk, String option) throws Exception {
 		JSONObject resultJson = new JSONObject();
 
-		// 원본데이터 삭제(천처리 삭제,모델 삭제) => 전처리 삭제(update) => 모델 삭제(update)
+		// 원본데이터 삭제(전처리 삭제,모델 삭제) => 전처리 삭제(update) => 모델 삭제(update)
 		List<Map<String, Object>> originalDataList = projectRestMapper.originalDataList(projectSequencePk);
 		JSONObject originalDataJson = null;
 		for( Map<String, Object> originalData : originalDataList ) {
@@ -189,7 +188,7 @@ public class ProjectRestService {
 		
 		List<Map<String, Object>> list = projectRestMapper.originalDataList(projectSequencePk);
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(JSONObject.fromObject(map)));
 		}
 
 		resultJson.put("result", "success");
@@ -209,7 +208,7 @@ public class ProjectRestService {
 		JSONObject resultJson = new JSONObject();
 		
 		Map<String, Object> detail = projectRestMapper.originalData(projectSequencePk, originalDataSequencePk);
-		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("originalData", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
+		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("originalData", MakeUtil.nvlJson(JSONObject.fromObject(detail)));
 		
 		resultJson.put("result", "success");
 		resultJson.put("type", "2000");
@@ -244,7 +243,7 @@ public class ProjectRestService {
 		httpJson = httpService.httpServicePOST(listUrl, param.toString(), null);
 		if( "201".equals(httpJson.get("type")) ) {
 			// 생성 성공
-			originalDataJson = new JSONObject().fromObject(httpJson.get("data"));
+			originalDataJson = JSONObject.fromObject(httpJson.get("data"));
 			originalData.setOriginalDataSequencePk(Integer.parseInt(""+originalDataJson.get("ORIGINAL_DATA_SEQUENCE_PK")));
 			originalData.setName(""+originalDataJson.get("NAME"));
 			originalData.setFilename(""+originalDataJson.get("FILENAME"));
@@ -337,7 +336,7 @@ public class ProjectRestService {
 		// 모델정보 가져오기
 		Map<String, Object> projectDetail = projectRestMapper.project(projectSequencePk);
 		
-		// 천처리 삭제(모델 삭제) => 모델 삭제(update)
+		// 전처리 삭제(모델 삭제) => 모델 삭제(update)
 		List<Map<String, Object>> preprocessedList = projectRestMapper.preprocessedDataList(Integer.parseInt(""+projectDetail.get("SELECTED_INSTANCE")), originalDataSequencePk);
 		
 		JSONObject preprocessedJson = null;
@@ -358,7 +357,7 @@ public class ProjectRestService {
 		
 		// 원본데이터 삭제 API
 		if( !"NoAPI".equals(option)) {
-			httpJson = httpService.httpServiceDELETE(listUrl, "");
+			httpJson = httpService.httpServiceDELETE(listUrl);
 		}else {
 			httpJson.put("type", "200");
 		}
@@ -379,7 +378,7 @@ public class ProjectRestService {
 			resultJson.put("data", httpJson.get("data"));
 			
 		}else if( "404".equals(httpJson.get("type")) ) {
-			JSONObject json = new JSONObject().fromObject(httpJson.get("data"));
+			JSONObject json = JSONObject.fromObject(httpJson.get("data"));
 			// 이미 삭제처리되었을 경우
 			if( "4004".equals(json.get("type")) && "File Not Found".equals(json.get("title")) ){
 				// 삭제 성공
@@ -415,7 +414,7 @@ public class ProjectRestService {
 		
 		List<Map<String, Object>> list = projectRestMapper.preprocessFunctionList();
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(JSONObject.fromObject(map)));
 		}
 
 		resultJson.put("result", "success");
@@ -434,7 +433,7 @@ public class ProjectRestService {
 		JSONObject resultJson = new JSONObject();
 		
 		Map<String, Object> detail = projectRestMapper.preprocessFunction(preprocessFunctionSequencePk);
-		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("preprocessFunction", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
+		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("preprocessFunction", MakeUtil.nvlJson(JSONObject.fromObject(detail)));
 		
 		resultJson.put("result", "success");
 		resultJson.put("type", "2000");
@@ -459,12 +458,12 @@ public class ProjectRestService {
 		String ip = sandboxRestService.getInstanceIp(Integer.parseInt(""+project.get("SELECTED_INSTANCE")));
 		String listUrl = ip + "/preprocessedData";
 		
-		param = new JSONObject().fromObject(params);
+		param = JSONObject.fromObject(params);
 		httpJson = httpService.httpServicePOST(listUrl, param.toString(), null);
 		if( "202".equals(httpJson.get("type")) ) {
 			// 생성 성공
 			
-			preprocessedDataJson = new JSONObject().fromObject(httpJson.get("data"));
+			preprocessedDataJson = JSONObject.fromObject(httpJson.get("data"));
 			PreprocessedData pData = new PreprocessedData();
 			pData.setPreprocessedDataSequencePk(Integer.parseInt(""+preprocessedDataJson.get("PREPROCESSED_DATA_SEQUENCE_PK")));
 			pData.setCommand(""+preprocessedDataJson.get("COMMAND"));
@@ -512,7 +511,7 @@ public class ProjectRestService {
 		
 		List<Map<String, Object>> list = projectRestMapper.preprocessedDataList(instancePk, originalDataSequencePk);
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(JSONObject.fromObject(map)));
 		}
 
 		resultJson.put("result", "success");
@@ -532,7 +531,7 @@ public class ProjectRestService {
 		JSONObject resultJson = new JSONObject();
 		
 		Map<String, Object> detail = projectRestMapper.preprocessedData(instancePk, preprocessedDataSequencePk);
-		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("preprocessedData", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
+		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("preprocessedData", MakeUtil.nvlJson(JSONObject.fromObject(detail)));
 		
 		resultJson.put("result", "success");
 		resultJson.put("type", "2000");
@@ -576,8 +575,8 @@ public class ProjectRestService {
 			String ip = sandboxRestService.getInstanceIp(Integer.parseInt(""+project.get("SELECTED_INSTANCE")));
 			String listUrl = ip + "/preprocessedData/"+preprocessedDataSequencePk;
 			
-			// 천처리 삭제 API
-			httpJson = httpService.httpServiceDELETE(listUrl, "");
+			// 전처리 삭제 API
+			httpJson = httpService.httpServiceDELETE(listUrl);
 			
 		}else {
 			httpJson.put("type", "200");
@@ -599,7 +598,7 @@ public class ProjectRestService {
 			resultJson.put("data", httpJson.get("data"));
 			
 		}else if( "404".equals(httpJson.get("type")) ) {
-			JSONObject json = new JSONObject().fromObject(httpJson.get("data"));
+			JSONObject json = JSONObject.fromObject(httpJson.get("data"));
 			// 이미 삭제처리되었을 경우
 			if( "4004".equals(json.get("type")) && "File Not Found".equals(json.get("title")) ){
 				PreprocessedData pData = new PreprocessedData();
@@ -640,11 +639,11 @@ public class ProjectRestService {
 		String ip = sandboxRestService.getInstanceIp(Integer.parseInt(""+project.get("SELECTED_INSTANCE")));
 		String listUrl = ip + "/models";
 		
-		param = new JSONObject().fromObject(params);
+		param = JSONObject.fromObject(params);
 		httpJson = httpService.httpServicePOST(listUrl, param.toString(), null);
 		if( "202".equals(httpJson.get("type")) ) {
 			// 생성 성공
-			modelJson = new JSONObject().fromObject(httpJson.get("data"));
+			modelJson = JSONObject.fromObject(httpJson.get("data"));
 			Model model = new Model();
 			model.setModelSequencePk(Integer.parseInt(""+modelJson.get("MODEL_SEQUENCE_PK")));
 			model.setCommand(""+modelJson.get("COMMAND"));
@@ -704,7 +703,7 @@ public class ProjectRestService {
 		
 		List<Map<String, Object>> list = projectRestMapper.modelsList(model);
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(JSONObject.fromObject(map)));
 		}
 
 		resultJson.put("result", "success");
@@ -731,7 +730,7 @@ public class ProjectRestService {
 			detail.put("diffDateTime", MakeUtil.diffOfDateAll(startDate, endDate));
 		}
 		
-		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("model", MakeUtil.nvlJson(new JSONObject().fromObject(detail)));
+		if( MakeUtil.isNotNullAndEmpty(detail) )	resultJson.put("model", MakeUtil.nvlJson(JSONObject.fromObject(detail)));
 		
 		resultJson.put("result", "success");
 		resultJson.put("type", "2000");
@@ -758,7 +757,7 @@ public class ProjectRestService {
 			String listUrl = ip + "/models/"+modelSequencePk;
 			
 			// 모델 삭제 API
-			httpJson = httpService.httpServiceDELETE(listUrl, "");
+			httpJson = httpService.httpServiceDELETE(listUrl);
 			
 		}else {
 			httpJson.put("type", "200");
@@ -780,7 +779,7 @@ public class ProjectRestService {
 			resultJson.put("data", httpJson.get("data"));
 			
 		}else if( "404".equals(httpJson.get("type")) ) {
-			JSONObject json = new JSONObject().fromObject(httpJson.get("data"));
+			JSONObject json = JSONObject.fromObject(httpJson.get("data"));
 			// 이미 삭제처리되었을 경우
 			if( "4004".equals(json.get("type")) && "File Not Found".equals(json.get("title")) ){
 				Model model = new Model();
@@ -825,7 +824,7 @@ public class ProjectRestService {
 			Map<String, Object> project = projectRestMapper.project(projectSequencePk);
 			String ip = sandboxRestService.getInstanceIp(Integer.parseInt(""+project.get("SELECTED_INSTANCE")));
 			listUrl = ip + "/models/"+modelSequencePk;
-			param = new JSONObject().fromObject(params);
+			param = JSONObject.fromObject(params);
 			httpJson = httpService.httpServicePATCH(listUrl, param.toString(), null);
 			
 		}else {
@@ -884,7 +883,7 @@ public class ProjectRestService {
 		Map<String, Object> project = projectRestMapper.project(projectSequencePk);
 		String ip = sandboxRestService.getInstanceIp(Integer.parseInt(""+project.get("SELECTED_INSTANCE")));
 		listUrl = ip + "/models/"+modelSequencePk;
-		param = new JSONObject().fromObject(params);
+		param = JSONObject.fromObject(params);
 		
 		httpJson = httpService.httpServicePATCH(listUrl, param.toString(), null);
 		
@@ -927,7 +926,7 @@ public class ProjectRestService {
 		
 		List<Map<String, Object>> list = projectRestMapper.modelsOfInstancePk(instanceSequencePk);
 		for (Map<String, Object> map : list) {
-			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(new JSONObject().fromObject(map)));
+			if( MakeUtil.isNotNullAndEmpty(map) )	jsonArr.add(MakeUtil.nvlJson(JSONObject.fromObject(map)));
 		}
 
 		resultJson.put("result", "success");

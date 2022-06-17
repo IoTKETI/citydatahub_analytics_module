@@ -11,15 +11,7 @@ import com.vaiv.analyticsManager.restFullApi.domain.SearchData;
 @Mapper
 public interface BatchRestMapper {
 
-	List<Map<String, Object>> batchServiceRequests(String userId) throws Exception;
-
-	Map<String, Object> batchServiceRequest(Integer batchServiceSequencePk) throws Exception;
-	
-	void insertBatchServiceRequest(Batch batch) throws Exception;
-
-	void updateBatchServiceRequest(Batch batch) throws Exception;
-	
-	List<Map<String, Object>> batchServices(String userId) throws Exception;
+	List<Map<String, Object>> batchServices() throws Exception;
 
 	Map<String, Object> batchService(Integer batchServiceSequencePk) throws Exception;
 
@@ -28,8 +20,6 @@ public interface BatchRestMapper {
 	void insertBatchServices(Batch batch) throws Exception;
 
 	void updateBatchService(Batch batch) throws Exception;
-
-	List<Map<String, Object>> batchServers() throws Exception;
 
 	List<Map<String, Object>> batchServiceByinstancePk(int instancePk) throws Exception;
 	

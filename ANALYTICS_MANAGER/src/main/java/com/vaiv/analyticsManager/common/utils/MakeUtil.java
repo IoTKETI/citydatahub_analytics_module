@@ -276,13 +276,12 @@ public class MakeUtil {
 	 * @param log
 	 * @throws Exception
 	 */
-	@SuppressWarnings("static-access")
 	public static void printForJsonArr(JSONArray jsonArr, boolean log) throws Exception{
 		JSONObject json = null;
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		for (int i = 0; i < jsonArr.size(); i++) {
 			json = new JSONObject();
-			json = new JSONObject().fromObject(jsonArr.get(i));
+			json = JSONObject.fromObject(jsonArr.get(i));
 			
 			if( log ) logger.info(i+" "+gson.toJson(json));
 			else logger.info(i+" "+gson.toJson(json));
@@ -342,7 +341,6 @@ public class MakeUtil {
 	 * @param jsonObj
 	 * @return
 	 */
-	@SuppressWarnings("static-access")
 	public static JSONObject nvlJson(JSONObject jsonObj){
 		JSONObject resultJson = new JSONObject();
 		if( MakeUtil.isNotNullAndEmpty(jsonObj) && jsonObj instanceof JSONObject ){
@@ -369,11 +367,11 @@ public class MakeUtil {
 								&& "]".equals(sValue.substring(sValue.length()-1,sValue.length()))
 								&& sValue.contains("{") 
 								&& sValue.contains("}") ) {
-							resultJson.put(key, nvlJsonArray(new JSONArray().fromObject(value)));
+							resultJson.put(key, nvlJsonArray(JSONArray.fromObject(value)));
 						
 						}else if( "{".equals(sValue.substring(0,1))  
 								&& "}".equals(sValue.substring(sValue.length()-1,sValue.length()))) {
-							resultJson.put(key, nvlJson(new JSONObject().fromObject(value)));
+							resultJson.put(key, nvlJson(JSONObject.fromObject(value)));
 							
 						}else{
 							resultJson.put(key, nvl(value));
@@ -395,7 +393,6 @@ public class MakeUtil {
 	 * @param jsonArr
 	 * @return
 	 */
-	@SuppressWarnings("static-access")
 	public static JSONArray nvlJsonArray(JSONArray jsonArr){
 		JSONArray moveJsonArr = new JSONArray();
 		if( MakeUtil.isNotNullAndEmpty(jsonArr) && jsonArr instanceof JSONArray ){
@@ -409,7 +406,7 @@ public class MakeUtil {
 						moveJsonArr.add(nvlJsonArray((JSONArray)value));
 						
 					}else if( MakeUtil.isNotNullAndEmpty(value) && value instanceof JSONObject ){
-						json = new JSONObject().fromObject(value);
+						json = JSONObject.fromObject(value);
 						moveJsonArr.add(nvlJson(json));
 						
 					}else{
@@ -551,7 +548,6 @@ public class MakeUtil {
 	 * @param json
 	 * @return
 	 */
-	@SuppressWarnings("static-access")
 	public static JSONObject convertJsonSnakeCaseKeyToCamelCaseKey(JSONObject json) {
 		JSONObject camelCaseJson = new JSONObject();
 		String key;
@@ -563,10 +559,10 @@ public class MakeUtil {
 			value = json.get(key);
 			
 			if( isJSONArray(value) ) {
-				value = convertJsonArraySnakeCaseKeyToCamelCaseKey(new JSONArray().fromObject(value));
+				value = convertJsonArraySnakeCaseKeyToCamelCaseKey(JSONArray.fromObject(value));
 			
 			}else if( isJSONObject(value) ) {
-				value = convertJsonSnakeCaseKeyToCamelCaseKey(new JSONObject().fromObject(value));
+				value = convertJsonSnakeCaseKeyToCamelCaseKey(JSONObject.fromObject(value));
 			}
 			
 			
@@ -591,7 +587,6 @@ public class MakeUtil {
 	 * @param jsonArr
 	 * @return
 	 */
-	@SuppressWarnings("static-access")
 	public static JSONArray convertJsonArraySnakeCaseKeyToCamelCaseKey(JSONArray jsonArr) {
 		JSONArray camelCaseJsonArr = new JSONArray();
 		for (int i = 0; i < jsonArr.size(); i++) {
@@ -600,7 +595,7 @@ public class MakeUtil {
 				if( isNumeric(jsonArr.get(i)) ) {
 					camelCaseJsonArr.add(jsonArr.get(i));
 				}else {
-					JSONObject json = convertJsonSnakeCaseKeyToCamelCaseKey(new JSONObject().fromObject(jsonArr.get(i)));
+					JSONObject json = convertJsonSnakeCaseKeyToCamelCaseKey(JSONObject.fromObject(jsonArr.get(i)));
 					camelCaseJsonArr.add(json);	
 				}
 				
@@ -617,7 +612,6 @@ public class MakeUtil {
 	 * @param value
 	 * @return
 	 */
-	@SuppressWarnings("static-access")
 	public static boolean isJSONObject(Object value) {
 		try {
 			
@@ -627,7 +621,7 @@ public class MakeUtil {
 			
 			if( value instanceof Boolean )	return false;
 			
-			new JSONObject().fromObject(value);
+			JSONObject.fromObject(value);
 			return true;
 		} catch (Exception e) {
 			return false;
@@ -639,7 +633,6 @@ public class MakeUtil {
 	 * @param value
 	 * @return
 	 */
-	@SuppressWarnings("static-access")
 	public static boolean isJSONArray(Object value) {
 		try {
 			if( value instanceof JSONArray )	return true;
@@ -648,7 +641,7 @@ public class MakeUtil {
 			
 			if( value instanceof Boolean )	return false;
 			
-			new JSONArray().fromObject(value);
+			JSONArray.fromObject(value);
 			return true;
 		} catch (Exception e) {
 			return false;

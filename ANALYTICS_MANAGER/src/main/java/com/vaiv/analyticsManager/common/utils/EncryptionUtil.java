@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 
-@SuppressWarnings("restriction")
 public class EncryptionUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(EncryptionUtil.class);
@@ -230,7 +229,6 @@ public class EncryptionUtil {
 	 * @param request
 	 * @return
 	 */
-	@SuppressWarnings("unused")
 	public static String sha256Encoder(HttpServletRequest request) {
 		logger.info("--- sha256Encoder ---");
 		HttpSession session = request.getSession();
