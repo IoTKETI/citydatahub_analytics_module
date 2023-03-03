@@ -33,6 +33,25 @@ public class BatchRestController {
 
 	@Value("${admin.nifiUrl}")
 	private String adminNifiUrl;
+
+	/**
+	 * 배치 목록 조회
+	 * @param session
+	 * @return
+	 */
+	@GetMapping(value="/batchServices")
+	public ResponseEntity<JSONObject> batchServices(){
+		JSONObject result = new JSONObject();
+		try {
+			result = batchRestService.batchServices();
+			return new ResponseEntity<JSONObject>(result, HttpStatus.OK);
+		}catch (Exception e) {
+			result.put("type", "5000");
+			result.put("detail", e.toString());
+			MakeUtil.printErrorLogger(e, "batchServices");
+			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
+		}
+	}
 	
 	/**
 	 * 배치 조회
@@ -142,24 +161,6 @@ public class BatchRestController {
 			result.put("detail", e.toString());
 			MakeUtil.printErrorLogger(e, "batchServicesAsDelete");
 			return new ResponseEntity<JSONObject>(result,HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-	
-	/**
-	 * 배치서버 목록 조회
-	 * @return
-	 */
-	@GetMapping(value="/batchServers")
-	public ResponseEntity<JSONObject> batchServers(){
-		JSONObject result = new JSONObject();
-		try {
-			result = batchRestService.batchServers();
-			return new ResponseEntity<JSONObject>(result, HttpStatus.OK);
-		}catch (Exception e) {
-			result.put("type", "5000");
-			result.put("detail", e.toString());
-			MakeUtil.printErrorLogger(e, "batchServers");
-			return new ResponseEntity<JSONObject>(result, HttpStatus.EXPECTATION_FAILED);
 		}
 	}
 	
