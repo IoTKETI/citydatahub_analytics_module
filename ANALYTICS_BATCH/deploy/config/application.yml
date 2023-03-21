@@ -1,0 +1,42 @@
+spring:
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  batch:
+    job:
+      enabled: false
+  datasource:
+    hikari:
+      driver-class-name: org.postgresql.Driver
+      jdbc-url: jdbc:postgresql://localhost:5432/ANALYTICS_MANAGER?useUnicode=true&characterEncoding=utf-8
+      username: smartcity
+      password: smartcity
+      
+      
+server:
+  tomcat:
+    uri-encoding: UTF-8
+  port: 3030
+  servlet:
+    application-display-name: smartCity
+    
+module:
+  tempUrl:  
+  port: 8000
+  method: /modules/analyticsModule
+
+
+nfs:
+  resultPath: /ANALYTICS_MANAGER_NFS/NIFI_RESULT
+
+batchServer:
+  devTest: false
+  url: http://10.5.0.23:8000/modules/analyticsModule
+
+coreModuleServer:
+  url: http://10.0.0.189:8080/entities/
+  method: /attrs/congestionIndexPrediction
+
+

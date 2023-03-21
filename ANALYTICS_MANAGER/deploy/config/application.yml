@@ -1,0 +1,104 @@
+spring:
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+  thymeleaf:
+    prefix: classpath:templates/html/
+    check-template-location: true
+    suffix: .html
+    mode: HTML5
+    cache: false
+
+  datasource:
+    hikari:
+      driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+      jdbc-url: jdbc:log4jdbc:postgresql://localhost:5432/ANALYTICS_MANAGER?useUnicode=true&characterEncoding=utf-8
+      username: smartcity
+      password: smartcity
+      connection-test-query: SELECT 1
+  main:
+    allow-bean-definition-overriding: true
+
+  # spring-boot-devtool
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
+  application:
+    name: dh-analytics-manager
+
+# spring-boot-starter-actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+server:
+  tomcat:
+    uri-encoding: UTF-8
+  port: 2020
+
+cloudApi:
+  url: #Input URL
+
+sso:
+  dataHubUrl_pub_admin: #Input Info
+  dataHubUrl_pri_admin: #Input Info #not necessarily
+  authEndpoint: oauth2.0/authorize
+  tokenEndpoint: oauth2.0/token
+  publicKeyEndPoint: security/publickey
+  userMethod: security/users
+  logoutMethod: security/logout
+  adminClientId: #Input Info
+  adminClientSecret: #Input Info
+  redirectUri_pub: #Input URL
+  grantTypeAuth: authorization_code
+  grantTypeClient: client_credentials
+  grantTypePassword: password
+  grantTypeRefresh: refresh_token
+
+## KETI API
+allModel:
+  modelListUrl: #Input URL
+
+module:
+  tempUrl: #Input URL
+  port: 8000
+  method: /modules/analyticsModule
+  localFiles: /localFiles?path=/&command=get_list
+  healthCheck: /healthCheck
+  asyncSecond: 5000
+  asyncPeriod: 360
+
+# zuul proxy 설정
+zuul:
+  routes:
+    modules:
+      stripPrefix: false
+      path: /modules/**
+      sensitiveHeaders:
+  isNotUseSandbox: false
+  analyticsModuleServer: #Input URL
+  contextPortMap: analyticsModule:8000
+  contextSubpathMap: /modules/analyticsModule:/modules/analyticsModule
+
+nfs:
+  path: /ANALYTICS_MANAGER_NFS/batchServer/batchService_
+  resultPath: /ANALYTICS_MANAGER_NFS/NIFI_RESULT
+
+analyticsBatchServer:
+  isDevTest: false
+  url: #Input URL
+
+admin:
+  nifiUrl: #Input URL/nifi
+  hueUrl: #Input URL/hue
